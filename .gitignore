@@ -1,0 +1,11 @@
+# Entorno IntelliJ IDEA y Python
+.idea/
+*.iml
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.DS_Store
+
+# Carpeta generada automáticamente
+public/

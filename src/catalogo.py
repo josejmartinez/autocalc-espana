@@ -1,0 +1,89 @@
+# -*- coding: utf-8 -*-
+"""Catálogo de medidas ITV, modelos superventas y rutas de España."""
+
+MEDIDAS_ESPANA = [
+    # Compactos y berlinas (Llanta 16 y 17)
+    (205, 55, 16, 225, 45, 17, "Seat León, VW Golf, Toyota Corolla, Ford Focus, Peugeot 308"),
+    (205, 55, 16, 205, 50, 17, "Renault Mégane, Citroën C4, Hyundai i30, Kia Ceed"),
+    (205, 60, 16, 215, 55, 16, "Renault Captur, Peugeot 2008, Citroën C4 Picasso, Mazda 3"),
+    (215, 55, 16, 225, 45, 17, "Ford Mondeo, VW Passat, Peugeot 508, Citroën C5"),
+    (215, 60, 16, 215, 55, 17, "Skoda Karoq, Seat Ateca, Peugeot 3008, Suzuki Vitara"),
+    (195, 55, 16, 205, 50, 16, "Peugeot 208, Opel Corsa, Citroën C3, Renault Clio"),
+    (195, 60, 16, 205, 55, 16, "Nissan Juke, Renault Arkana, Citroën C3 Aircross"),
+    (225, 45, 17, 225, 40, 18, "Seat León FR, VW Golf GTI/GTD, BMW Serie 1, Audi A3, Mercedes Clase A"),
+    (215, 55, 17, 225, 50, 17, "VW T-Roc, Hyundai Kona, Kia Niro, Toyota C-HR"),
+    (215, 60, 17, 225, 55, 17, "Nissan Qashqai, Dacia Duster, Renault Kadjar, Jeep Renegade"),
+    (205, 50, 17, 225, 45, 17, "Mazda 3, Ford Focus ST-Line, Volvo V40, BMW Serie 1"),
+    (225, 50, 17, 235, 45, 17, "Audi A4, BMW Serie 3, Mercedes Clase C, Alfa Romeo Giulia"),
+    (225, 55, 17, 235, 50, 17, "BMW Serie 5, Audi A6, Mazda 6, Citroën C5 Aircross"),
+    (235, 45, 17, 235, 40, 18, "VW Passat R-Line, Audi A4 Avant, Skoda Superb"),
+    (215, 45, 17, 225, 45, 17, "Seat Ibiza FR, Polo GTI, Toyota Yaris GR Sport, Mini Cooper"),
+    # Utilitarios y clásicos (Llanta 13, 14 y 15)
+    (195, 65, 15, 205, 55, 16, "Seat León I/II, VW Golf IV/V, Skoda Octavia, Audi A3 8L"),
+    (185, 65, 15, 195, 60, 15, "Dacia Sandero, Renault Clio, Dacia Logan, Nissan Primera, Hyundai i20"),
+    (185, 60, 15, 195, 55, 15, "Seat Ibiza, VW Polo, Skoda Fabia, Toyota Yaris"),
+    (195, 50, 15, 195, 55, 15, "Ford Fiesta, Seat Ibiza, Peugeot 206, Mazda MX-5"),
+    (195, 55, 15, 205, 50, 15, "Citroën Xsara, Peugeot 206 GTI, Seat Córdoba, Fiat Bravo"),
+    (195, 60, 15, 205, 55, 15, "Ford Focus MK1, Opel Astra G, Nissan Almera, Toyota Avensis"),
+    (175, 65, 15, 185, 60, 15, "Mini One, Suzuki Swift, Fiat Punto, Toyota Yaris"),
+    (175, 65, 14, 185, 60, 14, "Opel Corsa C, Ford Fiesta, Peugeot 206, Citroën C2/C3, Renault Kangoo"),
+    (185, 60, 14, 195, 55, 14, "VW Polo, Seat Ibiza, Opel Astra F, Golf III"),
+    (185, 65, 14, 195, 60, 14, "Peugeot 306, Citroën ZX/Xsara, Ford Escort/Mondeo"),
+    (165, 70, 14, 175, 65, 14, "Citroën Berlingo, Peugeot Partner, Fiat Panda, VW Up!"),
+    (165, 65, 14, 175, 60, 14, "Hyundai i10, Kia Picanto, Citroën C1, Peugeot 108"),
+    (155, 65, 14, 165, 60, 14, "Toyota Aygo, Peugeot 107, Citroën C1, Twingo"),
+    (175, 70, 13, 185, 65, 13, "Seat Toledo, Renault 19, Clio I, Ford Orion"),
+    (165, 70, 13, 175, 65, 13, "Opel Corsa B, Fiat Uno, Peugeot 106, Citroën Saxo"),
+    # SUVs, Crossovers y Deportivos (Llanta 18, 19 y 20)
+    (225, 40, 18, 235, 35, 19, "Cupra León, Golf R, Audi S3, BMW M135i, Focus ST"),
+    (215, 55, 18, 225, 50, 18, "Nissan Qashqai, Peugeot 2008 GT, Opel Mokka, Mazda CX-30"),
+    (225, 55, 18, 235, 50, 18, "Peugeot 3008/5008, Hyundai Tucson, Citroën C5 Aircross, Jeep Compass"),
+    (235, 45, 18, 245, 40, 18, "Tesla Model 3, Cupra Formentor, Peugeot 508, Volvo S60"),
+    (235, 55, 18, 245, 50, 18, "VW Tiguan, Skoda Kodiaq, Seat Tarraco, Toyota RAV4, Kia Sportage"),
+    (235, 60, 18, 255, 55, 18, "Volvo XC60, Audi Q5, Mercedes GLC, Mazda CX-60, Honda CR-V"),
+    (245, 40, 18, 255, 35, 18, "Audi A4/A5 S-Line, Mercedes Clase C AMG, BMW Serie 4"),
+    (245, 45, 18, 255, 40, 18, "BMW Serie 5, Mercedes Clase E, Opel Insignia, Volvo S90"),
+    (225, 45, 18, 235, 40, 18, "Kia Xceed, BMW Serie 2 Gran Coupé, Mercedes CLA, Mini Countryman"),
+    (235, 50, 18, 245, 45, 18, "Audi Q3, BMW X1/X3, VW Tiguan, Ford Kuga"),
+    (235, 55, 19, 255, 50, 19, "Hyundai Tucson, Kia Sportage, Audi Q5, Volvo XC60, Tesla Model Y"),
+    (225, 45, 19, 235, 40, 19, "Nissan Qashqai Tekna, Mazda 6, Cupra Ateca, Renault Austral"),
+    (235, 40, 19, 245, 35, 19, "Peugeot 508 GT, Passat R-Line, Alfa Romeo Tonale"),
+    (245, 45, 19, 255, 40, 19, "BMW X3/X4, Tucson N-Line, Mercedes Clase S"),
+    (255, 35, 19, 265, 30, 19, "Audi RS3/S4, BMW M3/M4, Mercedes C63 AMG"),
+    # Furgonetas, Camper y 4x4
+    (205, 65, 16, 215, 60, 16, "VW Transporter T5/T6, Mercedes Vito, Renault Trafic, Ford Transit Custom"),
+    (215, 65, 16, 225, 60, 16, "Dacia Duster 4x4, Citroën Jumpy, Peugeot Expert, Renault Trafic"),
+    (225, 65, 16, 235, 60, 16, "Fiat Ducato, Renault Master, Iveco Daily, Peugeot Boxer"),
+    (235, 65, 16, 225, 70, 16, "Mercedes Sprinter, VW Crafter, Ford Transit"),
+    (195, 70, 15, 205, 65, 15, "VW Transporter T4, Ford Transit, Mercedes Sprinter Clásica"),
+    (265, 65, 17, 265, 60, 18, "Toyota Land Cruiser, Toyota Hilux, Mitsubishi Montero, Ford Ranger")
+]
+
+RUTAS_ESPANA = [
+    ("Madrid", "Barcelona", 620, 5.8), ("Madrid", "Valencia", 355, 5.6),
+    ("Madrid", "Sevilla", 530, 5.9), ("Madrid", "Málaga", 535, 6.0),
+    ("Madrid", "Bilbao", 400, 6.1), ("Madrid", "Alicante", 425, 5.7),
+    ("Barcelona", "Valencia", 350, 5.8), ("Barcelona", "Zaragoza", 310, 5.7),
+    ("Valencia", "Sevilla", 655, 6.0), ("Bilbao", "Madrid", 400, 5.9),
+    ("Madrid", "A Coruña", 595, 6.2), ("Madrid", "Oviedo", 450, 6.1),
+    ("Sevilla", "Málaga", 205, 5.5), ("Zaragoza", "Madrid", 315, 5.8),
+    ("Madrid", "Lisboa", 625, 6.0), ("Barcelona", "Madrid", 620, 5.8),
+    ("Madrid", "Granada", 420, 5.8), ("Madrid", "Murcia", 405, 5.7),
+    ("Valencia", "Madrid", 355, 5.6), ("Sevilla", "Cádiz", 120, 5.4)
+]
+
+GARGANTA_POR_ANCHO = {
+    155: "4.5\" - 5.5\"",
+    165: "4.5\" - 6.0\"",
+    175: "5.0\" - 6.0\"",
+    185: "5.0\" - 6.5\"",
+    195: "5.5\" - 7.0\"",
+    205: "5.5\" - 7.5\"",
+    215: "6.0\" - 7.5\"",
+    225: "6.0\" - 8.0\"",
+    235: "6.5\" - 8.5\"",
+    245: "7.0\" - 9.0\"",
+    255: "7.5\" - 9.5\"",
+    265: "8.0\" - 10.0\"",
+    275: "8.5\" - 10.5\""
+}
