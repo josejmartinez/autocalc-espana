@@ -110,8 +110,6 @@ RUTAS_ESPANA = [
     ("Aranjuez", "Madrid", 48, 5.5), ("Aranjuez", "Toledo", 42, 5.4)
 ]
 
-# Zonas clave de ITV, recambios y desguaces (Aranjuez, Sur de Madrid y La Sagra/Ocaña)
-# Formato: (slug, nombre_zona, distancia_ref, desguaces_destacados, centros_taller_itv)
 ZONAS_DESGUACES_ITV = [
     (
         "aranjuez-comarca-las-vegas",

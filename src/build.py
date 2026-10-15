@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Motor generador estático AutoCalc España v4.0
-Incluye: 6 herramientas (ITV, consumo, amortización, DGT, checklist pre-ITV y calculadora Desguace vs. Autodoc/Taller),
-comparador multitienda (Muchoneumático, Autodoc, Norauto, Feu Vert y Amazon) y guías de desguaces de Aranjuez y Madrid Sur.
+Motor generador estático AutoCalc España v5.0 (Edición completa estilo dieselogasolina.com)
+Incluye:
+1. ITV Neumáticos (±3 %) + Calculadora de ET (offset) y separadores + Tablas de índices de carga/velocidad.
+2. Coste de viaje con peajes/desgaste + Calculadora de consumo real L/100km + Buscador de gasolineras en vivo (API Ministerio).
+3. Comparador TCO (Gasolina vs. Diésel vs. Híbrido vs. GLP) con impuestos y mantenimiento.
+4. Datador de matrículas españolas (mes/año y edad) + Calculadora oficial BOE de caballos fiscales (CVF), IVTM, ITP y CO2.
+5. Checklist pre-ITV de 12 puntos + Buscador interactivo de códigos de avería OBD2 + Plan de mantenimiento.
+6. Calculadora ¿Desguace, Autodoc o taller? con 20 piezas reales preconfiguradas y directorio de desguaces.
 """
 
 import os
@@ -59,7 +64,7 @@ def generar_tabla_equivalencias_html(a_orig, p_orig, l_orig):
                     fila_html = f"""
                     <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
                         <td class="py-2.5 px-3 font-bold text-slate-900">
-                            <button onclick="cargarMedidaCandidata({ancho},{perfil},{llanta})" class="text-left hover:text-amber-600 underline decoration-dotted" title="Probar esta medida en el comparador">
+                            <button onclick="cargarMedidaCandidata({ancho},{perfil},{llanta})" class="text-left hover:text-amber-600 underline decoration-dotted" title="Simular esta medida arriba">
                                 {ancho}/{perfil} R{llanta}
                             </button>
                         </td>
@@ -71,9 +76,9 @@ def generar_tabla_equivalencias_html(a_orig, p_orig, l_orig):
                         <td class="py-2.5 px-3 text-center text-slate-600">{s_alt}{delta_alt:.1f} mm</td>
                         <td class="py-2.5 px-3 text-right">
                             <div class="flex flex-wrap justify-end gap-1">
-                                <a href="{url_mucho}" target="_blank" rel="nofollow sponsored" class="text-[11px] bg-sky-600 hover:bg-sky-700 text-white font-semibold px-2 py-1 rounded transition" title="Ver en Muchoneumático">Muchoneumático</a>
-                                <a href="{url_norauto}" target="_blank" rel="nofollow sponsored" class="text-[11px] bg-blue-900 hover:bg-blue-950 text-white font-semibold px-2 py-1 rounded transition" title="Ver en Norauto con montaje">Norauto</a>
-                                <a href="{url_amz}" target="_blank" rel="nofollow sponsored" class="text-[11px] bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-2 py-1 rounded transition" title="Ver en Amazon">Amazon</a>
+                                <a href="{url_mucho}" target="_blank" rel="nofollow sponsored" class="text-[11px] bg-sky-600 hover:bg-sky-700 text-white font-semibold px-2 py-1 rounded transition">Muchoneumático</a>
+                                <a href="{url_norauto}" target="_blank" rel="nofollow sponsored" class="text-[11px] bg-blue-900 hover:bg-blue-950 text-white font-semibold px-2 py-1 rounded transition">Norauto</a>
+                                <a href="{url_amz}" target="_blank" rel="nofollow sponsored" class="text-[11px] bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-2 py-1 rounded transition">Amazon</a>
                             </div>
                         </td>
                     </tr>"""
@@ -87,7 +92,7 @@ def generar_tabla_equivalencias_html(a_orig, p_orig, l_orig):
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
             <div>
                 <h2 class="text-lg font-bold text-slate-900">Tabla oficial de equivalencias para {a_orig}/{p_orig} R{l_orig} (ITV ±3 %)</h2>
-                <p class="text-xs text-slate-500">Diámetro original: <strong>{d_orig:.1f} mm</strong> · Rango legal permitido en ITV: <strong>{d_orig*0.97:.1f} mm a {d_orig*1.03:.1f} mm</strong> (compara precios en tiempo real)</p>
+                <p class="text-xs text-slate-500">Diámetro original: <strong>{d_orig:.1f} mm</strong> · Rango legal permitido en ITV: <strong>{d_orig*0.97:.1f} mm a {d_orig*1.03:.1f} mm</strong> (pulsa en cualquier medida para simularla en el gráfico)</p>
             </div>
             <span class="text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-full font-semibold w-fit">Sin homologar</span>
         </div>
@@ -139,12 +144,12 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             <div class="flex items-center gap-3">
                 <a href="index.html" class="hover:opacity-90 transition flex items-center gap-2">
                     <span class="text-2xl font-extrabold tracking-tight text-amber-400">__SITE_NAME__</span>
-                    <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">ITV, recambios y DGT</span>
+                    <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">Portal técnico del motor</span>
                 </a>
             </div>
-            <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
                 <a href="desguaces-itv-aranjuez-comarca-las-vegas.html" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Desguaces y talleres</a>
-                <a href="mapa-web.html" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Buscador</a>
+                <a href="mapa-web.html" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Buscador (116 guías)</a>
                 <button onclick="copiarEnlaceCalculo()" id="btn-compartir" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Copiar enlace</button>
                 <button onclick="window.print()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-3 py-2 rounded-lg transition">Guardar PDF</button>
             </div>
@@ -158,311 +163,543 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             <p class="text-sm text-slate-600 mt-1">__HERO_SUBTITLE__</p>
         </div>
 
-        <!-- Selector de 6 herramientas -->
+        <!-- Selector de las 6 suites de herramientas -->
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-6 bg-slate-200 p-1.5 rounded-xl no-print">
             <button onclick="cambiarTab('itv')" id="tab-itv" class="py-2.5 px-2 rounded-lg font-semibold text-xs bg-white text-slate-900 shadow-sm transition">
-                1. Equivalencia ITV
+                1. Neumáticos y ET
             </button>
             <button onclick="cambiarTab('consumo')" id="tab-consumo" class="py-2.5 px-2 rounded-lg font-semibold text-xs text-slate-600 hover:text-slate-900 transition">
-                2. Coste de viaje
+                2. Viajes y gasolineras
             </button>
             <button onclick="cambiarTab('amortizacion')" id="tab-amortizacion" class="py-2.5 px-2 rounded-lg font-semibold text-xs text-slate-600 hover:text-slate-900 transition">
-                3. Diésel vs. gasolina
+                3. ¿Diésel, híbrido o GLP?
             </button>
             <button onclick="cambiarTab('dgt')" id="tab-dgt" class="py-2.5 px-2 rounded-lg font-semibold text-xs text-slate-600 hover:text-slate-900 transition">
-                4. Etiqueta DGT y CO₂
+                4. Matrículas, CVF y DGT
             </button>
             <button onclick="cambiarTab('preitv')" id="tab-preitv" class="py-2.5 px-2 rounded-lg font-semibold text-xs text-slate-600 hover:text-slate-900 transition">
-                5. Checklist pre-ITV
+                5. Pre-ITV y fallos OBD2
             </button>
             <button onclick="cambiarTab('desguace')" id="tab-desguace" class="py-2.5 px-2 rounded-lg font-semibold text-xs text-slate-600 hover:text-slate-900 transition">
                 6. ¿Desguace o nuevo?
             </button>
         </div>
 
-        <!-- 1. CALCULADORA ITV NEUMÁTICOS -->
-        <section id="sec-itv" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5 pb-4 border-b border-slate-100 no-print">
-                <label for="preset-coche" class="text-xs font-semibold text-slate-600">Autocompletar medida original según modelo de coche:</label>
-                <select id="preset-coche" onchange="aplicarPresetCoche()" class="p-2 border rounded-lg text-xs bg-slate-50 font-medium text-slate-800 w-full sm:w-72">
-                    <option value="">— Seleccionar vehículo de referencia —</option>
-                    <option value="205,55,16,225,45,17">Seat León / VW Golf / Toyota Corolla (205/55 R16)</option>
-                    <option value="225,45,17,225,40,18">Seat León FR / Golf GTI / Audi A3 (225/45 R17)</option>
-                    <option value="195,65,15,205,55,16">Seat León I-II / Skoda Octavia / Golf IV (195/65 R15)</option>
-                    <option value="185,65,15,195,60,15">Dacia Sandero / Renault Clio / Nissan Primera (185/65 R15)</option>
-                    <option value="175,65,14,185,60,14">Opel Corsa C / Ford Fiesta / Peugeot 206 (175/65 R14)</option>
-                    <option value="215,60,17,225,55,17">Nissan Qashqai / Dacia Duster (215/60 R17)</option>
-                    <option value="235,55,18,245,50,18">VW Tiguan / Kia Sportage / Toyota RAV4 (235/55 R18)</option>
-                    <option value="205,65,16,215,60,16">VW Transporter / Mercedes Vito / Trafic (205/65 R16)</option>
+        <!-- ==================== SECCIÓN 1: NEUMÁTICOS, EQUIVALENCIAS ITV Y OFFSET ET ==================== -->
+        <section id="sec-itv" class="space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5 pb-4 border-b border-slate-100 no-print">
+                    <label for="preset-coche" class="text-xs font-semibold text-slate-600">Autocompletar medida de serie por vehículo:</label>
+                    <select id="preset-coche" onchange="aplicarPresetCoche()" class="p-2 border rounded-lg text-xs bg-slate-50 font-medium text-slate-800 w-full sm:w-80">
+                        <option value="">— Seleccionar modelo rápido —</option>
+                        <option value="205,55,16,225,45,17">Seat León / VW Golf / Toyota Corolla (205/55 R16)</option>
+                        <option value="225,45,17,225,40,18">Seat León FR / Golf GTI / Audi A3 (225/45 R17)</option>
+                        <option value="195,65,15,205,55,16">Seat León I-II / Skoda Octavia / Golf IV (195/65 R15)</option>
+                        <option value="185,65,15,195,60,15">Dacia Sandero / Renault Clio / Nissan Primera (185/65 R15)</option>
+                        <option value="175,65,14,185,60,14">Opel Corsa C / Ford Fiesta / Peugeot 206 (175/65 R14)</option>
+                        <option value="215,60,17,225,55,17">Nissan Qashqai / Dacia Duster (215/60 R17)</option>
+                        <option value="235,55,18,245,50,18">VW Tiguan / Kia Sportage / Toyota RAV4 (235/55 R18)</option>
+                        <option value="205,65,16,215,60,16">VW Transporter / Mercedes Vito / Trafic (205/65 R16)</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <h2 class="font-bold text-xs text-slate-700 mb-3">1A. Neumático original (en ficha técnica ITV)</h2>
+                        <div class="grid grid-cols-3 gap-3 mb-3">
+                            <div>
+                                <label class="block text-xs text-slate-500 mb-1">Ancho (mm)</label>
+                                <input type="number" id="ancho1" value="__VAL_A1__" oninput="calcularITV()" class="w-full p-2 border rounded-lg text-center font-bold text-slate-900">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-500 mb-1">Perfil (%)</label>
+                                <input type="number" id="perfil1" value="__VAL_P1__" oninput="calcularITV()" class="w-full p-2 border rounded-lg text-center font-bold text-slate-900">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-500 mb-1">Llanta (pulg.)</label>
+                                <input type="number" id="llanta1" value="__VAL_L1__" oninput="calcularITV()" class="w-full p-2 border rounded-lg text-center font-bold text-slate-900">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-200/80">
+                            <div>
+                                <label class="block text-xs text-slate-500 mb-1">Índice de carga</label>
+                                <input type="number" id="carga1" value="91" min="60" max="125" oninput="calcularITV()" class="w-full p-1.5 border rounded-lg text-center text-xs font-semibold">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-500 mb-1">Cód. velocidad</label>
+                                <select id="vel1" onchange="calcularITV()" class="w-full p-1.5 border rounded-lg text-center text-xs font-semibold bg-white">
+                                    <option value="160">Q (160 km/h)</option>
+                                    <option value="170">R (170 km/h)</option>
+                                    <option value="180">S (180 km/h)</option>
+                                    <option value="190">T (190 km/h)</option>
+                                    <option value="210">H (210 km/h)</option>
+                                    <option value="240" selected>V (240 km/h)</option>
+                                    <option value="270">W (270 km/h)</option>
+                                    <option value="300">Y (300 km/h)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <h2 class="font-bold text-xs text-slate-700 mb-3">Neumático nuevo a comprobar</h2>
+                        <div class="grid grid-cols-3 gap-3 mb-3">
+                            <div>
+                                <label class="block text-xs text-slate-500 mb-1">Ancho (mm)</label>
+                                <input type="number" id="ancho2" value="__VAL_A2__" oninput="calcularITV()" class="w-full p-2 border rounded-lg text-center font-bold text-slate-900">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-500 mb-1">Perfil (%)</label>
+                                <input type="number" id="perfil2" value="__VAL_P2__" oninput="calcularITV()" class="w-full p-2 border rounded-lg text-center font-bold text-slate-900">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-500 mb-1">Llanta (pulg.)</label>
+                                <input type="number" id="llanta2" value="__VAL_L2__" oninput="calcularITV()" class="w-full p-2 border rounded-lg text-center font-bold text-slate-900">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-200/80">
+                            <div>
+                                <label class="block text-xs text-slate-500 mb-1">Índice de carga</label>
+                                <input type="number" id="carga2" value="91" min="60" max="125" oninput="calcularITV()" class="w-full p-1.5 border rounded-lg text-center text-xs font-semibold">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-500 mb-1">Cód. velocidad</label>
+                                <select id="vel2" onchange="calcularITV()" class="w-full p-1.5 border rounded-lg text-center text-xs font-semibold bg-white">
+                                    <option value="160">Q (160 km/h)</option>
+                                    <option value="170">R (170 km/h)</option>
+                                    <option value="180">S (180 km/h)</option>
+                                    <option value="190">T (190 km/h)</option>
+                                    <option value="210">H (210 km/h)</option>
+                                    <option value="240">V (240 km/h)</option>
+                                    <option value="270" selected>W (270 km/h)</option>
+                                    <option value="300">Y (300 km/h)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="res-itv" class="mt-6 p-5 rounded-xl border"></div>
+
+                <div class="mt-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-xs font-bold text-slate-700">Comparación visual a escala (diámetro lateral y huella de pisada)</h3>
+                        <div class="flex gap-4 text-xs">
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 inline-block rounded-full bg-slate-700"></span> Original</span>
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 inline-block rounded-full bg-amber-500"></span> Nueva medida</span>
+                        </div>
+                    </div>
+                    <div id="svg-comparador" class="w-full flex justify-center py-2"></div>
+                </div>
+            </div>
+
+            <!-- 1B. Calculadora de ET (Offset) de llanta, ancho de vías y separadores -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h2 class="text-lg font-bold text-slate-900 mb-1">1B. Calculadora de desplazamiento de llanta (ET / Offset) y ancho de vías ITV</h2>
+                <p class="text-xs text-slate-500 mb-4">Comprueba si tus nuevas llantas o separadores rozarán con el amortiguador interior o si superan el límite legal de ancho de vías en la ITV (±30 mm totales en turismos).</p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-xs text-slate-600 mb-1">Ancho llanta orig. (pulg.)</label>
+                        <input type="number" step="0.5" id="et-j1" value="6.5" oninput="calcularET()" class="w-full p-2 border rounded-lg font-bold text-center">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-600 mb-1">ET original (mm)</label>
+                        <input type="number" id="et-off1" value="45" oninput="calcularET()" class="w-full p-2 border rounded-lg font-bold text-center">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-600 mb-1">Ancho llanta nueva (pulg.)</label>
+                        <input type="number" step="0.5" id="et-j2" value="7.5" oninput="calcularET()" class="w-full p-2 border rounded-lg font-bold text-center">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-600 mb-1">ET nuevo (mm)</label>
+                        <input type="number" id="et-off2" value="35" oninput="calcularET()" class="w-full p-2 border rounded-lg font-bold text-center">
+                    </div>
+                </div>
+                <div id="res-et" class="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200"></div>
+            </div>
+
+            <!-- 1C. Tablas de referencia de índice de carga y velocidad -->
+            <details class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 text-xs">
+                <summary class="font-bold text-sm text-slate-900 cursor-pointer">Ver tablas oficiales de índices de carga (kg) y códigos de velocidad ITV</summary>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 pt-4 border-t border-slate-100">
+                    <div>
+                        <h4 class="font-bold text-slate-800 mb-2">Equivalencia de índices de carga más comunes</h4>
+                        <div class="grid grid-cols-3 gap-1.5 text-slate-600">
+                            <div class="p-1.5 bg-slate-50 rounded"><strong>75:</strong> 387 kg</div>
+                            <div class="p-1.5 bg-slate-50 rounded"><strong>82:</strong> 475 kg</div>
+                            <div class="p-1.5 bg-slate-50 rounded"><strong>84:</strong> 500 kg</div>
+                            <div class="p-1.5 bg-slate-50 rounded"><strong>86:</strong> 530 kg</div>
+                            <div class="p-1.5 bg-slate-50 rounded"><strong>88:</strong> 560 kg</div>
+                            <div class="p-1.5 bg-slate-50 rounded"><strong>91:</strong> 615 kg</div>
+                            <div class="p-1.5 bg-slate-50 rounded"><strong>92:</strong> 630 kg</div>
+                            <div class="p-1.5 bg-slate-50 rounded"><strong>94:</strong> 670 kg</div>
+                            <div class="p-1.5 bg-slate-50 rounded"><strong>95:</strong> 690 kg</div>
+                            <div class="p-1.5 bg-slate-50 rounded"><strong>97:</strong> 730 kg</div>
+                            <div class="p-1.5 bg-slate-50 rounded"><strong>99:</strong> 775 kg</div>
+                            <div class="p-1.5 bg-slate-50 rounded"><strong>103:</strong> 875 kg</div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800 mb-2">Códigos de velocidad máxima</h4>
+                        <div class="grid grid-cols-3 gap-1.5 text-slate-600">
+                            <div class="p-1.5 bg-slate-50 rounded"><strong>Q:</strong> 160 km/h</div>
+                            <div class="p-1.5 bg-slate-50 rounded"><strong>R:</strong> 170 km/h</div>
+                            <div class="p-1.5 bg-slate-50 rounded"><strong>S:</strong> 180 km/h</div>
+                            <div class="p-1.5 bg-slate-50 rounded"><strong>T:</strong> 190 km/h</div>
+                            <div class="p-1.5 bg-slate-50 rounded"><strong>H:</strong> 210 km/h</div>
+                            <div class="p-1.5 bg-slate-50 rounded"><strong>V:</strong> 240 km/h</div>
+                            <div class="p-1.5 bg-slate-50 rounded"><strong>W:</strong> 270 km/h</div>
+                            <div class="p-1.5 bg-slate-50 rounded"><strong>Y:</strong> 300 km/h</div>
+                            <div class="p-1.5 bg-slate-50 rounded"><strong>ZR:</strong> >240 km/h</div>
+                        </div>
+                    </div>
+                </div>
+            </details>
+        </section>
+
+        <!-- ==================== SECCIÓN 2: VIAJES, CONSUMO REAL L/100KM Y GASOLINERAS EN VIVO ==================== -->
+        <section id="sec-consumo" class="space-y-6 hidden">
+            <!-- 2A. Coste de viaje completo (con peajes, desgaste y tiempo) -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h2 class="text-lg font-bold mb-1 text-slate-900">2A. Calculadora de coste de viaje, peajes, desgaste y tiempo</h2>
+                <p class="text-xs text-slate-500 mb-4">Calcula el gasto exacto de carburante, el coste real incluyendo desgaste mecánico (neumáticos, frenos y aceite: ~0,06 €/km) y cuánto paga cada pasajero.</p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Distancia (km)</label>
+                        <input type="number" id="km-viaje" value="__VAL_KM__" oninput="calcularConsumo()" class="w-full p-2 border rounded-lg font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Consumo (L/100)</label>
+                        <input type="number" step="0.1" id="litros-100" value="__VAL_L100__" oninput="calcularConsumo()" class="w-full p-2 border rounded-lg font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Precio (€/L)</label>
+                        <input type="number" step="0.01" id="precio-litro" value="1.56" oninput="calcularConsumo()" class="w-full p-2 border rounded-lg font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Peajes (€)</label>
+                        <input type="number" step="0.5" id="peajes-viaje" value="0" oninput="calcularConsumo()" class="w-full p-2 border rounded-lg font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Vel. media (km/h)</label>
+                        <input type="number" id="vel-viaje" value="105" oninput="calcularConsumo()" class="w-full p-2 border rounded-lg font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Ocupantes</label>
+                        <input type="number" id="ocupantes" value="2" min="1" oninput="calcularConsumo()" class="w-full p-2 border rounded-lg font-bold">
+                    </div>
+                </div>
+                <div id="res-consumo" class="mt-5 p-4 rounded-xl bg-slate-50 border border-slate-200"></div>
+            </div>
+
+            <!-- 2B. Calculadora inversa: averigua el consumo real de tu coche (L/100 km) -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h2 class="text-lg font-bold mb-1 text-slate-900">2B. Calculadora de consumo real de tu coche (depósito lleno)</h2>
+                <p class="text-xs text-slate-500 mb-4">El ordenador de a bordo suele mentir entre un 5 % y un 10 %. Llena el depósito, pon el cuentakilómetros parcial a cero y, en el siguiente repostaje, introduce los litros que han entrado y los kilómetros recorridos:</p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Litros repostados (L)</label>
+                        <input type="number" step="0.1" id="real-litros" value="42.5" oninput="calcularConsumoReal()" class="w-full p-2.5 border rounded-lg font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Kilómetros recorridos (km)</label>
+                        <input type="number" id="real-km" value="740" oninput="calcularConsumoReal()" class="w-full p-2.5 border rounded-lg font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Precio pagado (€/L)</label>
+                        <input type="number" step="0.01" id="real-precio" value="1.56" oninput="calcularConsumoReal()" class="w-full p-2.5 border rounded-lg font-bold">
+                    </div>
+                </div>
+                <div id="res-consumo-real" class="mt-4 p-4 rounded-xl bg-emerald-50 border border-emerald-200"></div>
+            </div>
+
+            <!-- 2C. Buscador en tiempo real de gasolineras baratas (API Oficial Ministerio) + Ahorro Low-Cost -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">2C. Precio de gasolineras hoy en tiempo real (datos oficiales del Ministerio)</h2>
+                        <p class="text-xs text-slate-500">Consulta las estaciones más económicas de tu municipio hoy mismo y comprueba cuánto ahorras por depósito.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <select id="municipio-gas" onchange="cargarGasolinerasMunicipio()" class="p-2 border rounded-xl text-xs font-bold bg-slate-50">
+                            <option value="4281" selected>Aranjuez (Madrid)</option>
+                            <option value="4313">Ciempozuelos (Madrid)</option>
+                            <option value="4448">Valdemoro (Madrid)</option>
+                            <option value="4392">Pinto (Madrid)</option>
+                            <option value="4418">San Martín de la Vega (Madrid)</option>
+                            <option value="4334">Getafe (Madrid)</option>
+                            <option value="4386">Parla (Madrid)</option>
+                            <option value="6862">Ocaña (Toledo)</option>
+                            <option value="6902">Seseña (Toledo)</option>
+                            <option value="6828">Illescas (Toledo)</option>
+                            <option value="6912">Toledo capital</option>
+                            <option value="4354">Madrid capital</option>
+                            <option value="881">Barcelona</option>
+                            <option value="7247">Valencia</option>
+                            <option value="6152">Sevilla</option>
+                            <option value="8116">Zaragoza</option>
+                            <option value="4540">Málaga</option>
+                        </select>
+                        <button onclick="cargarGasolinerasMunicipio()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-3 py-2 rounded-xl transition">Actualizar</button>
+                    </div>
+                </div>
+                <div id="contenedor-gasolineras" class="text-xs text-slate-600">
+                    Pulsa en «Actualizar» o cambia de municipio para consultar los precios oficiales de hoy...
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== SECCIÓN 3: COMPARADOR TOTAL (GASOLINA VS DIÉSEL VS HÍBRIDO VS GLP) ==================== -->
+        <section id="sec-amortizacion" class="space-y-6 hidden">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h2 class="text-lg font-bold mb-1 text-slate-900">3. Calculadora de rentabilidad total: ¿gasolina, diésel, híbrido o GLP?</h2>
+                <p class="text-xs text-slate-500 mb-4">Incluye precio de compra, consumo real, diferencia de mantenimiento anual (aceite, filtros, AdBlue/GLP) e impuestos para hallar el kilómetro exacto de amortización.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Kilómetros recorridos al año</label>
+                        <input type="number" id="km-anual" value="15000" oninput="calcularAmortizacion()" class="w-full p-2.5 border rounded-lg font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Sobreprecio de compra Opción B (€)</label>
+                        <input type="number" id="dif-precio" value="2500" oninput="calcularAmortizacion()" class="w-full p-2.5 border rounded-lg font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Años que mantendrás el coche</label>
+                        <input type="number" id="anios-uso" value="8" min="1" max="25" oninput="calcularAmortizacion()" class="w-full p-2.5 border rounded-lg font-bold">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-slate-50 p-4 rounded-xl border">
+                        <h3 class="font-bold text-sm mb-2 text-slate-800">Vehículo A (ej. gasolina)</h3>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="block text-xs text-slate-600">L/100 km</label>
+                                <input type="number" step="0.1" id="cons-a" value="6.8" oninput="calcularAmortizacion()" class="w-full p-2 border rounded-lg font-semibold">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-600">Precio (€/L)</label>
+                                <input type="number" step="0.01" id="prec-a" value="1.61" oninput="calcularAmortizacion()" class="w-full p-2 border rounded-lg font-semibold">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-600">Mantenim./año (€)</label>
+                                <input type="number" id="mant-a" value="220" oninput="calcularAmortizacion()" class="w-full p-2 border rounded-lg font-semibold">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl border">
+                        <h3 class="font-bold text-sm mb-2 text-slate-800">Vehículo B (ej. diésel / híbrido / GLP)</h3>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="block text-xs text-slate-600">L/100 km</label>
+                                <input type="number" step="0.1" id="cons-b" value="4.7" oninput="calcularAmortizacion()" class="w-full p-2 border rounded-lg font-semibold">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-600">Precio (€/L)</label>
+                                <input type="number" step="0.01" id="prec-b" value="1.51" oninput="calcularAmortizacion()" class="w-full p-2 border rounded-lg font-semibold">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-600">Mantenim./año (€)</label>
+                                <input type="number" id="mant-b" value="260" oninput="calcularAmortizacion()" class="w-full p-2 border rounded-lg font-semibold">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="res-amortizacion" class="mt-6 p-5 rounded-xl bg-slate-50 border border-slate-200"></div>
+            </div>
+        </section>
+
+        <!-- ==================== SECCIÓN 4: MATRÍCULAS ESPAÑOLAS, CABALLOS FISCALES (CVF) Y DGT ==================== -->
+        <section id="sec-dgt" class="space-y-6 hidden">
+            <!-- 4A. Datador de matrículas españolas (mes/año, antigüedad y periodicidad ITV) -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h2 class="text-lg font-bold mb-1 text-slate-900">4A. Calculadora de fecha de matriculación por matrícula, edad y próxima ITV</h2>
+                <p class="text-xs text-slate-500 mb-4">Introduce las 3 letras de cualquier matrícula europea española (desde BBB en el año 2000 hasta la actualidad) para conocer el mes y año estimado de matriculación, su antigüedad y cada cuánto debe pasar la ITV.</p>
+                <div class="flex flex-col sm:flex-row items-center gap-4">
+                    <div class="flex items-center border-2 border-slate-900 rounded-xl overflow-hidden bg-white shadow-sm w-64 h-14">
+                        <div class="bg-blue-700 text-white h-full px-2.5 flex flex-col justify-center items-center text-[10px] font-bold">
+                            <span>★★★</span>
+                            <span>E</span>
+                        </div>
+                        <input type="text" id="mat-num" value="4820" maxlength="4" class="w-24 text-center text-2xl font-mono font-extrabold tracking-wider outline-none" placeholder="0000">
+                        <input type="text" id="mat-letras" value="JXK" maxlength="3" oninput="calcularMatricula()" class="w-24 text-center text-2xl font-mono font-extrabold tracking-widest uppercase outline-none text-amber-600" placeholder="BBB">
+                    </div>
+                    <button onclick="calcularMatricula()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-5 py-3.5 rounded-xl transition">Consultar matrícula</button>
+                </div>
+                <div id="res-matricula" class="mt-5 p-4 rounded-xl bg-slate-50 border border-slate-200"></div>
+            </div>
+
+            <!-- 4B. Calculadora oficial BOE de caballos fiscales (CVF), IVTM, etiqueta DGT y CO2 -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h2 class="text-lg font-bold mb-1 text-slate-900">4B. Calculadora de caballos fiscales (CVF), etiqueta DGT e impuestos (IVTM y CO₂)</h2>
+                <p class="text-xs text-slate-500 mb-4">Calcula la potencia fiscal exacta según la fórmula del Anexo V del Reglamento General de Vehículos (BOE), el tramo del impuesto de circulación municipal (IVTM) y el impuesto de matriculación.</p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Motorización</label>
+                        <select id="dgt-motor" onchange="calcularDGT()" class="w-full p-2 border rounded-lg font-bold bg-white text-xs">
+                            <option value="gasolina">Gasolina</option>
+                            <option value="diesel" selected>Diésel</option>
+                            <option value="hibrido">Híbrido / GLP (ECO)</option>
+                            <option value="cero">Eléctrico / PHEV (0)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Año 1.ª matr.</label>
+                        <input type="number" id="dgt-anio" value="2015" min="1980" max="2027" oninput="calcularDGT()" class="w-full p-2 border rounded-lg font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Cilindrada (cm³)</label>
+                        <input type="number" id="dgt-cc" value="1968" oninput="calcularDGT()" class="w-full p-2 border rounded-lg font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">N.º cilindros</label>
+                        <input type="number" id="dgt-cil" value="4" min="2" max="12" oninput="calcularDGT()" class="w-full p-2 border rounded-lg font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">CO₂ (g/km)</label>
+                        <input type="number" id="dgt-co2" value="119" oninput="calcularDGT()" class="w-full p-2 border rounded-lg font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Valor coche (€)</label>
+                        <input type="number" id="dgt-base" value="22000" oninput="calcularDGT()" class="w-full p-2 border rounded-lg font-bold">
+                    </div>
+                </div>
+                <div id="res-dgt" class="mt-5 p-4 rounded-xl bg-slate-50 border border-slate-200"></div>
+            </div>
+        </section>
+
+        <!-- ==================== SECCIÓN 5: CHECKLIST PRE-ITV Y BUSCADOR DE CÓDIGOS OBD2 ==================== -->
+        <section id="sec-preitv" class="space-y-6 hidden">
+            <!-- 5A. Buscador de códigos de avería OBD2 frecuentes en rechazo ITV -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h2 class="text-lg font-bold mb-1 text-slate-900">5A. Consultor rápido de códigos de fallo OBD2 críticos en la ITV</h2>
+                <p class="text-xs text-slate-500 mb-4">Desde la entrada en vigor de la lectura OBD en las estaciones ITV, cualquier código de avería activo en la centralita (testigo MIL encendido) supone resultado desfavorable. Selecciona un código para ver causa y solución:</p>
+                <select id="obd-select" onchange="mostrarFalloOBD()" class="w-full p-3 border rounded-xl font-bold text-sm bg-slate-50">
+                    <option value="P0401">P0401 / P0402 — Flujo insuficiente o excesivo en válvula EGR (recirculación de gases)</option>
+                    <option value="P2002">P2002 / P2463 — Eficiencia del filtro de partículas diésel (DPF / FAP) por debajo del umbral</option>
+                    <option value="P0420">P0420 — Eficiencia del sistema catalizador por debajo del umbral (Banco 1)</option>
+                    <option value="P0101">P0101 / P0102 — Problema de rango/rendimiento en caudalímetro (sensor MAF)</option>
+                    <option value="P0380">P0380 / P0670 — Fallo en circuito de bujías de precalentamiento (calentadores diésel)</option>
+                    <option value="P0135">P0135 / P0141 — Fallo en circuito calentador de sonda lambda (sensor de oxígeno)</option>
+                    <option value="P0299">P0299 — Presión de sobrealimentación del turbocompresor baja (geometría o manguito)</option>
                 </select>
+                <div id="res-obd" class="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200"></div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <h2 class="font-bold text-xs text-slate-700 mb-3">Medida en ficha técnica (original)</h2>
-                    <div class="grid grid-cols-3 gap-3 mb-3">
+            <!-- 5B. Checklist de 8 puntos pre-ITV -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h2 class="text-lg font-bold mb-1 text-slate-900">5B. Checklist interactivo de revisión pre-ITV en casa</h2>
+                <p class="text-xs text-slate-500 mb-4">Verifica estos 6 puntos antes de salir hacia la estación ITV para evitar el 85 % de los rechazos más habituales:</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                    <label class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border cursor-pointer hover:bg-slate-100 transition">
+                        <input type="checkbox" class="chk-itv mt-1 w-4 h-4" onchange="evaluarChecklist()" checked>
                         <div>
-                            <label class="block text-xs text-slate-500 mb-1">Ancho (mm)</label>
-                            <input type="number" id="ancho1" value="__VAL_A1__" oninput="calcularITV()" class="w-full p-2 border rounded-lg text-center font-bold text-slate-900">
+                            <span class="font-bold block text-slate-900">1. Dibujo de neumáticos (>1,6 mm) y medida dentro del ±3 %</span>
+                            <span class="text-xs text-slate-500">Misma marca/modelo en cada eje, sin huevos ni cortes en los flancos.</span>
                         </div>
+                    </label>
+                    <label class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border cursor-pointer hover:bg-slate-100 transition">
+                        <input type="checkbox" class="chk-itv mt-1 w-4 h-4" onchange="evaluarChecklist()" checked>
                         <div>
-                            <label class="block text-xs text-slate-500 mb-1">Perfil (%)</label>
-                            <input type="number" id="perfil1" value="__VAL_P1__" oninput="calcularITV()" class="w-full p-2 border rounded-lg text-center font-bold text-slate-900">
+                            <span class="font-bold block text-slate-900">2. Alumbrado completo, altura de faros y luz de matrícula</span>
+                            <span class="text-xs text-slate-500">Las ópticas opacas o las bombillas de matrícula fundidas son motivo constante de falta.</span>
                         </div>
+                    </label>
+                    <label class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border cursor-pointer hover:bg-slate-100 transition">
+                        <input type="checkbox" class="chk-itv mt-1 w-4 h-4" onchange="evaluarChecklist()">
                         <div>
-                            <label class="block text-xs text-slate-500 mb-1">Llanta (pulg.)</label>
-                            <input type="number" id="llanta1" value="__VAL_L1__" oninput="calcularITV()" class="w-full p-2 border rounded-lg text-center font-bold text-slate-900">
+                            <span class="font-bold block text-slate-900">3. Escobillas limpiaparabrisas y eyectores con líquido</span>
+                            <span class="text-xs text-slate-500">Comprueba que barren sin dejar cortina de agua y que el depósito está lleno.</span>
                         </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-200/80">
+                    </label>
+                    <label class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border cursor-pointer hover:bg-slate-100 transition">
+                        <input type="checkbox" class="chk-itv mt-1 w-4 h-4" onchange="evaluarChecklist()">
                         <div>
-                            <label class="block text-xs text-slate-500 mb-1">Índice de carga</label>
-                            <input type="number" id="carga1" value="91" min="60" max="125" oninput="calcularITV()" class="w-full p-1.5 border rounded-lg text-center text-xs font-semibold">
+                            <span class="font-bold block text-slate-900">4. Centralita sin fallos OBD2 y descarbonización pre-ITV</span>
+                            <span class="text-xs text-slate-500">En diésel, circular 20 min a ~3.000 rpm en autovía con motor caliente antes de la prueba de opacidad.</span>
                         </div>
+                    </label>
+                    <label class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border cursor-pointer hover:bg-slate-100 transition">
+                        <input type="checkbox" class="chk-itv mt-1 w-4 h-4" onchange="evaluarChecklist()">
                         <div>
-                            <label class="block text-xs text-slate-500 mb-1">Cód. velocidad</label>
-                            <select id="vel1" onchange="calcularITV()" class="w-full p-1.5 border rounded-lg text-center text-xs font-semibold bg-white">
-                                <option value="160">Q (160 km/h)</option>
-                                <option value="170">R (170 km/h)</option>
-                                <option value="180">S (180 km/h)</option>
-                                <option value="190">T (190 km/h)</option>
-                                <option value="210">H (210 km/h)</option>
-                                <option value="240" selected>V (240 km/h)</option>
-                                <option value="270">W (270 km/h)</option>
-                                <option value="300">Y (300 km/h)</option>
-                            </select>
+                            <span class="font-bold block text-slate-900">5. Baliza V16 conectada homologada DGT 3.0 y chaleco</span>
+                            <span class="text-xs text-slate-500">Equipamiento obligatorio de señalización de averías en carretera.</span>
                         </div>
-                    </div>
+                    </label>
+                    <label class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border cursor-pointer hover:bg-slate-100 transition">
+                        <input type="checkbox" class="chk-itv mt-1 w-4 h-4" onchange="evaluarChecklist()">
+                        <div>
+                            <span class="font-bold block text-slate-900">6. Cinturones de seguridad, claxon y cierre de puertas</span>
+                            <span class="text-xs text-slate-500">Tira de todos los cinturones para comprobar el bloqueo automático.</span>
+                        </div>
+                    </label>
                 </div>
-
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <h2 class="font-bold text-xs text-slate-700 mb-3">Medida nueva a comprobar</h2>
-                    <div class="grid grid-cols-3 gap-3 mb-3">
-                        <div>
-                            <label class="block text-xs text-slate-500 mb-1">Ancho (mm)</label>
-                            <input type="number" id="ancho2" value="__VAL_A2__" oninput="calcularITV()" class="w-full p-2 border rounded-lg text-center font-bold text-slate-900">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-500 mb-1">Perfil (%)</label>
-                            <input type="number" id="perfil2" value="__VAL_P2__" oninput="calcularITV()" class="w-full p-2 border rounded-lg text-center font-bold text-slate-900">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-500 mb-1">Llanta (pulg.)</label>
-                            <input type="number" id="llanta2" value="__VAL_L2__" oninput="calcularITV()" class="w-full p-2 border rounded-lg text-center font-bold text-slate-900">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 pt-2 border-t border-slate-200/80">
-                        <div>
-                            <label class="block text-xs text-slate-500 mb-1">Índice de carga</label>
-                            <input type="number" id="carga2" value="91" min="60" max="125" oninput="calcularITV()" class="w-full p-1.5 border rounded-lg text-center text-xs font-semibold">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-500 mb-1">Cód. velocidad</label>
-                            <select id="vel2" onchange="calcularITV()" class="w-full p-1.5 border rounded-lg text-center text-xs font-semibold bg-white">
-                                <option value="160">Q (160 km/h)</option>
-                                <option value="170">R (170 km/h)</option>
-                                <option value="180">S (180 km/h)</option>
-                                <option value="190">T (190 km/h)</option>
-                                <option value="210">H (210 km/h)</option>
-                                <option value="240">V (240 km/h)</option>
-                                <option value="270" selected>W (270 km/h)</option>
-                                <option value="300">Y (300 km/h)</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="res-itv" class="mt-6 p-5 rounded-xl border"></div>
-
-            <div class="mt-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <div class="flex items-center justify-between mb-2">
-                    <h3 class="text-xs font-bold text-slate-700">Comparación visual a escala (diámetro lateral y anchura de pisada)</h3>
-                    <div class="flex gap-4 text-xs">
-                        <span class="flex items-center gap-1"><span class="w-3 h-3 inline-block rounded-full bg-slate-700"></span> Original</span>
-                        <span class="flex items-center gap-1"><span class="w-3 h-3 inline-block rounded-full bg-amber-500"></span> Nueva medida</span>
-                    </div>
-                </div>
-                <div id="svg-comparador" class="w-full flex justify-center py-2"></div>
+                <div id="res-preitv" class="mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm font-semibold text-amber-900"></div>
             </div>
         </section>
 
-        <!-- 2. CALCULADORA CONSUMO -->
-        <section id="sec-consumo" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hidden">
-            <h2 class="text-lg font-bold mb-4 text-slate-900">Calculadora de gasto de combustible y coste por ocupante</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Distancia total (km)</label>
-                    <input type="number" id="km-viaje" value="__VAL_KM__" oninput="calcularConsumo()" class="w-full p-2.5 border rounded-lg font-bold">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Consumo real (L/100 km)</label>
-                    <input type="number" step="0.1" id="litros-100" value="__VAL_L100__" oninput="calcularConsumo()" class="w-full p-2.5 border rounded-lg font-bold">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Precio combustible (€/L)</label>
-                    <input type="number" step="0.01" id="precio-litro" value="1.58" oninput="calcularConsumo()" class="w-full p-2.5 border rounded-lg font-bold">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Personas en el coche</label>
-                    <input type="number" id="ocupantes" value="2" min="1" oninput="calcularConsumo()" class="w-full p-2.5 border rounded-lg font-bold">
-                </div>
-            </div>
-            <div id="res-consumo" class="mt-6 p-5 rounded-xl bg-slate-50 border border-slate-200"></div>
-        </section>
+        <!-- ==================== SECCIÓN 6: ¿DESGUACE, AUTODOC O TALLER? (CATÁLOGO DE 16 PIEZAS REALES) ==================== -->
+        <section id="sec-desguace" class="space-y-6 hidden">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h2 class="text-lg font-bold mb-1 text-slate-900">6. Calculadora maestra de recambios: ¿desguace, Autodoc o taller (Norauto / Feu Vert)?</h2>
+                <p class="text-xs text-slate-500 mb-4">Selecciona la pieza exacta que necesitas sustituir para cargar sus precios medios reales en España y descubrir dónde te ahorras más dinero sin comprometer la seguridad:</p>
 
-        <!-- 3. CALCULADORA AMORTIZACIÓN -->
-        <section id="sec-amortizacion" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hidden">
-            <h2 class="text-lg font-bold mb-4 text-slate-900">Calculadora de rentabilidad: ¿cuándo se amortiza un diésel, híbrido o GLP?</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Kilómetros al año</label>
-                    <input type="number" id="km-anual" value="15000" oninput="calcularAmortizacion()" class="w-full p-2.5 border rounded-lg font-bold">
-                </div>
-                <div class="sm:col-span-2">
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Diferencia de precio de compra (€)</label>
-                    <input type="number" id="dif-precio" value="2500" oninput="calcularAmortizacion()" class="w-full p-2.5 border rounded-lg font-bold">
-                </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-slate-50 p-4 rounded-xl border">
-                    <h3 class="font-semibold text-sm mb-2">Opción A (gasolina)</h3>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs text-slate-600">Consumo (L/100 km)</label>
-                            <input type="number" step="0.1" id="cons-a" value="6.8" oninput="calcularAmortizacion()" class="w-full p-2 border rounded-lg">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-600">Precio (€/L)</label>
-                            <input type="number" step="0.01" id="prec-a" value="1.62" oninput="calcularAmortizacion()" class="w-full p-2 border rounded-lg">
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-slate-50 p-4 rounded-xl border">
-                    <h3 class="font-semibold text-sm mb-2">Opción B (diésel / híbrido / GLP)</h3>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs text-slate-600">Consumo (L/100 km)</label>
-                            <input type="number" step="0.1" id="cons-b" value="4.8" oninput="calcularAmortizacion()" class="w-full p-2 border rounded-lg">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-600">Precio (€/L)</label>
-                            <input type="number" step="0.01" id="prec-b" value="1.51" oninput="calcularAmortizacion()" class="w-full p-2 border rounded-lg">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div id="res-amortizacion" class="mt-6 p-5 rounded-xl bg-slate-50 border border-slate-200"></div>
-        </section>
-
-        <!-- 4. CALCULADORA ETIQUETA DGT E IMPUESTO DE MATRICULACIÓN CO2 -->
-        <section id="sec-dgt" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hidden">
-            <h2 class="text-lg font-bold mb-2 text-slate-900">Simulador de distintivo ambiental DGT e impuesto de matriculación (CO₂)</h2>
-            <p class="text-xs text-slate-500 mb-4">Comprueba qué etiqueta de la DGT corresponde por año y motorización, y calcula el impuesto de matriculación según emisiones WLTP.</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Tipo de motor</label>
-                    <select id="dgt-motor" onchange="calcularDGT()" class="w-full p-2.5 border rounded-lg font-bold bg-white">
-                        <option value="gasolina">Gasolina</option>
-                        <option value="diesel">Diésel</option>
-                        <option value="hibrido">Híbrido (HEV / MHEV / GLP)</option>
-                        <option value="cero">Eléctrico BEV / PHEV (>40 km)</option>
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Seleccionar pieza del catálogo rápido (autocompleta precios reales y tiempos de taller):</label>
+                    <select id="pieza-catalogo" onchange="cargarPiezaCatalogo()" class="w-full p-2.5 border rounded-xl font-bold text-xs sm:text-sm bg-slate-50">
+                        <option value="mecanica,50,145,1.5,alternador">Alternador (50 € desguace vs. 145 € nuevo Autodoc)</option>
+                        <option value="mecanica,40,115,1.2,motor+de+arranque">Motor de arranque (40 € desguace vs. 115 € nuevo Autodoc)</option>
+                        <option value="mecanica,85,240,2.5,compresor+aire+acondicionado">Compresor de aire acondicionado (85 € desguace vs. 240 € Autodoc)</option>
+                        <option value="mecanica,140,380,3.5,turbocompresor">Turbocompresor (140 € desguace vs. 380 € reconstruido/nuevo)</option>
+                        <option value="mecanica,220,950,5.0,caja+de+cambios">Caja de cambios manual (220 € desguace vs. 950 € reconstruida)</option>
+                        <option value="mecanica,75,230,2.5,cremallera+direccion">Cremallera de dirección (75 € desguace vs. 230 € Autodoc)</option>
+                        <option value="carroceria,35,110,0.5,faro+delantero">Faro delantero principal (35 € desguace vs. 110 € Autodoc)</option>
+                        <option value="carroceria,25,65,0.3,piloto+trasero">Piloto trasero (25 € desguace vs. 65 € Autodoc)</option>
+                        <option value="carroceria,30,85,0.4,retrovisor+exterior">Espejo retrovisor completo (30 € desguace vs. 85 € Autodoc)</option>
+                        <option value="carroceria,65,190,1.5,paragolpes">Paragolpes delantero o trasero (65 € desguace vs. 190 € nuevo)</option>
+                        <option value="carroceria,30,75,1.2,elevalunas+electrico">Mecanismo elevalunas eléctrico (30 € desguace vs. 75 € Autodoc)</option>
+                        <option value="desgaste,40,115,1.5,valvula+egr">Válvula EGR nueva recomendada (40 € desguace vs. 115 € Autodoc)</option>
+                        <option value="desgaste,35,85,1.5,discos+y+pastillas+de+freno">Juego de discos y pastillas de freno (¡Comprar siempre nuevo!)</option>
+                        <option value="desgaste,50,130,2.0,amortiguadores">Pareja de amortiguadores (¡Comprar siempre nuevo en Autodoc/Norauto!)</option>
+                        <option value="desgaste,90,340,5.5,kit+embrague+bimasa">Kit de embrague + volante bimasa (¡Comprar siempre nuevo en Autodoc!)</option>
+                        <option value="desgaste,45,110,3.5,kit+distribucion+bomba+agua">Kit correa de distribución + bomba de agua (¡Siempre nuevo!)</option>
                     </select>
                 </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Año de 1.ª matriculación</label>
-                    <input type="number" id="dgt-anio" value="2012" min="1980" max="2027" oninput="calcularDGT()" class="w-full p-2.5 border rounded-lg font-bold">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Emisiones CO₂ (g/km)</label>
-                    <input type="number" id="dgt-co2" value="132" oninput="calcularDGT()" class="w-full p-2.5 border rounded-lg font-bold">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Base imponible del coche (€)</label>
-                    <input type="number" id="dgt-base" value="22000" oninput="calcularDGT()" class="w-full p-2.5 border rounded-lg font-bold">
-                </div>
-            </div>
-            <div id="res-dgt" class="mt-6 p-5 rounded-xl bg-slate-50 border border-slate-200"></div>
-        </section>
 
-        <!-- 5. CHECKLIST PRE-ITV -->
-        <section id="sec-preitv" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hidden">
-            <h2 class="text-lg font-bold mb-1 text-slate-900">Checklist interactivo de revisión pre-ITV en casa</h2>
-            <p class="text-xs text-slate-500 mb-4">Marca los puntos que ya has revisado en tu vehículo para evaluar el riesgo de rechazo antes de acudir a la estación ITV.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                <label class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border cursor-pointer hover:bg-slate-100 transition">
-                    <input type="checkbox" class="chk-itv mt-1 w-4 h-4" onchange="evaluarChecklist()" checked>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <div>
-                        <span class="font-bold block text-slate-900">1. Profundidad de neumáticos (>1,6 mm) y equivalencia</span>
-                        <span class="text-xs text-slate-500">Sin desgaste irregular, cortes en flancos ni medidas fuera del ±3 %.</span>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Familia de pieza</label>
+                        <select id="rep-tipo" onchange="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold bg-white text-xs">
+                            <option value="carroceria">Carrocería, óptica o interior</option>
+                            <option value="mecanica" selected>Mecánica / eléctrica OEM</option>
+                            <option value="desgaste">Frenos, embrague, correas o filtros</option>
+                        </select>
                     </div>
-                </label>
-                <label class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border cursor-pointer hover:bg-slate-100 transition">
-                    <input type="checkbox" class="chk-itv mt-1 w-4 h-4" onchange="evaluarChecklist()" checked>
                     <div>
-                        <span class="font-bold block text-slate-900">2. Alumbrado, reglaje de faros y bombillas H7/H4</span>
-                        <span class="text-xs text-slate-500">Cruce, carretera, intermitentes, luz de freno, marcha atrás y matrícula.</span>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Precio en desguace (€)</label>
+                        <input type="number" id="rep-desguace" value="50" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
                     </div>
-                </label>
-                <label class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border cursor-pointer hover:bg-slate-100 transition">
-                    <input type="checkbox" class="chk-itv mt-1 w-4 h-4" onchange="evaluarChecklist()">
                     <div>
-                        <span class="font-bold block text-slate-900">3. Escobillas limpiaparabrisas y nivel de líquido</span>
-                        <span class="text-xs text-slate-500">Las gomas cuarteadas o la falta de líquido lavaparabrisas son falta en ITV.</span>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Precio nuevo Autodoc (€)</label>
+                        <input type="number" id="rep-autodoc" value="145" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
                     </div>
-                </label>
-                <label class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border cursor-pointer hover:bg-slate-100 transition">
-                    <input type="checkbox" class="chk-itv mt-1 w-4 h-4" onchange="evaluarChecklist()">
                     <div>
-                        <span class="font-bold block text-slate-900">4. Ausencia de testigo MIL (fallo motor) y humos OBD2</span>
-                        <span class="text-xs text-slate-500">Lectura de centralita sin fallos activos de emisiones ni opacidad excesiva.</span>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Horas de mano de obra</label>
+                        <input type="number" step="0.5" id="rep-horas" value="1.5" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
                     </div>
-                </label>
-                <label class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border cursor-pointer hover:bg-slate-100 transition">
-                    <input type="checkbox" class="chk-itv mt-1 w-4 h-4" onchange="evaluarChecklist()">
-                    <div>
-                        <span class="font-bold block text-slate-900">5. Baliza V16 conectada homologada DGT 3.0</span>
-                        <span class="text-xs text-slate-500">Señalización de emergencia obligatoria con geolocalización DGT en guantera.</span>
-                    </div>
-                </label>
-                <label class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border cursor-pointer hover:bg-slate-100 transition">
-                    <input type="checkbox" class="chk-itv mt-1 w-4 h-4" onchange="evaluarChecklist()">
-                    <div>
-                        <span class="font-bold block text-slate-900">6. Placas de matrícula legibles y retrovisores</span>
-                        <span class="text-xs text-slate-500">Sin números borrados, acrílicos rotos ni fijaciones sueltas.</span>
-                    </div>
-                </label>
-            </div>
-            <div id="res-preitv" class="mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm font-semibold text-amber-900"></div>
-        </section>
+                </div>
+                <div id="res-desguace" class="mt-6 p-5 rounded-xl bg-slate-50 border border-slate-200"></div>
 
-        <!-- 6. CALCULADORA: ¿DESGUACE, AUTODOC O TALLER (NORAUTO / FEU VERT)? -->
-        <section id="sec-desguace" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hidden">
-            <h2 class="text-lg font-bold mb-1 text-slate-900">Calculadora de ahorro en reparaciones: ¿desguace, Autodoc o taller?</h2>
-            <p class="text-xs text-slate-500 mb-4">Compara el coste real y la recomendación técnica entre comprar pieza recuperada en desguace (ej. San Martín de la Vega o La Torre), pedirla nueva en Autodoc o montarla en Norauto / Feu Vert.</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Tipo de recambio</label>
-                    <select id="rep-tipo" onchange="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold bg-white text-xs">
-                        <option value="carroceria">Carrocería, faro, retrovisor o interior</option>
-                        <option value="mecanica">Alternador, motor arranque, compresor o caja</option>
-                        <option value="desgaste">Frenos, filtros, embrague, correas o amortiguadores</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Precio en desguace (€)</label>
-                    <input type="number" id="rep-desguace" value="45" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Precio nuevo Autodoc (€)</label>
-                    <input type="number" id="rep-autodoc" value="95" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Horas de montaje / taller</label>
-                    <input type="number" step="0.5" id="rep-horas" value="1.5" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
+                <!-- Enlaces directos a los grandes desguaces cerca de Aranjuez / Madrid Sur y tiendas online -->
+                <div class="mt-6 pt-5 border-t border-slate-200">
+                    <h3 class="text-xs font-bold text-slate-700 mb-3">Consultar stock de esta pieza en grandes desguaces (Aranjuez / Madrid Sur / Toledo) y tiendas online:</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                        <a id="link-pieza-autodoc" href="https://www.autodoc.es/search?keyword=alternador" target="_blank" rel="nofollow sponsored" class="p-2.5 bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold rounded-lg text-center transition">1. Ver nuevo en Autodoc →</a>
+                        <a href="https://www.desguaceslatorre.es/" target="_blank" rel="nofollow" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-lg text-center transition">2. Desguaces La Torre (A-42)</a>
+                        <a href="https://www.elchoque.com/" target="_blank" rel="nofollow" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-lg text-center transition">3. Pol. Aimayr (S. Martín Vega)</a>
+                        <a href="https://www.recambioverde.es/" target="_blank" rel="nofollow" class="p-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold rounded-lg text-center transition">4. Buscador RecambioVerde</a>
+                    </div>
                 </div>
             </div>
-            <div id="res-desguace" class="mt-6 p-5 rounded-xl bg-slate-50 border border-slate-200"></div>
         </section>
 
         <!-- COMPARADOR MULTITIENDA (MUCHONEUMÁTICO + AUTODOC + NORAUTO/FEU VERT + AMAZON) -->
@@ -475,7 +712,6 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                 <span class="text-xs bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full w-fit">Selección mecánica experta</span>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <!-- 1. Muchoneumático -->
                 <a id="cta-muchoneumatico" href="https://www.muchoneumatico.com/buscar?controller=search&s=__VAL_A1__+__VAL_P1__+__VAL_L1__" target="_blank" rel="nofollow sponsored" class="bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
                     <div>
                         <span class="text-xs text-sky-400 font-semibold">Especialista en ruedas</span>
@@ -485,7 +721,6 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                     <span class="mt-4 inline-block text-center bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold text-xs py-2 rounded-lg">Ver en Muchoneumático →</span>
                 </a>
 
-                <!-- 2. Autodoc -->
                 <a id="cta-autodoc" href="https://www.autodoc.es/search?keyword=__CAR_AUTODOC_QUERY__" target="_blank" rel="nofollow sponsored" class="bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
                     <div>
                         <span class="text-xs text-orange-400 font-semibold">Recambios en general</span>
@@ -495,7 +730,6 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                     <span class="mt-4 inline-block text-center bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold text-xs py-2 rounded-lg">Buscar en Autodoc →</span>
                 </a>
 
-                <!-- 3. Norauto y Feu Vert -->
                 <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col justify-between">
                     <div>
                         <span class="text-xs text-emerald-400 font-semibold">Talleres por cercanía y ofertas</span>
@@ -508,7 +742,6 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                     </div>
                 </div>
 
-                <!-- 4. Amazon España -->
                 <a id="cta-neumatico-orig" href="https://www.amazon.es/s?k=neumaticos+__VAL_A1__+__VAL_P1__+R__VAL_L1__&tag=__AMAZON_TAG__" target="_blank" rel="nofollow sponsored" class="bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
                     <div>
                         <span class="text-xs text-amber-400 font-semibold">Envío 24 h y pre-ITV</span>
@@ -566,6 +799,58 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
         const TAB_INICIAL = "__INITIAL_TAB__";
         const GARGANTAS = {155:'4.5"-5.5"',165:'4.5"-6.0"',175:'5.0"-6.0"',185:'5.0"-6.5"',195:'5.5"-7.0"',205:'5.5"-7.5"',215:'6.0"-7.5"',225:'6.0"-8.0"',235:'6.5"-8.5"',245:'7.0"-9.0"',255:'7.5"-9.5"',265:'8.0"-10.0"',275:'8.5"-10.5"'};
 
+        const DICCIONARIO_OBD = {
+            "P0401": {
+                titulo: "P0401 / P0402 — Fallo de caudal en válvula EGR",
+                causa: "Carbonilla acumulada obstruyendo la válvula de recirculación de gases de escape o membrana perforada.",
+                itv: "Rechazo directo (Defecto Grave) en lectura OBD y aumento de emisiones NOx.",
+                solucion: "Limpiar con spray descarbonizador de admisión/EGR o sustituir la válvula EGR completa.",
+                query: "valvula+egr+limpiador"
+            },
+            "P2002": {
+                titulo: "P2002 / P2463 — Saturación de hollín en filtro de partículas (DPF / FAP)",
+                causa: "Exceso de trayectos cortos urbanos que impiden completar la regeneración térmica o sensor diferencial de presión averiado.",
+                itv: "Rechazo grave en prueba de opacidad de humos y lectura OBD.",
+                solucion: "Añadir aditivo regenerador de filtro de partículas, forzar regeneración en carretera a 3.000 rpm o sustituir sensor de presión DPF.",
+                query: "aditivo+limpiador+filtro+particulas+dpf"
+            },
+            "P0420": {
+                titulo: "P0420 — Baja eficiencia del catalizador (Banco 1)",
+                causa: "Desgaste del monolito cerámico del catalizador o lectura errónea de la segunda sonda lambda trasera.",
+                itv: "Defecto grave en prueba de gases (CO alto en gasolina) y testigo MIL encendido.",
+                solucion: "Comprobar primero la sonda lambda posterior antes de sustituir el catalizador.",
+                query: "sonda+lambda+catalizador"
+            },
+            "P0101": {
+                titulo: "P0101 — Rango incorrecto en sensor de masa de aire (caudalímetro MAF)",
+                causa: "Hilo térmico del caudalímetro sucio por polvo/aceite o toma de aire parásita en el manguito de admisión.",
+                itv: "Pérdida de potencia, tirones y fallo registrado en centralita.",
+                solucion: "Limpiar con spray de residuo cero para sensores MAF o cambiar el caudalímetro (10 min).",
+                query: "caudalimetro+sensor+maf"
+            },
+            "P0380": {
+                titulo: "P0380 / P0670 — Avería en calentadores o caja de precalentamiento diésel",
+                causa: "Uno o varios calentadores cortados (resistencia infinita) o relé de precalentamiento dañado.",
+                itv: "En muchos vehículos enciende el testigo de avería o parpadea el muelle, causando rechazo en lectura OBD.",
+                solucion: "Medir continuidad con multímetro y sustituir el juego de calentadores.",
+                query: "bujias+precalentamiento+calentadores+diesel"
+            },
+            "P0135": {
+                titulo: "P0135 — Fallo en calentador de sonda lambda (sensor O2)",
+                causa: "Resistencia interna de precalentamiento de la sonda lambda fundida.",
+                itv: "Mezcla aire/combustible imprecisa en frío y fallo grave en lectura OBD de la ITV.",
+                solucion: "Sustituir la sonda lambda afectada con llave hexagonal de 22 mm.",
+                query: "sonda+lambda+universal"
+            },
+            "P0299": {
+                titulo: "P0299 — Presión de sobrealimentación del turbo inferior a la demandada",
+                causa: "Manguito del intercooler rajado, electroválvula N75 defectuosa o geometría variable del turbo atascada por carbonilla.",
+                itv: "El coche entra en modo protección (limp mode), humea negro y registra fallo en ECU.",
+                solucion: "Revisar fugas en tubos de vacío/intercooler y comprobar la electroválvula de control del turbo.",
+                query: "electrovalvula+control+presion+turbo"
+            }
+        };
+
         function cambiarTab(tab) {
             ['itv', 'consumo', 'amortizacion', 'dgt', 'preitv', 'desguace'].forEach(t => {
                 const sec = document.getElementById('sec-' + t);
@@ -581,6 +866,228 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                 activeSec.classList.remove('hidden');
                 activeBtn.className = 'py-2.5 px-2 rounded-lg font-semibold text-xs bg-white text-slate-900 shadow-sm transition';
             }
+            if (tab === 'consumo' && !window.gasolinerasCargadas) {
+                window.gasolinerasCargadas = true;
+                cargarGasolinerasMunicipio();
+            }
+        }
+
+        // 1B. Calculadora de ET y ancho de vías
+        function calcularET() {
+            const j1 = parseFloat(document.getElementById('et-j1').value) || 6.5;
+            const et1 = parseFloat(document.getElementById('et-off1').value) || 45;
+            const j2 = parseFloat(document.getElementById('et-j2').value) || 7.5;
+            const et2 = parseFloat(document.getElementById('et-off2').value) || 35;
+
+            const w1 = j1 * 25.4;
+            const w2 = j2 * 25.4;
+            const deltaInterior = ((w2 - w1) / 2) - (et1 - et2);
+            const deltaExterior = ((w2 - w1) / 2) + (et1 - et2);
+            const cambioAnchoVias = (et1 - et2) * 2;
+            const legalVias = Math.abs(cambioAnchoVias) <= 30;
+
+            const txtInt = deltaInterior > 0
+                ? `Se acerca ${deltaInterior.toFixed(1)} mm al amortiguador`
+                : `Gana ${Math.abs(deltaInterior).toFixed(1)} mm de holgura interior`;
+            const txtExt = deltaExterior > 0
+                ? `Sobresale ${deltaExterior.toFixed(1)} mm más hacia la aleta`
+                : `Se mete ${Math.abs(deltaExterior).toFixed(1)} mm hacia dentro`;
+
+            document.getElementById('res-et').innerHTML = `
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center text-xs sm:text-sm">
+                    <div class="bg-white p-3 rounded-lg border">
+                        <div class="text-xs text-slate-500">Borde interior (suspensión)</div>
+                        <div class="font-bold text-slate-900 mt-1">${txtInt}</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border">
+                        <div class="text-xs text-slate-500">Borde exterior (aleta)</div>
+                        <div class="font-bold text-amber-600 mt-1">${txtExt}</div>
+                    </div>
+                    <div class="p-3 rounded-lg border ${legalVias ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-200 text-rose-900'}">
+                        <div class="text-xs opacity-75">Variación ancho de vías total</div>
+                        <div class="font-extrabold mt-1">${cambioAnchoVias > 0 ? '+' : ''}${cambioAnchoVias.toFixed(0)} mm (${legalVias ? 'Legal ITV ≤30 mm' : 'Requiere homologar >30 mm'})</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 2B. Consumo real del depósito
+        function calcularConsumoReal() {
+            const litros = parseFloat(document.getElementById('real-litros').value) || 0;
+            const km = parseFloat(document.getElementById('real-km').value) || 1;
+            const precio = parseFloat(document.getElementById('real-precio').value) || 0;
+
+            const l100 = (litros / km) * 100;
+            const coste100 = l100 * precio;
+            const kmPorLitro = litros > 0 ? km / litros : 0;
+
+            document.getElementById('res-consumo-real').innerHTML = `
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
+                    <div class="bg-white p-3 rounded-lg border border-emerald-200">
+                        <div class="text-xs text-slate-500">Consumo real medido</div>
+                        <div class="text-xl font-extrabold text-emerald-700">${l100.toFixed(2)} L/100 km</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border border-emerald-200">
+                        <div class="text-xs text-slate-500">Coste real cada 100 km</div>
+                        <div class="text-xl font-bold text-slate-900">${coste100.toFixed(2)} €/100 km</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border border-emerald-200">
+                        <div class="text-xs text-slate-500">Rendimiento por litro</div>
+                        <div class="text-xl font-bold text-amber-600">${kmPorLitro.toFixed(1)} km/L</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 2C. API Oficial del Ministerio para precios de gasolineras en tiempo real
+        async function cargarGasolinerasMunicipio() {
+            const idMun = document.getElementById('municipio-gas').value;
+            const cont = document.getElementById('contenedor-gasolineras');
+            cont.innerHTML = `<div class="p-4 text-center text-slate-500">Conectando con la sede electrónica del Ministerio para obtener los precios de hoy...</div>`;
+            try {
+                const resp = await fetch(`https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroMunicipio/${idMun}`);
+                const data = await resp.json();
+                const lista = data.ListaEESSPrecio || [];
+                if (!lista.length) {
+                    cont.innerHTML = `<div class="p-3 bg-slate-100 rounded-lg">No hay estaciones registradas en este municipio en este momento.</div>`;
+                    return;
+                }
+                const parsePrecio = (str) => str ? parseFloat(str.replace(',', '.')) : 999;
+                lista.sort((a, b) => parsePrecio(a["Precio Gasoleo A"]) - parsePrecio(b["Precio Gasoleo A"]));
+
+                const top = lista.slice(0, 8);
+                let filas = top.map(e => {
+                    const pDiesel = e["Precio Gasoleo A"] || "-";
+                    const pGas95 = e["Precio Gasolina 95 E5"] || "-";
+                    return `
+                        <tr class="border-b border-slate-100 hover:bg-slate-50">
+                            <td class="py-2 px-2 font-bold text-slate-900">${e["Rótulo"]}</td>
+                            <td class="py-2 px-2 text-slate-600">${e["Dirección"]} (${e["Localidad"]})</td>
+                            <td class="py-2 px-2 text-center font-bold text-emerald-700">${pDiesel} €/L</td>
+                            <td class="py-2 px-2 text-center font-bold text-amber-700">${pGas95} €/L</td>
+                            <td class="py-2 px-2 text-right">
+                                <button onclick="usarPrecioGasolinera('${pDiesel}', '${pGas95}')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-white px-2 py-1 rounded">Usar precio</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+                cont.innerHTML = `
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="border-b-2 border-slate-200 text-slate-500">
+                                    <th class="py-2 px-2">Estación</th>
+                                    <th class="py-2 px-2">Dirección</th>
+                                    <th class="py-2 px-2 text-center">Diésel A</th>
+                                    <th class="py-2 px-2 text-center">Gasolina 95</th>
+                                    <th class="py-2 px-2 text-right">Aplicar</th>
+                                </tr>
+                            </thead>
+                            <tbody>${filas}</tbody>
+                        </table>
+                    </div>
+                `;
+            } catch (err) {
+                cont.innerHTML = `<div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-900">El servidor del Ministerio no responde en este instante. Puedes introducir el precio por litro manualmente arriba.</div>`;
+            }
+        }
+
+        function usarPrecioGasolinera(dieselStr, gas95Str) {
+            const p = parseFloat((dieselStr !== "-" ? dieselStr : gas95Str).replace(',', '.'));
+            if (!isNaN(p)) {
+                document.getElementById('precio-litro').value = p.toFixed(3);
+                document.getElementById('real-precio').value = p.toFixed(3);
+                calcularConsumo();
+                calcularConsumoReal();
+            }
+        }
+
+        // 4A. Datador de matrículas españolas (BBB = Sep 2000 hasta hoy)
+        function calcularMatricula() {
+            const inputLetras = document.getElementById('mat-letras');
+            if (!inputLetras) return;
+            const letras = inputLetras.value.toUpperCase().replace(/[^BCDFGHJKLMNPRSTVWXYZ]/g, '');
+            inputLetras.value = letras;
+            const box = document.getElementById('res-matricula');
+
+            if (letras.length !== 3) {
+                box.innerHTML = `<p class="text-xs text-rose-700 font-semibold">Introduce las 3 consonantes válidas de la matrícula (sin vocales ni Ñ/Q, ej. JXK, HBB, MNP).</p>`;
+                return;
+            }
+
+            const alfabeto = "BCDFGHJKLMNPRSTVWXYZ";
+            const v1 = alfabeto.indexOf(letras[0]);
+            const v2 = alfabeto.indexOf(letras[1]);
+            const v3 = alfabeto.indexOf(letras[2]);
+            const indice = (v1 * 400) + (v2 * 20) + v3; // 0 (BBB) a 7999
+
+            // Hitos históricos oficiales de la DGT (índice base 20 -> año.mes)
+            const hitos = [
+                [0, 2000.75], [140, 2001.0], [420, 2002.0], [680, 2003.0],
+                [980, 2004.0], [1310, 2005.0], [1650, 2006.0], [2010, 2007.0],
+                [2350, 2008.0], [2580, 2009.0], [2740, 2010.0], [2900, 2011.0],
+                [3040, 2012.0], [3150, 2013.0], [3260, 2014.0], [3420, 2015.0],
+                [3620, 2016.0], [3860, 2017.0], [4120, 2018.0], [4390, 2019.0],
+                [4620, 2020.0], [4790, 2021.0], [4960, 2022.0], [5140, 2023.0],
+                [5340, 2024.0], [5550, 2025.0], [5770, 2026.0], [6000, 2027.0]
+            ];
+
+            let fechaEst = 2026.5;
+            for (let i = 0; i < hitos.length - 1; i++) {
+                if (indice >= hitos[i][0] && indice <= hitos[i+1][0]) {
+                    const ratio = (indice - hitos[i][0]) / (hitos[i+1][0] - hitos[i][0]);
+                    fechaEst = hitos[i][1] + ratio * (hitos[i+1][1] - hitos[i][1]);
+                    break;
+                }
+            }
+
+            const anioMat = Math.floor(fechaEst);
+            const mesIndex = Math.min(11, Math.max(0, Math.floor((fechaEst - anioMat) * 12)));
+            const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+            const edad = Math.max(0, (2026.78 - fechaEst));
+
+            let frecuenciaITV = "Anual (cada año por tener más de 10 años)";
+            if (edad < 4) frecuenciaITV = `Exento hasta los 4 años (1.ª ITV en ${anioMat + 4})`;
+            else if (edad < 10) frecuenciaITV = "Bienal (cada 2 años hasta cumplir los 10 años)";
+
+            // Sincronizar con la calculadora de año DGT inferior
+            document.getElementById('dgt-anio').value = anioMat;
+            calcularDGT();
+
+            box.innerHTML = `
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                    <div class="bg-white p-3 rounded-lg border">
+                        <div class="text-xs text-slate-500">Fecha estimada de matriculación</div>
+                        <div class="text-lg font-extrabold text-slate-900 capitalize">${meses[mesIndex]} de ${anioMat}</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border">
+                        <div class="text-xs text-slate-500">Antigüedad del vehículo</div>
+                        <div class="text-lg font-bold text-amber-600">${edad.toFixed(1)} años</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border">
+                        <div class="text-xs text-slate-500">Periodicidad de ITV (turismo)</div>
+                        <div class="text-xs font-bold text-emerald-800 mt-1">${frecuenciaITV}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 5A. Mostrar código de fallo OBD2
+        function mostrarFalloOBD() {
+            const sel = document.getElementById('obd-select');
+            if (!sel) return;
+            const info = DICCIONARIO_OBD[sel.value];
+            document.getElementById('res-obd').innerHTML = `
+                <h3 class="font-bold text-sm text-slate-900">${info.titulo}</h3>
+                <p class="text-xs text-slate-600 mt-1"><strong>Causa mecánica habitual:</strong> ${info.causa}</p>
+                <p class="text-xs text-rose-700 font-semibold mt-1"><strong>Impacto en la estación ITV:</strong> ${info.itv}</p>
+                <p class="text-xs text-emerald-800 font-medium mt-1"><strong>Solución recomendada:</strong> ${info.solucion}</p>
+                <div class="flex flex-wrap gap-2 mt-3">
+                    <a href="https://www.autodoc.es/search?keyword=${info.query}" target="_blank" rel="nofollow sponsored" class="text-xs bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg transition">Buscar recambio en Autodoc →</a>
+                    <a href="https://www.amazon.es/s?k=${info.query}&tag=${AMAZON_TAG}" target="_blank" rel="nofollow sponsored" class="text-xs bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg transition">Ver aditivos / recambio en Amazon →</a>
+                </div>
+            `;
         }
 
         function evaluarChecklist() {
@@ -595,6 +1102,20 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                 box.className = 'mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm font-semibold text-amber-900';
                 box.innerText = `Progreso pre-ITV: ${marcados} de ${total} puntos críticos verificados. Revisa los pendientes antes de tu cita.`;
             }
+        }
+
+        // 6. Catálogo de piezas y calculadora Desguace vs. Autodoc vs. Taller
+        function cargarPiezaCatalogo() {
+            const val = document.getElementById('pieza-catalogo').value;
+            if (!val) return;
+            const p = val.split(',');
+            document.getElementById('rep-tipo').value = p[0];
+            document.getElementById('rep-desguace').value = p[1];
+            document.getElementById('rep-autodoc').value = p[2];
+            document.getElementById('rep-horas').value = p[3];
+            const linkAutodoc = document.getElementById('link-pieza-autodoc');
+            if (linkAutodoc) linkAutodoc.href = `https://www.autodoc.es/search?keyword=${p[4]}`;
+            calcularDesguace();
         }
 
         function calcularDesguace() {
@@ -809,30 +1330,41 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const km = parseFloat(elKm.value) || 0;
             const l100 = parseFloat(document.getElementById('litros-100').value) || 0;
             const precio = parseFloat(document.getElementById('precio-litro').value) || 0;
+            const peajes = parseFloat(document.getElementById('peajes-viaje').value) || 0;
+            const vel = Math.max(1, parseFloat(document.getElementById('vel-viaje').value) || 100);
             const personas = Math.max(1, parseInt(document.getElementById('ocupantes').value) || 1);
 
             const litrosTotales = (km / 100) * l100;
-            const costeTotal = litrosTotales * precio;
-            const costePorPersona = costeTotal / personas;
-            const costePorKm = km > 0 ? costeTotal / km : 0;
+            const costeCombustible = litrosTotales * precio;
+            const costeDirectoViaje = costeCombustible + peajes;
+            const costeConDesgaste = costeDirectoViaje + (km * 0.06);
+            const costePorPersona = costeDirectoViaje / personas;
+
+            const horasTotales = km / vel;
+            const h = Math.floor(horasTotales);
+            const m = Math.round((horasTotales - h) * 60);
 
             document.getElementById('res-consumo').innerHTML = `
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center">
                     <div class="bg-white p-3 rounded-lg border">
-                        <div class="text-xs text-slate-500">Coste total del viaje</div>
-                        <div class="text-xl font-bold text-slate-900">${costeTotal.toFixed(2)} €</div>
+                        <div class="text-xs text-slate-500">Combustible + peajes</div>
+                        <div class="text-xl font-bold text-slate-900">${costeDirectoViaje.toFixed(2)} €</div>
                     </div>
                     <div class="bg-white p-3 rounded-lg border">
                         <div class="text-xs text-slate-500">Por ocupante (${personas})</div>
                         <div class="text-xl font-bold text-amber-600">${costePorPersona.toFixed(2)} €</div>
                     </div>
                     <div class="bg-white p-3 rounded-lg border">
-                        <div class="text-xs text-slate-500">Litros totales</div>
+                        <div class="text-xs text-slate-500">Litros necesarios</div>
                         <div class="text-xl font-bold text-slate-900">${litrosTotales.toFixed(1)} L</div>
                     </div>
                     <div class="bg-white p-3 rounded-lg border">
-                        <div class="text-xs text-slate-500">Coste por km</div>
-                        <div class="text-xl font-bold text-slate-900">${costePorKm.toFixed(3)} €/km</div>
+                        <div class="text-xs text-slate-500">Tiempo estimado</div>
+                        <div class="text-lg font-bold text-slate-900">${h} h ${m} min</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border col-span-2 sm:col-span-1">
+                        <div class="text-xs text-slate-500">Total con desgaste</div>
+                        <div class="text-lg font-bold text-slate-700">${costeConDesgaste.toFixed(2)} €</div>
                     </div>
                 </div>
             `;
@@ -843,54 +1375,77 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             if (!elKmAnual) return;
             const kmAnual = parseFloat(elKmAnual.value) || 1;
             const difPrecio = parseFloat(document.getElementById('dif-precio').value) || 0;
+            const aniosUso = parseFloat(document.getElementById('anios-uso').value) || 8;
             const consA = parseFloat(document.getElementById('cons-a').value) || 0;
             const precA = parseFloat(document.getElementById('prec-a').value) || 0;
+            const mantA = parseFloat(document.getElementById('mant-a').value) || 0;
             const consB = parseFloat(document.getElementById('cons-b').value) || 0;
             const precB = parseFloat(document.getElementById('prec-b').value) || 0;
+            const mantB = parseFloat(document.getElementById('mant-b').value) || 0;
 
-            const ahorroPorKm = ((consA * precA) - (consB * precB)) / 100;
+            const gastoAnualA = ((kmAnual / 100) * consA * precA) + mantA;
+            const gastoAnualB = ((kmAnual / 100) * consB * precB) + mantB;
+            const ahorroAnualNeto = gastoAnualA - gastoAnualB;
+            const ahorroPorKm = ahorroAnualNeto / kmAnual;
+            const balanceFinUso = (ahorroAnualNeto * aniosUso) - difPrecio;
+
             const box = document.getElementById('res-amortizacion');
 
-            if (ahorroPorKm <= 0) {
-                box.innerHTML = `<p class="text-rose-700 font-semibold text-sm">Con estos datos, la opción B no ahorra dinero por kilómetro respecto a la opción A.</p>`;
+            if (ahorroAnualNeto <= 0) {
+                box.innerHTML = `<p class="text-rose-700 font-semibold text-sm">Con estos datos (incluyendo mantenimiento), el vehículo B no genera ahorro anual respecto al vehículo A.</p>`;
                 return;
             }
 
             const kmParaAmortizar = difPrecio / ahorroPorKm;
-            const aniosParaAmortizar = kmParaAmortizar / kmAnual;
-            const ahorroAnual = ahorroPorKm * kmAnual;
+            const aniosParaAmortizar = difPrecio / ahorroAnualNeto;
 
             box.innerHTML = `
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                     <div class="bg-white p-3 rounded-lg border">
-                        <div class="text-xs text-slate-500">Ahorro anual</div>
-                        <div class="text-xl font-bold text-emerald-600">${ahorroAnual.toFixed(0)} €/año</div>
+                        <div class="text-xs text-slate-500">Ahorro neto anual</div>
+                        <div class="text-xl font-bold text-emerald-600">${ahorroAnualNeto.toFixed(0)} €/año</div>
                     </div>
                     <div class="bg-white p-3 rounded-lg border">
                         <div class="text-xs text-slate-500">Km para amortizar</div>
                         <div class="text-xl font-bold text-slate-900">${Math.round(kmParaAmortizar).toLocaleString('es-ES')} km</div>
                     </div>
                     <div class="bg-white p-3 rounded-lg border">
-                        <div class="text-xs text-slate-500">Tiempo de retorno</div>
+                        <div class="text-xs text-slate-500">Punto de equilibrio</div>
                         <div class="text-xl font-bold text-amber-600">${aniosParaAmortizar.toFixed(1)} años</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border">
+                        <div class="text-xs text-slate-500">Balance a los ${aniosUso} años</div>
+                        <div class="text-xl font-extrabold ${balanceFinUso >= 0 ? 'text-emerald-700' : 'text-rose-700'}">${balanceFinUso >= 0 ? '+' : ''}${balanceFinUso.toFixed(0)} €</div>
                     </div>
                 </div>
             `;
         }
 
+        // 4B. Caballos fiscales (fórmula oficial BOE) + DGT + IVTM + CO2
         function calcularDGT() {
             const elMotor = document.getElementById('dgt-motor');
             if (!elMotor) return;
             const motor = elMotor.value;
             const anio = parseInt(document.getElementById('dgt-anio').value) || 2015;
+            const cc = parseFloat(document.getElementById('dgt-cc').value) || 1600;
+            const cil = Math.max(1, parseInt(document.getElementById('dgt-cil').value) || 4);
             const co2 = parseFloat(document.getElementById('dgt-co2').value) || 0;
             const base = parseFloat(document.getElementById('dgt-base').value) || 0;
+
+            // Fórmula BOE Anexo V: CVF = 0.08 * (cc / N)^0.6 * N
+            const cvf = 0.08 * Math.pow(cc / cil, 0.6) * cil;
+
+            let tramoIVTM = "De 12 a 15,99 CVF (~143 €/año)";
+            if (cvf < 8) tramoIVTM = "Menos de 8 CVF (~25 €/año)";
+            else if (cvf < 12) tramoIVTM = "De 8 a 11,99 CVF (~68 €/año)";
+            else if (cvf >= 16 && cvf < 20) tramoIVTM = "De 16 a 19,99 CVF (~179 €/año)";
+            else if (cvf >= 20) tramoIVTM = "20 CVF o más (~224 €/año)";
 
             let etiqueta = "Sin distintivo (A)";
             let colorEtiqueta = "bg-slate-200 text-slate-800";
 
             if (motor === "cero") {
-                etiqueta = "Etiqueta CERO emisiones (azul)";
+                etiqueta = "CERO emisiones (azul)";
                 colorEtiqueta = "bg-sky-200 text-sky-950";
             } else if (motor === "hibrido") {
                 etiqueta = "Etiqueta ECO (verde/azul)";
@@ -921,18 +1476,22 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const cuotaImpuesto = base * (tipoImpositivo / 100);
 
             document.getElementById('res-dgt').innerHTML = `
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center items-center">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center items-center">
                     <div class="p-3 rounded-lg font-bold ${colorEtiqueta}">
                         <div class="text-xs opacity-75">Distintivo DGT</div>
-                        <div class="text-sm mt-1">${etiqueta}</div>
+                        <div class="text-xs sm:text-sm mt-1">${etiqueta}</div>
                     </div>
                     <div class="bg-white p-3 rounded-lg border">
-                        <div class="text-xs text-slate-500">Tramo impuesto CO₂ (${co2} g/km)</div>
-                        <div class="text-xl font-bold text-slate-900">${tipoImpositivo.toFixed(2)} %</div>
+                        <div class="text-xs text-slate-500">Potencia fiscal (BOE)</div>
+                        <div class="text-xl font-extrabold text-slate-900">${cvf.toFixed(2)} CVF</div>
                     </div>
                     <div class="bg-white p-3 rounded-lg border">
-                        <div class="text-xs text-slate-500">Impuesto de matriculación</div>
-                        <div class="text-xl font-bold text-amber-600">${cuotaImpuesto.toFixed(2)} €</div>
+                        <div class="text-xs text-slate-500">Tramo IVTM («numerito»)</div>
+                        <div class="text-xs font-bold text-slate-800 mt-1">${tramoIVTM}</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border">
+                        <div class="text-xs text-slate-500">Imp. matriculación (${tipoImpositivo}%)</div>
+                        <div class="text-xl font-bold text-amber-600">${cuotaImpuesto.toFixed(0)} €</div>
                     </div>
                 </div>
             `;
@@ -956,9 +1515,13 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             leerParametrosURL();
             cambiarTab(TAB_INICIAL);
             calcularITV();
+            calcularET();
             calcularConsumo();
+            calcularConsumoReal();
             calcularAmortizacion();
+            calcularMatricula();
             calcularDGT();
+            mostrarFalloOBD();
             evaluarChecklist();
             calcularDesguace();
             if (!localStorage.getItem('autocalc_cookies')) {
@@ -1067,27 +1630,26 @@ def main():
     internal_links_html = "\n".join(chips)
 
     faqs_home = [
-        ("¿Dónde es más barato comprar neumáticos equivalentes y recambios para la ITV?",
-         "Para neumáticos sueltos con envío gratuito destacan Muchoneumático y Amazon; si prefieres montaje e instalación en taller físico convienen las ofertas de Norauto y Feu Vert; para recambios mecánicos generales (filtros, frenos, suspensión) Autodoc ofrece el catálogo más amplio, mientras que para piezas de carrocería o motores de arranque compensan los grandes desguaces como el Polígono Aimayr (San Martín de la Vega) o La Torre."),
-        ("¿Qué margen permite la ITV para neumáticos equivalentes en España?",
-         "La ITV permite una tolerancia máxima del ±3 % en el diámetro exterior respecto a la medida en ficha técnica, manteniendo índice de carga y velocidad iguales o superiores.")
+        ("¿Cómo saber la fecha de matriculación de un coche por su matrícula?",
+         "En la pestaña 4 (Matrículas, CVF y DGT) puedes introducir las 3 letras de cualquier matrícula española desde el año 2000 para obtener el mes y año exacto de matriculación, su etiqueta DGT y cuándo le corresponde pasar la ITV."),
+        ("¿Cómo se calculan los caballos fiscales (CVF) de un coche en España?",
+         "Se aplica la fórmula oficial del Anexo V del Reglamento General de Vehículos: CVF = 0,08 × (cilindrada / número de cilindros)^0,6 × número de cilindros.")
     ]
     seo_home = """
-        <h2 class="text-base font-bold text-slate-900">Guía técnica de equivalencia de neumáticos ITV, comparador de recambios y desguaces</h2>
-        <p>Con nuestras 6 herramientas técnicas verificadas podrás comprobar equivalencias de ruedas sin homologar (±3 %), comparar precios al instante entre <strong>Muchoneumático, Autodoc, Norauto, Feu Vert y Amazon</strong>, y calcular si te compensa acudir a un gran desguace (como el Polígono Aimayr en San Martín de la Vega o Desguaces La Torre) frente a montar pieza nueva.</p>
+        <h2 class="text-base font-bold text-slate-900">Portal técnico del motor: equivalencias ITV, matrículas, gasolineras en tiempo real y recambios</h2>
+        <p>En <strong>AutoCalc España</strong> dispones de todas las calculadoras esenciales para el conductor y el mecánico: equivalencia de neumáticos ITV (±3 %) y desplazamiento ET de llantas, precio de gasolineras hoy en tiempo real conectado al Ministerio, cálculo de consumo real de depósito, datador de matrículas españolas, calculadora de potencia fiscal (caballos fiscales CVF), diccionario de averías OBD2 y comparador de recambios entre <strong>Autodoc, Muchoneumático, Norauto, Feu Vert, Amazon y grandes desguaces</strong>.</p>
     """
     render_page(
         "index.html",
-        f"Calculadora de equivalencia de neumáticos ITV, recambios y DGT | {SITE_NAME}",
-        "Comprueba la equivalencia de neumáticos para la ITV (±3 %), compara precios en Muchoneumático, Autodoc, Norauto, Feu Vert y desguaces.",
-        "Calculadoras técnicas de ITV, neumáticos, recambios y DGT",
-        "Comprueba medidas equivalentes sin homologar (±3 %) y compara al instante entre Muchoneumático, Autodoc, Norauto, Feu Vert, Amazon y desguaces.",
+        f"Calculadora de neumáticos ITV, matrículas, consumo y gasolineras | {SITE_NAME}",
+        "Calculadoras de motor: equivalencia de neumáticos ITV y ET, fecha por matrícula, caballos fiscales CVF, gasolineras baratas hoy, consumo real y recambios.",
+        "Calculadoras técnicas de ITV, matrículas, gasolineras y recambios",
+        "Equivalencias ITV y ET, datador de matrículas, caballos fiscales, gasolineras en vivo y comparador Autodoc, Muchoneumático, Norauto y desguaces.",
         205, 55, 16, 225, 45, 17, 450, 5.8, "itv",
         generar_tabla_equivalencias_html(205, 55, 16), seo_home, internal_links_html, faqs_home
     )
-    sitemap_urls.append(("index.html", f"{DOMINIO}/", "Portada principal - 6 calculadoras y comparador multitienda"))
+    sitemap_urls.append(("index.html", f"{DOMINIO}/", "Portada principal - Suite completa de calculadoras de motor"))
 
-    # Páginas por medida
     procesadas = set()
     for a1, p1, l1, a2, p2, l2, modelos in MEDIDAS_ESPANA:
         if (a1, p1, l1) in procesadas:
@@ -1126,7 +1688,6 @@ def main():
         )
         sitemap_urls.append((slug, f"{DOMINIO}/{slug}", f"Equivalencia de neumáticos {a1}/{p1} R{l1} ({modelos})"))
 
-    # Páginas por modelo de coche
     for slug_c, nombre_c, a1, p1, l1, a2, p2, l2, l100 in MODELOS_COCHES:
         archivo_c = f"neumaticos-itv-{slug_c}.html"
         d1 = calcular_diametro(a1, p1, l1)
@@ -1161,7 +1722,6 @@ def main():
         )
         sitemap_urls.append((archivo_c, f"{DOMINIO}/{archivo_c}", f"Neumáticos y recambios ITV para {nombre_c} ({a1}/{p1} R{l1})"))
 
-    # NUEVO v4.0: Páginas locales de Desguaces, Talleres e ITV (Aranjuez, San Martín de la Vega, La Torre, Ocaña...)
     for slug_z, nombre_z, dist_z, desguaces_z, itv_z in ZONAS_DESGUACES_ITV:
         archivo_z = f"desguaces-itv-{slug_z}.html"
         seo_zona = f"""
@@ -1191,11 +1751,10 @@ def main():
         )
         sitemap_urls.append((archivo_z, f"{DOMINIO}/{archivo_z}", f"Guía de desguaces, talleres e ITV: {nombre_z}"))
 
-    # Páginas de rutas
     for orig, dest, km, l100 in RUTAS_ESPANA:
         slug_r = f"calcular-consumo-{orig.lower().replace(' ', '-')}-{dest.lower().replace(' ', '-')}.html"
         litros = (km / 100.0) * l100
-        coste = litros * 1.58
+        coste = litros * 1.56
 
         seo_ruta = f"""
             <h2 class="text-base font-bold text-slate-900">Gasto de combustible en la ruta {orig} - {dest} ({km} km)</h2>
@@ -1217,7 +1776,6 @@ def main():
         )
         sitemap_urls.append((slug_r, f"{DOMINIO}/{slug_r}", f"Calculadora de viaje {orig} a {dest} ({km} km)"))
 
-    # Mapa web
     items_html = "".join([
         f'<li class="item-mapa py-2 px-3 bg-slate-50 rounded-lg border border-slate-200 hover:border-amber-400 transition">'
         f'<a href="{archivo}" class="text-slate-800 hover:text-amber-600 font-medium text-sm block">{label}</a></li>'
@@ -1280,7 +1838,7 @@ def main():
     with open(os.path.join(OUTPUT_DIR, "ads.txt"), "w", encoding="utf-8") as f:
         f.write(f"google.com, {ads_pub}, DIRECT, f08c47fec0942fa0\n")
 
-    print(f"[OK] Portal v4.0 generado en ./public con {len(sitemap_urls)} páginas SEO (incluye comparador Autodoc/Muchoneumático/Norauto/Feu Vert y guías de desguaces de Aranjuez y Madrid Sur).")
+    print(f"[OK] Portal v5.0 (Edicion dieselogasolina.com) generado en ./public con {len(sitemap_urls)} paginas SEO.")
 
 
 if __name__ == "__main__":
