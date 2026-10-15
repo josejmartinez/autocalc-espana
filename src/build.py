@@ -116,6 +116,8 @@ def generar_tabla_equivalencias_html(a_orig, p_orig, l_orig):
 PLANTILLA_HTML = r"""<!DOCTYPE html>
 <html lang="es">
 <head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QN5542F4NX"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-QN5542F4NX');</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>__PAGE_TITLE__</title>
