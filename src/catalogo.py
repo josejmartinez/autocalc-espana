@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Catálogo de medidas ITV, modelos superventas y rutas de España."""
+"""Catálogo de medidas ITV, modelos superventas, rutas y zonas de desguaces/ITV."""
 
 MEDIDAS_ESPANA = [
     (205, 55, 16, 225, 45, 17, "Seat León, VW Golf, Toyota Corolla, Ford Focus, Peugeot 308"),
@@ -55,7 +55,6 @@ MEDIDAS_ESPANA = [
     (265, 65, 17, 265, 60, 18, "Toyota Land Cruiser, Toyota Hilux, Mitsubishi Montero, Ford Ranger")
 ]
 
-# Formato: (slug, nombre_modelo, a1, p1, l1, a2, p2, l2, consumo_medio)
 MODELOS_COCHES = [
     ("seat-leon", "Seat León", 205, 55, 16, 225, 45, 17, 5.4),
     ("seat-ibiza", "Seat Ibiza", 185, 60, 15, 215, 45, 17, 5.2),
@@ -107,7 +106,48 @@ RUTAS_ESPANA = [
     ("Sevilla", "Málaga", 205, 5.5), ("Zaragoza", "Madrid", 315, 5.8),
     ("Madrid", "Lisboa", 625, 6.0), ("Barcelona", "Madrid", 620, 5.8),
     ("Madrid", "Granada", 420, 5.8), ("Madrid", "Murcia", 405, 5.7),
-    ("Valencia", "Madrid", 355, 5.6), ("Sevilla", "Cádiz", 120, 5.4)
+    ("Valencia", "Madrid", 355, 5.6), ("Sevilla", "Cádiz", 120, 5.4),
+    ("Aranjuez", "Madrid", 48, 5.5), ("Aranjuez", "Toledo", 42, 5.4)
+]
+
+# Zonas clave de ITV, recambios y desguaces (Aranjuez, Sur de Madrid y La Sagra/Ocaña)
+# Formato: (slug, nombre_zona, distancia_ref, desguaces_destacados, centros_taller_itv)
+ZONAS_DESGUACES_ITV = [
+    (
+        "aranjuez-comarca-las-vegas",
+        "Aranjuez y comarca de Las Vegas",
+        "0 - 20 km (A-4 / M-305 / N-400)",
+        "Polígono Aimayr (San Martín de la Vega a 20 min por M-307/A-4), Desguaces en Ocaña (A-4 km 62) y Seseña",
+        "Estación ITV Aranjuez (Pol. Ind. Gonzalo Chacón), ITV Ocaña y talleres Norauto/Feu Vert en eje A-4 Sur"
+    ),
+    (
+        "san-martin-de-la-vega-poligono-aimayr",
+        "San Martín de la Vega (Polígono Aimayr)",
+        "22 km desde Aranjuez / 30 km desde Madrid",
+        "El Choque, Desguaces Boyacá, Desguaces Calvo, Desguaces Stop, El Álamo y más de 30 centros CAT autorizados",
+        "ITV Pinto / Valdemoro (A-4) y centros de montaje rápido Norauto en Parque Comercial Nassica (Getafe)"
+    ),
+    (
+        "torrejon-de-la-calzada-la-torre",
+        "Torrejón de la Calzada y eje A-42 (La Torre)",
+        "32 km desde Aranjuez / 25 km desde Madrid",
+        "Desguaces La Torre (A-42 km 25) y polígonos de recambio recuperado de Griñón, Humanes y Fuenlabrada",
+        "ITV Parla, ITV Illescas / Yeles y centros Norauto / Feu Vert en Parla, Getafe y Fuenlabrada"
+    ),
+    (
+        "ocana-sesena-illescas-toledo",
+        "Ocaña, Seseña, Ontígola y La Sagra (Toledo Norte)",
+        "5 - 25 km desde Aranjuez (A-4 / CM-4001)",
+        "Centros de desguace en Ocaña, Seseña, Yeles e Illescas junto a los corredores A-4 y A-42",
+        "ITV Ocaña, ITV Seseña / Illescas y centros de neumáticos y mecánica rápida en Madrid Sur y Toledo"
+    ),
+    (
+        "valdemoro-ciempozuelos-pinto-getafe",
+        "Ciempozuelos, Valdemoro, Pinto y Getafe (Eje A-4 Sur)",
+        "14 - 32 km desde Aranjuez por A-4",
+        "Acceso directo en 10-15 minutos al Polígono Aimayr de San Martín de la Vega (M-841 / M-506) y La Torre",
+        "ITV Valdemoro, ITV Pinto, ITV Getafe y centros Norauto / Feu Vert en Nassica y Parque Sur"
+    )
 ]
 
 GARGANTA_POR_ANCHO = {

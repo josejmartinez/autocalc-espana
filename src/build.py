@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Motor generador estático AutoCalc España v3.0
-Incluye: 5 herramientas (ITV, consumo, amortización, DGT, checklist pre-ITV),
-páginas por medida, por ruta y por modelo de coche.
+Motor generador estático AutoCalc España v4.0
+Incluye: 6 herramientas (ITV, consumo, amortización, DGT, checklist pre-ITV y calculadora Desguace vs. Autodoc/Taller),
+comparador multitienda (Muchoneumático, Autodoc, Norauto, Feu Vert y Amazon) y guías de desguaces de Aranjuez y Madrid Sur.
 """
 
 import os
 import json
 from datetime import date
-from catalogo import MEDIDAS_ESPANA, MODELOS_COCHES, RUTAS_ESPANA, GARGANTA_POR_ANCHO
+from catalogo import MEDIDAS_ESPANA, MODELOS_COCHES, RUTAS_ESPANA, ZONAS_DESGUACES_ITV, GARGANTA_POR_ANCHO
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
@@ -51,6 +51,9 @@ def generar_tabla_equivalencias_html(a_orig, p_orig, l_orig):
                     badge = "bg-emerald-100 text-emerald-800" if abs(diff_pct) <= 1.5 else "bg-amber-100 text-amber-800"
                     s_pct = "+" if diff_pct > 0 else ""
                     s_alt = "+" if delta_alt > 0 else ""
+
+                    url_mucho = f"https://www.muchoneumatico.com/buscar?controller=search&s={ancho}+{perfil}+{llanta}"
+                    url_norauto = f"https://www.norauto.es/c/47595-neumaticos.html?q={ancho}%2F{perfil}R{llanta}"
                     url_amz = f"https://www.amazon.es/s?k=neumaticos+{ancho}+{perfil}+R{llanta}&tag={AMAZON_TAG}"
 
                     fila_html = f"""
@@ -67,7 +70,11 @@ def generar_tabla_equivalencias_html(a_orig, p_orig, l_orig):
                         </td>
                         <td class="py-2.5 px-3 text-center text-slate-600">{s_alt}{delta_alt:.1f} mm</td>
                         <td class="py-2.5 px-3 text-right">
-                            <a href="{url_amz}" target="_blank" rel="nofollow sponsored" class="text-xs bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-2.5 py-1 rounded transition">Ver precios →</a>
+                            <div class="flex flex-wrap justify-end gap-1">
+                                <a href="{url_mucho}" target="_blank" rel="nofollow sponsored" class="text-[11px] bg-sky-600 hover:bg-sky-700 text-white font-semibold px-2 py-1 rounded transition" title="Ver en Muchoneumático">Muchoneumático</a>
+                                <a href="{url_norauto}" target="_blank" rel="nofollow sponsored" class="text-[11px] bg-blue-900 hover:bg-blue-950 text-white font-semibold px-2 py-1 rounded transition" title="Ver en Norauto con montaje">Norauto</a>
+                                <a href="{url_amz}" target="_blank" rel="nofollow sponsored" class="text-[11px] bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-2 py-1 rounded transition" title="Ver en Amazon">Amazon</a>
+                            </div>
                         </td>
                     </tr>"""
                     filas.append((abs(diff_pct), fila_html))
@@ -80,7 +87,7 @@ def generar_tabla_equivalencias_html(a_orig, p_orig, l_orig):
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
             <div>
                 <h2 class="text-lg font-bold text-slate-900">Tabla oficial de equivalencias para {a_orig}/{p_orig} R{l_orig} (ITV ±3 %)</h2>
-                <p class="text-xs text-slate-500">Diámetro original: <strong>{d_orig:.1f} mm</strong> · Rango legal permitido en ITV: <strong>{d_orig*0.97:.1f} mm a {d_orig*1.03:.1f} mm</strong> (pulsa en cualquier medida para simularla arriba)</p>
+                <p class="text-xs text-slate-500">Diámetro original: <strong>{d_orig:.1f} mm</strong> · Rango legal permitido en ITV: <strong>{d_orig*0.97:.1f} mm a {d_orig*1.03:.1f} mm</strong> (compara precios en tiempo real)</p>
             </div>
             <span class="text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-full font-semibold w-fit">Sin homologar</span>
         </div>
@@ -92,7 +99,7 @@ def generar_tabla_equivalencias_html(a_orig, p_orig, l_orig):
                     <th class="py-2 px-3 text-center font-semibold">Diámetro</th>
                     <th class="py-2 px-3 text-center font-semibold">Variación ITV</th>
                     <th class="py-2 px-3 text-center font-semibold">Altura chasis</th>
-                    <th class="py-2 px-3 text-right font-semibold">Ofertas</th>
+                    <th class="py-2 px-3 text-right font-semibold">Comparar precios por tienda</th>
                 </tr>
             </thead>
             <tbody>{filas_top}</tbody>
@@ -132,11 +139,12 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             <div class="flex items-center gap-3">
                 <a href="index.html" class="hover:opacity-90 transition flex items-center gap-2">
                     <span class="text-2xl font-extrabold tracking-tight text-amber-400">__SITE_NAME__</span>
-                    <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">ITV y DGT</span>
+                    <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">ITV, recambios y DGT</span>
                 </a>
             </div>
             <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <a href="mapa-web.html" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Buscador de medidas y coches</a>
+                <a href="desguaces-itv-aranjuez-comarca-las-vegas.html" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Desguaces y talleres</a>
+                <a href="mapa-web.html" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Buscador</a>
                 <button onclick="copiarEnlaceCalculo()" id="btn-compartir" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Copiar enlace</button>
                 <button onclick="window.print()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-3 py-2 rounded-lg transition">Guardar PDF</button>
             </div>
@@ -150,22 +158,25 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             <p class="text-sm text-slate-600 mt-1">__HERO_SUBTITLE__</p>
         </div>
 
-        <!-- Selector de 5 pestañas -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mb-6 bg-slate-200 p-1.5 rounded-xl no-print">
-            <button onclick="cambiarTab('itv')" id="tab-itv" class="py-2.5 px-2.5 rounded-lg font-semibold text-xs bg-white text-slate-900 shadow-sm transition">
-                1. Equivalencia ITV (±3 %)
+        <!-- Selector de 6 herramientas -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-6 bg-slate-200 p-1.5 rounded-xl no-print">
+            <button onclick="cambiarTab('itv')" id="tab-itv" class="py-2.5 px-2 rounded-lg font-semibold text-xs bg-white text-slate-900 shadow-sm transition">
+                1. Equivalencia ITV
             </button>
-            <button onclick="cambiarTab('consumo')" id="tab-consumo" class="py-2.5 px-2.5 rounded-lg font-semibold text-xs text-slate-600 hover:text-slate-900 transition">
-                2. Coste de viaje y consumo
+            <button onclick="cambiarTab('consumo')" id="tab-consumo" class="py-2.5 px-2 rounded-lg font-semibold text-xs text-slate-600 hover:text-slate-900 transition">
+                2. Coste de viaje
             </button>
-            <button onclick="cambiarTab('amortizacion')" id="tab-amortizacion" class="py-2.5 px-2.5 rounded-lg font-semibold text-xs text-slate-600 hover:text-slate-900 transition">
-                3. Diésel o híbrido vs. gasolina
+            <button onclick="cambiarTab('amortizacion')" id="tab-amortizacion" class="py-2.5 px-2 rounded-lg font-semibold text-xs text-slate-600 hover:text-slate-900 transition">
+                3. Diésel vs. gasolina
             </button>
-            <button onclick="cambiarTab('dgt')" id="tab-dgt" class="py-2.5 px-2.5 rounded-lg font-semibold text-xs text-slate-600 hover:text-slate-900 transition">
-                4. Etiqueta DGT e impuesto CO₂
+            <button onclick="cambiarTab('dgt')" id="tab-dgt" class="py-2.5 px-2 rounded-lg font-semibold text-xs text-slate-600 hover:text-slate-900 transition">
+                4. Etiqueta DGT y CO₂
             </button>
-            <button onclick="cambiarTab('preitv')" id="tab-preitv" class="py-2.5 px-2.5 rounded-lg font-semibold text-xs text-slate-600 hover:text-slate-900 transition col-span-2 sm:col-span-1">
+            <button onclick="cambiarTab('preitv')" id="tab-preitv" class="py-2.5 px-2 rounded-lg font-semibold text-xs text-slate-600 hover:text-slate-900 transition">
                 5. Checklist pre-ITV
+            </button>
+            <button onclick="cambiarTab('desguace')" id="tab-desguace" class="py-2.5 px-2 rounded-lg font-semibold text-xs text-slate-600 hover:text-slate-900 transition">
+                6. ¿Desguace o nuevo?
             </button>
         </div>
 
@@ -374,7 +385,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             <div id="res-dgt" class="mt-6 p-5 rounded-xl bg-slate-50 border border-slate-200"></div>
         </section>
 
-        <!-- 5. CHECKLIST PRE-ITV Y RECAMBIOS OBLIGATORIOS -->
+        <!-- 5. CHECKLIST PRE-ITV -->
         <section id="sec-preitv" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hidden">
             <h2 class="text-lg font-bold mb-1 text-slate-900">Checklist interactivo de revisión pre-ITV en casa</h2>
             <p class="text-xs text-slate-500 mb-4">Marca los puntos que ya has revisado en tu vehículo para evaluar el riesgo de rechazo antes de acudir a la estación ITV.</p>
@@ -425,47 +436,86 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             <div id="res-preitv" class="mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm font-semibold text-amber-900"></div>
         </section>
 
-        <!-- BLOQUE DE AFILIACIÓN DINÁMICA (AMAZON MOTOR 7 %) -->
+        <!-- 6. CALCULADORA: ¿DESGUACE, AUTODOC O TALLER (NORAUTO / FEU VERT)? -->
+        <section id="sec-desguace" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hidden">
+            <h2 class="text-lg font-bold mb-1 text-slate-900">Calculadora de ahorro en reparaciones: ¿desguace, Autodoc o taller?</h2>
+            <p class="text-xs text-slate-500 mb-4">Compara el coste real y la recomendación técnica entre comprar pieza recuperada en desguace (ej. San Martín de la Vega o La Torre), pedirla nueva en Autodoc o montarla en Norauto / Feu Vert.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">Tipo de recambio</label>
+                    <select id="rep-tipo" onchange="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold bg-white text-xs">
+                        <option value="carroceria">Carrocería, faro, retrovisor o interior</option>
+                        <option value="mecanica">Alternador, motor arranque, compresor o caja</option>
+                        <option value="desgaste">Frenos, filtros, embrague, correas o amortiguadores</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">Precio en desguace (€)</label>
+                    <input type="number" id="rep-desguace" value="45" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">Precio nuevo Autodoc (€)</label>
+                    <input type="number" id="rep-autodoc" value="95" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">Horas de montaje / taller</label>
+                    <input type="number" step="0.5" id="rep-horas" value="1.5" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
+                </div>
+            </div>
+            <div id="res-desguace" class="mt-6 p-5 rounded-xl bg-slate-50 border border-slate-200"></div>
+        </section>
+
+        <!-- COMPARADOR MULTITIENDA (MUCHONEUMÁTICO + AUTODOC + NORAUTO/FEU VERT + AMAZON) -->
         <section class="mt-8 bg-gradient-to-br from-slate-900 to-slate-800 text-white p-6 rounded-2xl shadow-md no-print">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-                <h2 class="text-lg font-bold text-amber-400">Recambios y accesorios compatibles con __CAR_CONTEXT_NAME__</h2>
-                <span class="text-xs bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full w-fit">Envío rápido en Amazon España</span>
+                <div>
+                    <h2 class="text-lg font-bold text-amber-400">Comparador de tiendas recomendadas para __CAR_CONTEXT_NAME__</h2>
+                    <p class="text-xs text-slate-300">Selecciona la tienda ideal según busques neumático con envío gratis, recambio general, montaje en taller cercano o urgencia 24 h.</p>
+                </div>
+                <span class="text-xs bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full w-fit">Selección mecánica experta</span>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- 1. Muchoneumático -->
+                <a id="cta-muchoneumatico" href="https://www.muchoneumatico.com/buscar?controller=search&s=__VAL_A1__+__VAL_P1__+__VAL_L1__" target="_blank" rel="nofollow sponsored" class="bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs text-sky-400 font-semibold">Especialista en ruedas</span>
+                        <h3 id="txt-cta-mucho" class="font-bold text-sm mt-1">Muchoneumático __VAL_A1__/__VAL_P1__ R__VAL_L1__</h3>
+                        <p class="text-xs text-slate-300 mt-1">Gran stock en primeras marcas y segundas líneas con envío gratuito.</p>
+                    </div>
+                    <span class="mt-4 inline-block text-center bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold text-xs py-2 rounded-lg">Ver en Muchoneumático →</span>
+                </a>
+
+                <!-- 2. Autodoc -->
+                <a id="cta-autodoc" href="https://www.autodoc.es/search?keyword=__CAR_AUTODOC_QUERY__" target="_blank" rel="nofollow sponsored" class="bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs text-orange-400 font-semibold">Recambios en general</span>
+                        <h3 class="font-bold text-sm mt-1">Catálogo Autodoc (__CAR_SHORT_NAME__)</h3>
+                        <p class="text-xs text-slate-300 mt-1">El mayor catálogo europeo de filtros, frenos, suspensión, aceites y correas.</p>
+                    </div>
+                    <span class="mt-4 inline-block text-center bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold text-xs py-2 rounded-lg">Buscar en Autodoc →</span>
+                </a>
+
+                <!-- 3. Norauto y Feu Vert -->
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs text-emerald-400 font-semibold">Talleres por cercanía y ofertas</span>
+                        <h3 id="txt-cta-norauto" class="font-bold text-sm mt-1">Montaje __VAL_A2__/__VAL_P2__ R__VAL_L2__</h3>
+                        <p class="text-xs text-slate-300 mt-1">Compra online tus neumáticos o batería con cita de montaje en tu centro más cercano.</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 mt-4">
+                        <a id="cta-norauto" href="https://www.norauto.es/c/47595-neumaticos.html?q=__VAL_A2__%2F__VAL_P2__R__VAL_L2__" target="_blank" rel="nofollow sponsored" class="text-center bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-2 rounded-lg transition">Norauto →</a>
+                        <a id="cta-feuvert" href="https://www.feuvert.es/neumaticos?q=__VAL_A2__+__VAL_P2__+__VAL_L2__" target="_blank" rel="nofollow sponsored" class="text-center bg-slate-600 hover:bg-slate-500 text-white font-bold text-xs py-2 rounded-lg transition">Feu Vert →</a>
+                    </div>
+                </div>
+
+                <!-- 4. Amazon España -->
                 <a id="cta-neumatico-orig" href="https://www.amazon.es/s?k=neumaticos+__VAL_A1__+__VAL_P1__+R__VAL_L1__&tag=__AMAZON_TAG__" target="_blank" rel="nofollow sponsored" class="bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
                     <div>
-                        <span class="text-xs text-amber-400 font-semibold">Medida original</span>
-                        <h3 id="txt-cta-orig" class="font-bold text-sm mt-1">Neumáticos __VAL_A1__/__VAL_P1__ R__VAL_L1__</h3>
-                        <p class="text-xs text-slate-300 mt-1">Primeras marcas y neumáticos económicos con etiqueta europea.</p>
+                        <span class="text-xs text-amber-400 font-semibold">Envío 24 h y pre-ITV</span>
+                        <h3 id="txt-cta-orig" class="font-bold text-sm mt-1">Amazon: __VAL_A1__/__VAL_P1__ R__VAL_L1__ y V16</h3>
+                        <p class="text-xs text-slate-300 mt-1">Neumáticos, baliza V16 conectada DGT, escobillas y diagnosis OBD2.</p>
                     </div>
-                    <span class="mt-4 inline-block text-center bg-amber-500 text-slate-950 font-bold text-xs py-2 rounded-lg">Ver precios →</span>
-                </a>
-
-                <a id="cta-neumatico-nuevo" href="https://www.amazon.es/s?k=neumaticos+__VAL_A2__+__VAL_P2__+R__VAL_L2__&tag=__AMAZON_TAG__" target="_blank" rel="nofollow sponsored" class="bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
-                    <div>
-                        <span class="text-xs text-emerald-400 font-semibold">Medida equivalente ITV</span>
-                        <h3 id="txt-cta-nuevo" class="font-bold text-sm mt-1">Neumáticos __VAL_A2__/__VAL_P2__ R__VAL_L2__</h3>
-                        <p class="text-xs text-slate-300 mt-1">Montaje directo legal en ITV dentro del ±3 % permitido.</p>
-                    </div>
-                    <span class="mt-4 inline-block text-center bg-amber-500 text-slate-950 font-bold text-xs py-2 rounded-lg">Ver ofertas →</span>
-                </a>
-
-                <a href="https://www.amazon.es/s?k=baliza+v16+homologada+dgt+con+geolocalizacion&tag=__AMAZON_TAG__" target="_blank" rel="nofollow sponsored" class="bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
-                    <div>
-                        <span class="text-xs text-rose-400 font-semibold">Obligatoria DGT 2026</span>
-                        <h3 class="font-bold text-sm mt-1">Baliza V16 conectada DGT 3.0</h3>
-                        <p class="text-xs text-slate-300 mt-1">Con eSIM y datos incluidos hasta 2038. Sustituye a los triángulos.</p>
-                    </div>
-                    <span class="mt-4 inline-block text-center bg-amber-500 text-slate-950 font-bold text-xs py-2 rounded-lg">Ver ofertas V16 →</span>
-                </a>
-
-                <a href="https://www.amazon.es/s?k=__CAR_RECAMBIO_QUERY__&tag=__AMAZON_TAG__" target="_blank" rel="nofollow sponsored" class="bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
-                    <div>
-                        <span class="text-xs text-amber-400 font-semibold">Revisión pre-ITV</span>
-                        <h3 class="font-bold text-sm mt-1">__CAR_RECAMBIO_TITLE__</h3>
-                        <p class="text-xs text-slate-300 mt-1">Evita faltas leves y graves en visibilidad, gases y alumbrado.</p>
-                    </div>
-                    <span class="mt-4 inline-block text-center bg-amber-500 text-slate-950 font-bold text-xs py-2 rounded-lg">Ver en Amazon →</span>
+                    <span class="mt-4 inline-block text-center bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs py-2 rounded-lg">Ver en Amazon →</span>
                 </a>
             </div>
         </section>
@@ -477,7 +527,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
         </article>
 
         <nav class="mt-8 bg-slate-100 p-6 rounded-2xl border border-slate-200 no-print">
-            <h3 class="text-xs font-bold text-slate-500 mb-3">Modelos de coche, medidas ITV y rutas más consultadas</h3>
+            <h3 class="text-xs font-bold text-slate-500 mb-3">Guías de desguaces, modelos de coche, medidas ITV y rutas</h3>
             <div class="flex flex-wrap gap-2">
                 __INTERNAL_LINKS_HTML__
             </div>
@@ -489,10 +539,11 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
         <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div>
                 <p class="font-bold text-slate-200">__SITE_NAME__ © 2026</p>
-                <p class="mt-1">Participamos en el Programa de Afiliados de Amazon de la UE.</p>
+                <p class="mt-1">Comparador independiente. Participamos en programas de afiliación (Amazon UE y tiendas del sector motor).</p>
             </div>
             <div class="flex flex-wrap gap-4">
                 <a href="index.html" class="hover:text-white transition">Inicio</a>
+                <a href="desguaces-itv-aranjuez-comarca-las-vegas.html" class="hover:text-white transition">Desguaces Madrid Sur y Aranjuez</a>
                 <a href="mapa-web.html" class="hover:text-white transition">Mapa web</a>
                 <a href="aviso-legal.html" class="hover:text-white transition">Aviso legal</a>
                 <a href="privacidad-cookies.html" class="hover:text-white transition">Privacidad y cookies</a>
@@ -516,19 +567,19 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
         const GARGANTAS = {155:'4.5"-5.5"',165:'4.5"-6.0"',175:'5.0"-6.0"',185:'5.0"-6.5"',195:'5.5"-7.0"',205:'5.5"-7.5"',215:'6.0"-7.5"',225:'6.0"-8.0"',235:'6.5"-8.5"',245:'7.0"-9.0"',255:'7.5"-9.5"',265:'8.0"-10.0"',275:'8.5"-10.5"'};
 
         function cambiarTab(tab) {
-            ['itv', 'consumo', 'amortizacion', 'dgt', 'preitv'].forEach(t => {
+            ['itv', 'consumo', 'amortizacion', 'dgt', 'preitv', 'desguace'].forEach(t => {
                 const sec = document.getElementById('sec-' + t);
                 const btn = document.getElementById('tab-' + t);
                 if (sec && btn) {
                     sec.classList.add('hidden');
-                    btn.className = 'py-2.5 px-2.5 rounded-lg font-semibold text-xs text-slate-600 hover:text-slate-900 transition';
+                    btn.className = 'py-2.5 px-2 rounded-lg font-semibold text-xs text-slate-600 hover:text-slate-900 transition';
                 }
             });
             const activeSec = document.getElementById('sec-' + tab);
             const activeBtn = document.getElementById('tab-' + tab);
             if (activeSec && activeBtn) {
                 activeSec.classList.remove('hidden');
-                activeBtn.className = 'py-2.5 px-2.5 rounded-lg font-semibold text-xs bg-white text-slate-900 shadow-sm transition';
+                activeBtn.className = 'py-2.5 px-2 rounded-lg font-semibold text-xs bg-white text-slate-900 shadow-sm transition';
             }
         }
 
@@ -544,6 +595,57 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                 box.className = 'mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm font-semibold text-amber-900';
                 box.innerText = `Progreso pre-ITV: ${marcados} de ${total} puntos críticos verificados. Revisa los pendientes antes de tu cita.`;
             }
+        }
+
+        function calcularDesguace() {
+            const elTipo = document.getElementById('rep-tipo');
+            if (!elTipo) return;
+            const tipo = elTipo.value;
+            const pDesguace = parseFloat(document.getElementById('rep-desguace').value) || 0;
+            const pAutodoc = parseFloat(document.getElementById('rep-autodoc').value) || 0;
+            const horas = parseFloat(document.getElementById('rep-horas').value) || 0;
+
+            const manoObraTaller = horas * 52;
+            const totalDesguaceDIY = pDesguace;
+            const totalAutodocDIY = pAutodoc;
+            const totalTallerMontado = (pAutodoc * 1.25) + manoObraTaller;
+            const ahorroDesguace = pAutodoc - pDesguace;
+
+            let recomendacion = "";
+            let badgeColor = "bg-emerald-100 text-emerald-900 border-emerald-300";
+
+            if (tipo === "desgaste") {
+                recomendacion = "Elemento de desgaste o seguridad: NO se recomienda desguace. Pídelo nuevo en Autodoc (si lo montas tú) o acude a Norauto / Feu Vert con montaje incluido.";
+                badgeColor = "bg-rose-100 text-rose-900 border-rose-300";
+            } else if (ahorroDesguace < 25) {
+                recomendacion = "Por una diferencia menor de 25 €, compensa estrenar recambio nuevo en Autodoc con 2 años de garantía frente a pieza usada.";
+                badgeColor = "bg-amber-100 text-amber-900 border-amber-300";
+            } else {
+                recomendacion = `¡Compensa ir a desguace! Te ahorras ${ahorroDesguace.toFixed(0)} € respecto al recambio nuevo (ideal buscar en Polígono Aimayr de San Martín de la Vega, La Torre u Ocaña).`;
+            }
+
+            document.getElementById('res-desguace').innerHTML = `
+                <div class="p-3.5 rounded-xl border font-semibold text-xs sm:text-sm mb-4 ${badgeColor}">
+                    ${recomendacion}
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                    <div class="bg-white p-3 rounded-lg border">
+                        <div class="text-xs text-slate-500">1. Desguace (montaje propio)</div>
+                        <div class="text-xl font-bold text-emerald-700">${totalDesguaceDIY.toFixed(0)} €</div>
+                        <div class="text-[11px] text-slate-400">Pieza original recuperada OEM</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border">
+                        <div class="text-xs text-slate-500">2. Nuevo en Autodoc (DIY)</div>
+                        <div class="text-xl font-bold text-orange-600">${totalAutodocDIY.toFixed(0)} €</div>
+                        <div class="text-[11px] text-slate-400">Pieza nueva con garantía</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg border">
+                        <div class="text-xs text-slate-500">3. Taller rápido (pieza + M.O.)</div>
+                        <div class="text-xl font-bold text-slate-900">${totalTallerMontado.toFixed(0)} €</div>
+                        <div class="text-[11px] text-slate-400">Estimado con ${horas} h de taller</div>
+                    </div>
+                </div>
+            `;
         }
 
         function diametroNeumatico(ancho, perfil, llanta) {
@@ -668,10 +770,13 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
 
             dibujarComparadorSVG(a1, p1, l1, d1, a2, p2, l2, d2);
 
+            document.getElementById('cta-muchoneumatico').href = `https://www.muchoneumatico.com/buscar?controller=search&s=${a1}+${p1}+${l1}`;
+            document.getElementById('txt-cta-mucho').innerText = `Muchoneumático ${a1}/${p1} R${l1}`;
+            document.getElementById('cta-norauto').href = `https://www.norauto.es/c/47595-neumaticos.html?q=${a2}%2F${p2}R${l2}`;
+            document.getElementById('cta-feuvert').href = `https://www.feuvert.es/neumaticos?q=${a2}+${p2}+${l2}`;
+            document.getElementById('txt-cta-norauto').innerText = `Montaje ${a2}/${p2} R${l2}`;
             document.getElementById('cta-neumatico-orig').href = `https://www.amazon.es/s?k=neumaticos+${a1}+${p1}+R${l1}&tag=${AMAZON_TAG}`;
-            document.getElementById('txt-cta-orig').innerText = `Neumáticos ${a1}/${p1} R${l1}`;
-            document.getElementById('cta-neumatico-nuevo').href = `https://www.amazon.es/s?k=neumaticos+${a2}+${p2}+R${l2}&tag=${AMAZON_TAG}`;
-            document.getElementById('txt-cta-nuevo').innerText = `Neumáticos ${a2}/${p2} R${l2}`;
+            document.getElementById('txt-cta-orig').innerText = `Amazon: ${a1}/${p1} R${l1} y V16`;
         }
 
         function copiarEnlaceCalculo() {
@@ -855,6 +960,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             calcularAmortizacion();
             calcularDGT();
             evaluarChecklist();
+            calcularDesguace();
             if (!localStorage.getItem('autocalc_cookies')) {
                 document.getElementById('cookie-banner').classList.remove('hidden');
             }
@@ -869,9 +975,9 @@ def render_page(
     filename, title, meta_desc, h1, subtitle,
     a1, p1, l1, a2, p2, l2, km, l100, initial_tab,
     table_html, seo_text, internal_links, faqs,
-    car_context_name="tu medida",
-    car_recambio_query="diagnosis+obd2+multimarca+español",
-    car_recambio_title="Máquina de diagnosis OBD2",
+    car_context_name="tu vehículo",
+    car_short_name="recambios OEM",
+    car_autodoc_query="filtros+pastillas+freno",
     robots="index, follow"
 ):
     canonical = f"{DOMINIO}/" if filename == "index.html" else f"{DOMINIO}/{filename}"
@@ -925,8 +1031,8 @@ def render_page(
         "__INTERNAL_LINKS_HTML__": internal_links,
         "__AMAZON_TAG__": AMAZON_TAG,
         "__CAR_CONTEXT_NAME__": car_context_name,
-        "__CAR_RECAMBIO_QUERY__": car_recambio_query,
-        "__CAR_RECAMBIO_TITLE__": car_recambio_title
+        "__CAR_SHORT_NAME__": car_short_name,
+        "__CAR_AUTODOC_QUERY__": car_autodoc_query
     }
 
     for k, v in replacements.items():
@@ -945,42 +1051,41 @@ def main():
         f.write(favicon_svg)
 
     chips = []
-    for slug_c, nombre_c, _, _, _, _, _, _, _ in MODELOS_COCHES[:18]:
+    for slug_z, nombre_z, _, _, _ in ZONAS_DESGUACES_ITV:
+        chips.append(f'<a href="desguaces-itv-{slug_z}.html" class="text-xs bg-amber-50 hover:bg-amber-200 text-slate-900 font-semibold px-2.5 py-1 rounded border border-amber-300 transition">Desguaces e ITV: {nombre_z}</a>')
+
+    for slug_c, nombre_c, _, _, _, _, _, _, _ in MODELOS_COCHES[:16]:
         chips.append(f'<a href="neumaticos-itv-{slug_c}.html" class="text-xs bg-white hover:bg-amber-100 text-slate-700 px-2.5 py-1 rounded border border-slate-300 transition">ITV {nombre_c}</a>')
 
     vistas = set()
     for a1, p1, l1, _, _, _, _ in MEDIDAS_ESPANA:
-        if (a1, p1, l1) not in vistas and len(chips) < 38:
+        if (a1, p1, l1) not in vistas and len(chips) < 42:
             vistas.add((a1, p1, l1))
             slug = f"equivalencia-neumaticos-{a1}-{p1}-r{l1}.html"
             chips.append(f'<a href="{slug}" class="text-xs bg-white hover:bg-amber-100 text-slate-700 px-2.5 py-1 rounded border border-slate-300 transition">Neumáticos {a1}/{p1} R{l1}</a>')
 
-    for orig, dest, _, _ in RUTAS_ESPANA[:8]:
-        slug_r = f"calcular-consumo-{orig.lower().replace(' ', '-')}-{dest.lower().replace(' ', '-')}.html"
-        chips.append(f'<a href="{slug_r}" class="text-xs bg-white hover:bg-amber-100 text-slate-700 px-2.5 py-1 rounded border border-slate-300 transition">Viaje {orig} - {dest}</a>')
-
     internal_links_html = "\n".join(chips)
 
     faqs_home = [
+        ("¿Dónde es más barato comprar neumáticos equivalentes y recambios para la ITV?",
+         "Para neumáticos sueltos con envío gratuito destacan Muchoneumático y Amazon; si prefieres montaje e instalación en taller físico convienen las ofertas de Norauto y Feu Vert; para recambios mecánicos generales (filtros, frenos, suspensión) Autodoc ofrece el catálogo más amplio, mientras que para piezas de carrocería o motores de arranque compensan los grandes desguaces como el Polígono Aimayr (San Martín de la Vega) o La Torre."),
         ("¿Qué margen permite la ITV para neumáticos equivalentes en España?",
-         "La ITV permite una tolerancia máxima del ±3 % en el diámetro exterior respecto a la medida en ficha técnica, manteniendo índice de carga y velocidad iguales o superiores."),
-        ("¿Qué baliza V16 es obligatoria según la DGT en 2026?",
-         "Desde enero de 2026 es obligatorio llevar una baliza V16 conectada y homologada con geolocalización DGT 3.0 en sustitución de los triángulos de emergencia.")
+         "La ITV permite una tolerancia máxima del ±3 % en el diámetro exterior respecto a la medida en ficha técnica, manteniendo índice de carga y velocidad iguales o superiores.")
     ]
     seo_home = """
-        <h2 class="text-base font-bold text-slate-900">Guía técnica de equivalencia de neumáticos ITV, consumo y etiquetas DGT</h2>
-        <p>Con nuestras 5 herramientas técnicas verificadas conforme al Manual de Procedimiento de Inspección de las Estaciones ITV y la Agencia Tributaria podrás comprobar equivalencias de ruedas sin homologar (±3 %), índice de carga, código de velocidad, ancho de garganta en pulgadas, gasto exacto de combustible por ocupante y el checklist de puntos críticos antes de pasar la ITV.</p>
+        <h2 class="text-base font-bold text-slate-900">Guía técnica de equivalencia de neumáticos ITV, comparador de recambios y desguaces</h2>
+        <p>Con nuestras 6 herramientas técnicas verificadas podrás comprobar equivalencias de ruedas sin homologar (±3 %), comparar precios al instante entre <strong>Muchoneumático, Autodoc, Norauto, Feu Vert y Amazon</strong>, y calcular si te compensa acudir a un gran desguace (como el Polígono Aimayr en San Martín de la Vega o Desguaces La Torre) frente a montar pieza nueva.</p>
     """
     render_page(
         "index.html",
-        f"Calculadora de equivalencia de neumáticos ITV, consumo y DGT | {SITE_NAME}",
-        "Comprueba la equivalencia de neumáticos para la ITV (±3 %), ancho de llanta, consumo de combustible por ruta, etiqueta DGT y checklist pre-ITV.",
-        "Calculadoras técnicas de ITV, neumáticos, consumo y DGT",
-        "Comprueba al instante medidas equivalentes sin homologar (±3 %), gasto por viaje, amortización diésel/híbrido, impuesto CO₂ y revisión pre-ITV.",
+        f"Calculadora de equivalencia de neumáticos ITV, recambios y DGT | {SITE_NAME}",
+        "Comprueba la equivalencia de neumáticos para la ITV (±3 %), compara precios en Muchoneumático, Autodoc, Norauto, Feu Vert y desguaces.",
+        "Calculadoras técnicas de ITV, neumáticos, recambios y DGT",
+        "Comprueba medidas equivalentes sin homologar (±3 %) y compara al instante entre Muchoneumático, Autodoc, Norauto, Feu Vert, Amazon y desguaces.",
         205, 55, 16, 225, 45, 17, 450, 5.8, "itv",
         generar_tabla_equivalencias_html(205, 55, 16), seo_home, internal_links_html, faqs_home
     )
-    sitemap_urls.append(("index.html", f"{DOMINIO}/", "Portada principal - 5 calculadoras de motor e ITV"))
+    sitemap_urls.append(("index.html", f"{DOMINIO}/", "Portada principal - 6 calculadoras y comparador multitienda"))
 
     # Páginas por medida
     procesadas = set()
@@ -996,63 +1101,95 @@ def main():
         garganta = GARGANTA_POR_ANCHO.get(a1, '6.0" - 7.5"')
 
         seo_medida = f"""
-            <h2 class="text-base font-bold text-slate-900">Ficha técnica y equivalencias del neumático {a1}/{p1} R{l1}</h2>
-            <p>La medida <strong>{a1}/{p1} R{l1}</strong> se monta de serie en modelos muy habituales en España como <em>{modelos}</em>. Presenta un diámetro exterior de <strong>{d1:.1f} mm</strong> y requiere un ancho de garganta de llanta recomendado de <strong>{garganta}</strong>.</p>
-            <p>Para superar la ITV sin proyecto de reforma, el neumático equivalente debe medir entre <strong>{d1*0.97:.1f} mm y {d1*1.03:.1f} mm</strong>. Una de las conversiones más demandadas es pasar a <strong>{a2}/{p2} R{l2}</strong> ({d2:.1f} mm, variación del {diff:+.2f} %).</p>
+            <h2 class="text-base font-bold text-slate-900">Ficha técnica y comparativa de precios del neumático {a1}/{p1} R{l1}</h2>
+            <p>La medida <strong>{a1}/{p1} R{l1}</strong> se monta de serie en modelos como <em>{modelos}</em>. Su diámetro exterior es de <strong>{d1:.1f} mm</strong> y requiere una garganta de llanta de <strong>{garganta}</strong>.</p>
+            <p>Puedes comparar ofertas online con envío gratis en <strong>Muchoneumático</strong> y <strong>Amazon</strong>, o reservar montaje directo en centros <strong>Norauto</strong> y <strong>Feu Vert</strong> tanto en la medida original como en su equivalente <strong>{a2}/{p2} R{l2}</strong> ({diff:+.2f} %).</p>
         """
         faqs_medida = [
             (f"¿Qué medidas son equivalentes a {a1}/{p1} R{l1} en la ITV?",
              f"Son equivalentes todas las medidas con un diámetro entre {d1*0.97:.1f} mm y {d1*1.03:.1f} mm (±3 %), destacando la {a2}/{p2} R{l2} ({diff:+.2f} %)."),
-            (f"¿Qué ancho de llanta necesita un neumático {a1}/{p1} R{l1}?",
-             f"Para un ancho de banda de {a1} mm se recomienda una garganta de llanta de {garganta} pulgadas.")
+            (f"¿Dónde comprar neumáticos {a1}/{p1} R{l1} al mejor precio?",
+             f"En la tabla superior puedes comparar precios directos en Muchoneumático (especialista en ruedas), Norauto y Feu Vert (con montaje en taller) y Amazon España.")
         ]
 
         render_page(
             slug,
-            f"Equivalencia de neumáticos {a1}/{p1} R{l1} en ITV | Tabla y medidas compatibles",
-            f"Tabla de neumáticos equivalentes a {a1}/{p1} R{l1} ({d1:.1f} mm) aptos para ITV sin homologar. Modelos habituales: {modelos}.",
+            f"Equivalencia de neumáticos {a1}/{p1} R{l1} en ITV | Precios y medidas",
+            f"Tabla de neumáticos equivalentes a {a1}/{p1} R{l1} ({d1:.1f} mm) aptos para ITV. Compara precios en Muchoneumático, Norauto, Feu Vert y Amazon.",
             f"Equivalencia de neumáticos {a1}/{p1} R{l1} en ITV",
-            f"Diámetro: {d1:.1f} mm · Garganta de llanta: {garganta} · Común en: {modelos}.",
+            f"Diámetro: {d1:.1f} mm · Garganta: {garganta} · Común en: {modelos}.",
             a1, p1, l1, a2, p2, l2, 450, 5.8, "itv",
             generar_tabla_equivalencias_html(a1, p1, l1), seo_medida, internal_links_html, faqs_medida,
-            car_context_name=f"la medida {a1}/{p1} R{l1}"
+            car_context_name=f"la medida {a1}/{p1} R{l1}",
+            car_short_name=f"{a1}/{p1} R{l1}",
+            car_autodoc_query=f"neumaticos+{a1}+{p1}+R{l1}"
         )
         sitemap_urls.append((slug, f"{DOMINIO}/{slug}", f"Equivalencia de neumáticos {a1}/{p1} R{l1} ({modelos})"))
 
-    # NUEVO v3.0: Páginas por modelo de coche (alta intención de compra de recambios y neumáticos)
+    # Páginas por modelo de coche
     for slug_c, nombre_c, a1, p1, l1, a2, p2, l2, l100 in MODELOS_COCHES:
         archivo_c = f"neumaticos-itv-{slug_c}.html"
         d1 = calcular_diametro(a1, p1, l1)
         d2 = calcular_diametro(a2, p2, l2)
         diff = ((d2 - d1) / d1) * 100.0
         garganta = GARGANTA_POR_ANCHO.get(a1, '6.0" - 7.5"')
-        q_recambio = f"escobillas+limpiaparabrisas+y+bombillas+{nombre_c.replace(' ', '+')}"
+        q_autodoc = nombre_c.replace(" ", "+")
 
         seo_coche = f"""
-            <h2 class="text-base font-bold text-slate-900">Medidas de neumáticos equivalentes y revisión pre-ITV para {nombre_c}</h2>
-            <p>El <strong>{nombre_c}</strong> equipa habitualmente en ficha técnica la medida base <strong>{a1}/{p1} R{l1}</strong> ({d1:.1f} mm de diámetro exterior y garganta de {garganta}), con un consumo medio de referencia en torno a <strong>{l100} L/100 km</strong>.</p>
-            <p>Si deseas cambiar de llanta o montar un neumático más económico sin homologar en la ITV, cualquier medida entre <strong>{d1*0.97:.1f} mm y {d1*1.03:.1f} mm</strong> es 100 % legal, siendo la opción <strong>{a2}/{p2} R{l2}</strong> ({diff:+.2f} %) una de las más instaladas en este modelo.</p>
+            <h2 class="text-base font-bold text-slate-900">Neumáticos equivalentes, recambios Autodoc y desguaces para {nombre_c}</h2>
+            <p>El <strong>{nombre_c}</strong> equipa habitualmente en ficha técnica la medida <strong>{a1}/{p1} R{l1}</strong> ({d1:.1f} mm de diámetro y garganta de {garganta}), pudiendo montar sin homologar en ITV la medida <strong>{a2}/{p2} R{l2}</strong> ({diff:+.2f} %).</p>
+            <p><strong>Consejo de ahorro en mantenimiento para {nombre_c}:</strong> para recambios de desgaste (kits de filtros, pastillas de freno, amortiguadores o brazos de suspensión), <strong>Autodoc</strong> suele ofrecer el precio más bajo; para neumáticos tienes envío rápido en <strong>Muchoneumático</strong> o montaje en centros <strong>Norauto y Feu Vert</strong>; y para piezas de carrocería, faros o espejos retrovisores te compensa consultar stock en los grandes desguaces del sur de Madrid (San Martín de la Vega o La Torre).</p>
         """
         faqs_coche = [
             (f"¿Qué neumáticos equivalentes puede montar un {nombre_c} para pasar la ITV?",
-             f"Partiendo de la medida habitual {a1}/{p1} R{l1} ({d1:.1f} mm), el {nombre_c} puede montar sin homologar medidas como {a2}/{p2} R{l2} ({diff:+.2f} %), siempre que se mantenga el índice de carga y velocidad."),
-            (f"¿Qué revisar en un {nombre_c} antes de ir a la ITV?",
-             f"Verifica que el dibujo del neumático supere los 1,6 mm, comprueba que las escobillas limpiaparabrisas no dejen rastro, revisa las bombillas de cruce/matrícula y lleva la baliza V16 conectada DGT.")
+             f"Partiendo de la medida habitual {a1}/{p1} R{l1} ({d1:.1f} mm), el {nombre_c} puede montar sin homologar medidas como {a2}/{p2} R{l2} ({diff:+.2f} %)."),
+            (f"¿Dónde comprar recambios baratos para {nombre_c}: Autodoc, Norauto o desguace?",
+             f"Para consumibles y mecánica nueva (frenos, embrague, filtros) conviene Autodoc; para montaje rápido en el día destaca Norauto o Feu Vert; y para piezas de carrocería o módulos originales OEM de {nombre_c} el mayor ahorro está en desguaces.")
         ]
 
         render_page(
             archivo_c,
-            f"Neumáticos equivalentes {nombre_c} ITV | Medidas, llantas y consumo",
-            f"Consulta las medidas de neumáticos equivalentes en ITV para {nombre_c} ({a1}/{p1} R{l1} a {a2}/{p2} R{l2}), consumo real y recambios pre-ITV.",
-            f"Neumáticos equivalentes e ITV para {nombre_c}",
-            f"Medida de referencia: {a1}/{p1} R{l1} ({d1:.1f} mm) · Equivalencia recomendada: {a2}/{p2} R{l2} ({diff:+.2f} %).",
+            f"Neumáticos equivalentes y recambios {nombre_c} ITV | Autodoc, Norauto y desguace",
+            f"Medidas de neumáticos equivalentes en ITV para {nombre_c} ({a1}/{p1} R{l1} a {a2}/{p2} R{l2}) y comparador de recambios en Autodoc, Muchoneumático y Norauto.",
+            f"Neumáticos equivalentes y recambios ITV para {nombre_c}",
+            f"Medida base: {a1}/{p1} R{l1} ({d1:.1f} mm) · Equivalencia ITV: {a2}/{p2} R{l2} ({diff:+.2f} %).",
             a1, p1, l1, a2, p2, l2, 450, l100, "itv",
             generar_tabla_equivalencias_html(a1, p1, l1), seo_coche, internal_links_html, faqs_coche,
             car_context_name=nombre_c,
-            car_recambio_query=q_recambio,
-            car_recambio_title=f"Escobillas y recambios {nombre_c}"
+            car_short_name=nombre_c,
+            car_autodoc_query=q_autodoc
         )
-        sitemap_urls.append((archivo_c, f"{DOMINIO}/{archivo_c}", f"Neumáticos equivalentes e ITV para {nombre_c} ({a1}/{p1} R{l1})"))
+        sitemap_urls.append((archivo_c, f"{DOMINIO}/{archivo_c}", f"Neumáticos y recambios ITV para {nombre_c} ({a1}/{p1} R{l1})"))
+
+    # NUEVO v4.0: Páginas locales de Desguaces, Talleres e ITV (Aranjuez, San Martín de la Vega, La Torre, Ocaña...)
+    for slug_z, nombre_z, dist_z, desguaces_z, itv_z in ZONAS_DESGUACES_ITV:
+        archivo_z = f"desguaces-itv-{slug_z}.html"
+        seo_zona = f"""
+            <h2 class="text-base font-bold text-slate-900">Guía práctica de desguaces, recambios y estaciones ITV en {nombre_z}</h2>
+            <p><strong>Distancia y accesos:</strong> {dist_z}.</p>
+            <p><strong>Principales núcleos de desguaces cercanos:</strong> {desguaces_z}. Son la mejor alternativa para adquirir piezas originales OEM de carrocería (paragolpes, aletas, faros, retrovisores), cajas de cambio, alternadores o motores de arranque con hasta un 70 % de ahorro.</p>
+            <p><strong>Estaciones ITV y talleres de montaje rápido en la zona:</strong> {itv_z}. Recuerda que para elementos de desgaste o seguridad (neumáticos, pastillas y discos de freno, amortiguadores, escobillas o filtros) siempre es recomendable pedir recambio nuevo en <strong>Autodoc</strong>, comprar neumáticos en <strong>Muchoneumático</strong> o acudir con cita a <strong>Norauto y Feu Vert</strong>.</p>
+        """
+        faqs_zona = [
+            (f"¿Qué piezas compensa comprar en los desguaces cercanos a {nombre_z}?",
+             f"En los centros de {desguaces_z} compensa comprar carrocería, ópticas, retrovisores, llantas sueltas, cuadros de instrumentos y motores de arranque; nunca elementos de desgaste como frenos o neumáticos."),
+            (f"¿Dónde pasar la ITV y montar neumáticos cerca de {nombre_z}?",
+             f"Cuentas con {itv_z}, además de envío directo a domicilio o taller concertado a través de Muchoneumático y Autodoc.")
+        ]
+
+        render_page(
+            archivo_z,
+            f"Desguaces, recambios e ITV en {nombre_z} | Comparador con Autodoc y Norauto",
+            f"Guía y calculadora de ahorro en reparaciones para {nombre_z}: compara precios entre desguaces ({desguaces_z}), Autodoc, Muchoneumático y Norauto.",
+            f"Desguaces, recambios e ITV en {nombre_z}",
+            f"Compara cuándo compensa ir a desguace ({dist_z}) frente a pedir pieza nueva en Autodoc o montar en Norauto / Feu Vert.",
+            205, 55, 16, 225, 45, 17, 48, 5.5, "desguace",
+            generar_tabla_equivalencias_html(205, 55, 16), seo_zona, internal_links_html, faqs_zona,
+            car_context_name=nombre_z,
+            car_short_name="tu coche",
+            car_autodoc_query="kit+mantenimiento+filtros+frenos"
+        )
+        sitemap_urls.append((archivo_z, f"{DOMINIO}/{archivo_z}", f"Guía de desguaces, talleres e ITV: {nombre_z}"))
 
     # Páginas de rutas
     for orig, dest, km, l100 in RUTAS_ESPANA:
@@ -1089,18 +1226,18 @@ def main():
     bloque_mapa = f"""
     <div class="mt-8 bg-white p-6 rounded-2xl border border-slate-200">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-            <h2 class="text-lg font-bold text-slate-900">Buscador instantáneo ({len(sitemap_urls)} calculadoras activas)</h2>
-            <input type="text" id="buscador-mapa" oninput="filtrarMapaWeb()" placeholder="Buscar coche, medida o ruta (ej. León, Corsa, Primera, 205/55...)" class="p-2.5 border rounded-xl text-sm w-full sm:w-80">
+            <h2 class="text-lg font-bold text-slate-900">Buscador instantáneo ({len(sitemap_urls)} calculadoras y guías activas)</h2>
+            <input type="text" id="buscador-mapa" oninput="filtrarMapaWeb()" placeholder="Buscar coche, medida o zona (ej. Aranjuez, Aimayr, Corsa, Primera...)" class="p-2.5 border rounded-xl text-sm w-full sm:w-80">
         </div>
         <ul class="grid grid-cols-1 md:grid-cols-2 gap-2">{items_html}</ul>
     </div>
     """
     render_page(
         "mapa-web.html",
-        f"Buscador de medidas ITV, modelos de coche y mapa web | {SITE_NAME}",
-        "Encuentra al instante la tabla de equivalencia de neumáticos de tu modelo de coche o calcula el gasto de combustible de tu ruta.",
-        "Índice general y buscador por coche y medida ITV",
-        f"Filtra en tiempo real entre nuestras {len(sitemap_urls)} calculadoras técnicas preconfiguradas.",
+        f"Buscador de medidas ITV, modelos de coche y desguaces | {SITE_NAME}",
+        "Encuentra al instante la tabla de equivalencia de neumáticos de tu coche, guías de desguaces o calcula el gasto de combustible de tu ruta.",
+        "Índice general y buscador por coche, medida ITV y zona",
+        f"Filtra en tiempo real entre nuestras {len(sitemap_urls)} herramientas técnicas preconfiguradas.",
         205, 55, 16, 225, 45, 17, 450, 5.8, "itv",
         bloque_mapa, "", internal_links_html, faqs_home
     )
@@ -1118,12 +1255,12 @@ def main():
 
     texto_privacidad = f"""
         <h2 class="text-lg font-bold text-slate-900">Política de privacidad, cookies y afiliación</h2>
-        <p><strong>1. Afiliación de Amazon:</strong> {SITE_NAME} participa en el Programa de Afiliados de Amazon de la UE, un programa de publicidad para afiliados diseñado para ofrecer a sitios web un modo de obtener comisiones por publicidad, publicitando e incluyendo enlaces a Amazon.es.</p>
+        <p><strong>1. Programas de afiliación:</strong> {SITE_NAME} participa en el Programa de Afiliados de Amazon de la UE y muestra enlaces comparativos a comercios especializados del sector de la automoción (como Muchoneumático, Autodoc, Norauto y Feu Vert) para facilitar la consulta de precios al usuario.</p>
         <p><strong>2. Cookies y publicidad (Google AdSense):</strong> Utilizamos almacenamiento local para recordar su preferencia de privacidad y, en su caso, proveedores como Google utilizan cookies para mostrar anuncios relevantes basados en visitas anteriores. Puede desactivar las cookies personalizadas en la configuración de su navegador o en Configuración de anuncios de Google.</p>
     """
     render_page(
         "privacidad-cookies.html", f"Política de privacidad y cookies | {SITE_NAME}", "Política de privacidad, cookies y divulgación de afiliados.",
-        "Política de privacidad y cookies (RGPD)", "Transparencia sobre cookies, Google AdSense y Amazon Afiliados.",
+        "Política de privacidad y cookies (RGPD)", "Transparencia sobre cookies, Google AdSense y programas de afiliación.",
         205, 55, 16, 225, 45, 17, 450, 5.8, "itv", "", texto_privacidad, internal_links_html, faqs_home, robots="noindex, follow"
     )
 
@@ -1143,7 +1280,7 @@ def main():
     with open(os.path.join(OUTPUT_DIR, "ads.txt"), "w", encoding="utf-8") as f:
         f.write(f"google.com, {ads_pub}, DIRECT, f08c47fec0942fa0\n")
 
-    print(f"[OK] Portal v3.0 generado en ./public con {len(sitemap_urls)} páginas SEO (incluye 38 fichas de coches y checklist pre-ITV).")
+    print(f"[OK] Portal v4.0 generado en ./public con {len(sitemap_urls)} páginas SEO (incluye comparador Autodoc/Muchoneumático/Norauto/Feu Vert y guías de desguaces de Aranjuez y Madrid Sur).")
 
 
 if __name__ == "__main__":
