@@ -111,6 +111,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
     <link rel="canonical" href="__CANONICAL_URL__">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <meta name="robots" content="__ROBOTS_META__">
+    <meta name="google-site-verification" content="ygUlG2Pg9SCogkqx8g4IBREETgPeDhS9pRcb2wbhPxE" />
     <link rel="preconnect" href="https://www.amazon.es">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
