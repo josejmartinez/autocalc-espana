@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Motor generador estático AutoCalc España v2.0
-Incluye: 4 calculadoras, comparador visual SVG, validador de carga/velocidad ITV,
-enlaces compartibles, ortotipografía española, ads.txt y favicon.svg.
+Motor generador estático AutoCalc España v3.0
+Incluye: 5 herramientas (ITV, consumo, amortización, DGT, checklist pre-ITV),
+páginas por medida, por ruta y por modelo de coche.
 """
 
 import os
 import json
 from datetime import date
-from catalogo import MEDIDAS_ESPANA, RUTAS_ESPANA, GARGANTA_POR_ANCHO
+from catalogo import MEDIDAS_ESPANA, MODELOS_COCHES, RUTAS_ESPANA, GARGANTA_POR_ANCHO
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
@@ -136,7 +136,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                 </a>
             </div>
             <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-                <a href="mapa-web.html" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Buscador de medidas</a>
+                <a href="mapa-web.html" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Buscador de medidas y coches</a>
                 <button onclick="copiarEnlaceCalculo()" id="btn-compartir" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Copiar enlace</button>
                 <button onclick="window.print()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-3 py-2 rounded-lg transition">Guardar PDF</button>
             </div>
@@ -150,25 +150,27 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             <p class="text-sm text-slate-600 mt-1">__HERO_SUBTITLE__</p>
         </div>
 
-        <!-- Selector de pestañas -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-6 bg-slate-200 p-1.5 rounded-xl no-print">
-            <button onclick="cambiarTab('itv')" id="tab-itv" class="py-2.5 px-3 rounded-lg font-semibold text-xs sm:text-sm bg-white text-slate-900 shadow-sm transition">
+        <!-- Selector de 5 pestañas -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mb-6 bg-slate-200 p-1.5 rounded-xl no-print">
+            <button onclick="cambiarTab('itv')" id="tab-itv" class="py-2.5 px-2.5 rounded-lg font-semibold text-xs bg-white text-slate-900 shadow-sm transition">
                 1. Equivalencia ITV (±3 %)
             </button>
-            <button onclick="cambiarTab('consumo')" id="tab-consumo" class="py-2.5 px-3 rounded-lg font-semibold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition">
+            <button onclick="cambiarTab('consumo')" id="tab-consumo" class="py-2.5 px-2.5 rounded-lg font-semibold text-xs text-slate-600 hover:text-slate-900 transition">
                 2. Coste de viaje y consumo
             </button>
-            <button onclick="cambiarTab('amortizacion')" id="tab-amortizacion" class="py-2.5 px-3 rounded-lg font-semibold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition">
+            <button onclick="cambiarTab('amortizacion')" id="tab-amortizacion" class="py-2.5 px-2.5 rounded-lg font-semibold text-xs text-slate-600 hover:text-slate-900 transition">
                 3. Diésel o híbrido vs. gasolina
             </button>
-            <button onclick="cambiarTab('dgt')" id="tab-dgt" class="py-2.5 px-3 rounded-lg font-semibold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition">
+            <button onclick="cambiarTab('dgt')" id="tab-dgt" class="py-2.5 px-2.5 rounded-lg font-semibold text-xs text-slate-600 hover:text-slate-900 transition">
                 4. Etiqueta DGT e impuesto CO₂
+            </button>
+            <button onclick="cambiarTab('preitv')" id="tab-preitv" class="py-2.5 px-2.5 rounded-lg font-semibold text-xs text-slate-600 hover:text-slate-900 transition col-span-2 sm:col-span-1">
+                5. Checklist pre-ITV
             </button>
         </div>
 
         <!-- 1. CALCULADORA ITV NEUMÁTICOS -->
         <section id="sec-itv" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-            <!-- Selector rápido por vehículo -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5 pb-4 border-b border-slate-100 no-print">
                 <label for="preset-coche" class="text-xs font-semibold text-slate-600">Autocompletar medida original según modelo de coche:</label>
                 <select id="preset-coche" onchange="aplicarPresetCoche()" class="p-2 border rounded-lg text-xs bg-slate-50 font-medium text-slate-800 w-full sm:w-72">
@@ -185,7 +187,6 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Medida original -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                     <h2 class="font-bold text-xs text-slate-700 mb-3">Medida en ficha técnica (original)</h2>
                     <div class="grid grid-cols-3 gap-3 mb-3">
@@ -223,7 +224,6 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                     </div>
                 </div>
 
-                <!-- Medida nueva -->
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                     <h2 class="font-bold text-xs text-slate-700 mb-3">Medida nueva a comprobar</h2>
                     <div class="grid grid-cols-3 gap-3 mb-3">
@@ -262,10 +262,8 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                 </div>
             </div>
 
-            <!-- Resultado numérico ITV -->
             <div id="res-itv" class="mt-6 p-5 rounded-xl border"></div>
 
-            <!-- Comparador gráfico visual SVG a escala -->
             <div class="mt-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
                 <div class="flex items-center justify-between mb-2">
                     <h3 class="text-xs font-bold text-slate-700">Comparación visual a escala (diámetro lateral y anchura de pisada)</h3>
@@ -376,10 +374,61 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             <div id="res-dgt" class="mt-6 p-5 rounded-xl bg-slate-50 border border-slate-200"></div>
         </section>
 
+        <!-- 5. CHECKLIST PRE-ITV Y RECAMBIOS OBLIGATORIOS -->
+        <section id="sec-preitv" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hidden">
+            <h2 class="text-lg font-bold mb-1 text-slate-900">Checklist interactivo de revisión pre-ITV en casa</h2>
+            <p class="text-xs text-slate-500 mb-4">Marca los puntos que ya has revisado en tu vehículo para evaluar el riesgo de rechazo antes de acudir a la estación ITV.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                <label class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border cursor-pointer hover:bg-slate-100 transition">
+                    <input type="checkbox" class="chk-itv mt-1 w-4 h-4" onchange="evaluarChecklist()" checked>
+                    <div>
+                        <span class="font-bold block text-slate-900">1. Profundidad de neumáticos (>1,6 mm) y equivalencia</span>
+                        <span class="text-xs text-slate-500">Sin desgaste irregular, cortes en flancos ni medidas fuera del ±3 %.</span>
+                    </div>
+                </label>
+                <label class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border cursor-pointer hover:bg-slate-100 transition">
+                    <input type="checkbox" class="chk-itv mt-1 w-4 h-4" onchange="evaluarChecklist()" checked>
+                    <div>
+                        <span class="font-bold block text-slate-900">2. Alumbrado, reglaje de faros y bombillas H7/H4</span>
+                        <span class="text-xs text-slate-500">Cruce, carretera, intermitentes, luz de freno, marcha atrás y matrícula.</span>
+                    </div>
+                </label>
+                <label class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border cursor-pointer hover:bg-slate-100 transition">
+                    <input type="checkbox" class="chk-itv mt-1 w-4 h-4" onchange="evaluarChecklist()">
+                    <div>
+                        <span class="font-bold block text-slate-900">3. Escobillas limpiaparabrisas y nivel de líquido</span>
+                        <span class="text-xs text-slate-500">Las gomas cuarteadas o la falta de líquido lavaparabrisas son falta en ITV.</span>
+                    </div>
+                </label>
+                <label class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border cursor-pointer hover:bg-slate-100 transition">
+                    <input type="checkbox" class="chk-itv mt-1 w-4 h-4" onchange="evaluarChecklist()">
+                    <div>
+                        <span class="font-bold block text-slate-900">4. Ausencia de testigo MIL (fallo motor) y humos OBD2</span>
+                        <span class="text-xs text-slate-500">Lectura de centralita sin fallos activos de emisiones ni opacidad excesiva.</span>
+                    </div>
+                </label>
+                <label class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border cursor-pointer hover:bg-slate-100 transition">
+                    <input type="checkbox" class="chk-itv mt-1 w-4 h-4" onchange="evaluarChecklist()">
+                    <div>
+                        <span class="font-bold block text-slate-900">5. Baliza V16 conectada homologada DGT 3.0</span>
+                        <span class="text-xs text-slate-500">Señalización de emergencia obligatoria con geolocalización DGT en guantera.</span>
+                    </div>
+                </label>
+                <label class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border cursor-pointer hover:bg-slate-100 transition">
+                    <input type="checkbox" class="chk-itv mt-1 w-4 h-4" onchange="evaluarChecklist()">
+                    <div>
+                        <span class="font-bold block text-slate-900">6. Placas de matrícula legibles y retrovisores</span>
+                        <span class="text-xs text-slate-500">Sin números borrados, acrílicos rotos ni fijaciones sueltas.</span>
+                    </div>
+                </label>
+            </div>
+            <div id="res-preitv" class="mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm font-semibold text-amber-900"></div>
+        </section>
+
         <!-- BLOQUE DE AFILIACIÓN DINÁMICA (AMAZON MOTOR 7 %) -->
         <section class="mt-8 bg-gradient-to-br from-slate-900 to-slate-800 text-white p-6 rounded-2xl shadow-md no-print">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-                <h2 class="text-lg font-bold text-amber-400">Recambios y accesorios compatibles con tu medida</h2>
+                <h2 class="text-lg font-bold text-amber-400">Recambios y accesorios compatibles con __CAR_CONTEXT_NAME__</h2>
                 <span class="text-xs bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full w-fit">Envío rápido en Amazon España</span>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -401,20 +450,20 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                     <span class="mt-4 inline-block text-center bg-amber-500 text-slate-950 font-bold text-xs py-2 rounded-lg">Ver ofertas →</span>
                 </a>
 
-                <a id="cta-cadenas" href="https://www.amazon.es/s?k=cadenas+nieve+textiles+__VAL_A1__+__VAL_P1__+R__VAL_L1__&tag=__AMAZON_TAG__" target="_blank" rel="nofollow sponsored" class="bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
+                <a href="https://www.amazon.es/s?k=baliza+v16+homologada+dgt+con+geolocalizacion&tag=__AMAZON_TAG__" target="_blank" rel="nofollow sponsored" class="bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
                     <div>
-                        <span class="text-xs text-amber-400 font-semibold">Homologadas DGT</span>
-                        <h3 id="txt-cta-cadenas" class="font-bold text-sm mt-1">Cadenas y fundas __VAL_A1__/__VAL_P1__ R__VAL_L1__</h3>
-                        <p class="text-xs text-slate-300 mt-1">Aptas para llantas de aleación y sistemas ABS/ESP.</p>
+                        <span class="text-xs text-rose-400 font-semibold">Obligatoria DGT 2026</span>
+                        <h3 class="font-bold text-sm mt-1">Baliza V16 conectada DGT 3.0</h3>
+                        <p class="text-xs text-slate-300 mt-1">Con eSIM y datos incluidos hasta 2038. Sustituye a los triángulos.</p>
                     </div>
-                    <span class="mt-4 inline-block text-center bg-amber-500 text-slate-950 font-bold text-xs py-2 rounded-lg">Comprobar talla →</span>
+                    <span class="mt-4 inline-block text-center bg-amber-500 text-slate-950 font-bold text-xs py-2 rounded-lg">Ver ofertas V16 →</span>
                 </a>
 
-                <a href="https://www.amazon.es/s?k=diagnosis+obd2+multimarca+español&tag=__AMAZON_TAG__" target="_blank" rel="nofollow sponsored" class="bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
+                <a href="https://www.amazon.es/s?k=__CAR_RECAMBIO_QUERY__&tag=__AMAZON_TAG__" target="_blank" rel="nofollow sponsored" class="bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
                     <div>
-                        <span class="text-xs text-amber-400 font-semibold">Pre-ITV en casa</span>
-                        <h3 class="font-bold text-sm mt-1">Máquina de diagnosis OBD2</h3>
-                        <p class="text-xs text-slate-300 mt-1">Revisa fallos de gases y borra códigos de avería antes de la ITV.</p>
+                        <span class="text-xs text-amber-400 font-semibold">Revisión pre-ITV</span>
+                        <h3 class="font-bold text-sm mt-1">__CAR_RECAMBIO_TITLE__</h3>
+                        <p class="text-xs text-slate-300 mt-1">Evita faltas leves y graves en visibilidad, gases y alumbrado.</p>
                     </div>
                     <span class="mt-4 inline-block text-center bg-amber-500 text-slate-950 font-bold text-xs py-2 rounded-lg">Ver en Amazon →</span>
                 </a>
@@ -428,7 +477,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
         </article>
 
         <nav class="mt-8 bg-slate-100 p-6 rounded-2xl border border-slate-200 no-print">
-            <h3 class="text-xs font-bold text-slate-500 mb-3">Consultas frecuentes de ITV y consumo en España</h3>
+            <h3 class="text-xs font-bold text-slate-500 mb-3">Modelos de coche, medidas ITV y rutas más consultadas</h3>
             <div class="flex flex-wrap gap-2">
                 __INTERNAL_LINKS_HTML__
             </div>
@@ -467,19 +516,33 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
         const GARGANTAS = {155:'4.5"-5.5"',165:'4.5"-6.0"',175:'5.0"-6.0"',185:'5.0"-6.5"',195:'5.5"-7.0"',205:'5.5"-7.5"',215:'6.0"-7.5"',225:'6.0"-8.0"',235:'6.5"-8.5"',245:'7.0"-9.0"',255:'7.5"-9.5"',265:'8.0"-10.0"',275:'8.5"-10.5"'};
 
         function cambiarTab(tab) {
-            ['itv', 'consumo', 'amortizacion', 'dgt'].forEach(t => {
+            ['itv', 'consumo', 'amortizacion', 'dgt', 'preitv'].forEach(t => {
                 const sec = document.getElementById('sec-' + t);
                 const btn = document.getElementById('tab-' + t);
                 if (sec && btn) {
                     sec.classList.add('hidden');
-                    btn.className = 'py-2.5 px-3 rounded-lg font-semibold text-xs sm:text-sm text-slate-600 hover:text-slate-900 transition';
+                    btn.className = 'py-2.5 px-2.5 rounded-lg font-semibold text-xs text-slate-600 hover:text-slate-900 transition';
                 }
             });
             const activeSec = document.getElementById('sec-' + tab);
             const activeBtn = document.getElementById('tab-' + tab);
             if (activeSec && activeBtn) {
                 activeSec.classList.remove('hidden');
-                activeBtn.className = 'py-2.5 px-3 rounded-lg font-semibold text-xs sm:text-sm bg-white text-slate-900 shadow-sm transition';
+                activeBtn.className = 'py-2.5 px-2.5 rounded-lg font-semibold text-xs bg-white text-slate-900 shadow-sm transition';
+            }
+        }
+
+        function evaluarChecklist() {
+            const total = document.querySelectorAll('.chk-itv').length;
+            const marcados = document.querySelectorAll('.chk-itv:checked').length;
+            const box = document.getElementById('res-preitv');
+            if (!box) return;
+            if (marcados === total) {
+                box.className = 'mt-4 p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-sm font-bold text-emerald-900';
+                box.innerText = '¡Vehículo listo para inspección! Has verificado los 6 puntos críticos de rechazo en ITV.';
+            } else {
+                box.className = 'mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm font-semibold text-amber-900';
+                box.innerText = `Progreso pre-ITV: ${marcados} de ${total} puntos críticos verificados. Revisa los pendientes antes de tu cita.`;
             }
         }
 
@@ -523,14 +586,12 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
 
             cont.innerHTML = `
                 <svg viewBox="0 0 420 150" class="w-full max-w-lg h-36">
-                    <!-- Vista lateral superpuesta -->
                     <text x="95" y="15" text-anchor="middle" class="text-[10px] fill-slate-500 font-semibold">Diámetro lateral</text>
                     <circle cx="95" cy="82" r="${rExt1.toFixed(1)}" fill="none" stroke="#334155" stroke-width="8" opacity="0.85"/>
                     <circle cx="95" cy="82" r="${rLlanta1.toFixed(1)}" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="3,2"/>
                     <circle cx="95" cy="82" r="${rExt2.toFixed(1)}" fill="none" stroke="#f59e0b" stroke-width="4"/>
                     <circle cx="95" cy="82" r="${rLlanta2.toFixed(1)}" fill="none" stroke="#d97706" stroke-width="1.5"/>
 
-                    <!-- Vista de banda de rodadura (ancho) -->
                     <text x="295" y="15" text-anchor="middle" class="text-[10px] fill-slate-500 font-semibold">Ancho de pisada (${a1} vs. ${a2} mm)</text>
                     <rect x="${(260 - w1/2).toFixed(1)}" y="${(82 - rExt1).toFixed(1)}" width="${w1.toFixed(1)}" height="${(rExt1*2).toFixed(1)}" rx="6" fill="#334155" opacity="0.85"/>
                     <rect x="${(330 - w2/2).toFixed(1)}" y="${(82 - rExt2).toFixed(1)}" width="${w2.toFixed(1)}" height="${(rExt2*2).toFixed(1)}" rx="6" fill="#f59e0b" opacity="0.9"/>
@@ -611,8 +672,6 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             document.getElementById('txt-cta-orig').innerText = `Neumáticos ${a1}/${p1} R${l1}`;
             document.getElementById('cta-neumatico-nuevo').href = `https://www.amazon.es/s?k=neumaticos+${a2}+${p2}+R${l2}&tag=${AMAZON_TAG}`;
             document.getElementById('txt-cta-nuevo').innerText = `Neumáticos ${a2}/${p2} R${l2}`;
-            document.getElementById('cta-cadenas').href = `https://www.amazon.es/s?k=cadenas+nieve+textiles+${a1}+${p1}+R${l1}&tag=${AMAZON_TAG}`;
-            document.getElementById('txt-cta-cadenas').innerText = `Cadenas y fundas ${a1}/${p1} R${l1}`;
         }
 
         function copiarEnlaceCalculo() {
@@ -795,6 +854,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             calcularConsumo();
             calcularAmortizacion();
             calcularDGT();
+            evaluarChecklist();
             if (!localStorage.getItem('autocalc_cookies')) {
                 document.getElementById('cookie-banner').classList.remove('hidden');
             }
@@ -808,7 +868,11 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
 def render_page(
     filename, title, meta_desc, h1, subtitle,
     a1, p1, l1, a2, p2, l2, km, l100, initial_tab,
-    table_html, seo_text, internal_links, faqs, robots="index, follow"
+    table_html, seo_text, internal_links, faqs,
+    car_context_name="tu medida",
+    car_recambio_query="diagnosis+obd2+multimarca+español",
+    car_recambio_title="Máquina de diagnosis OBD2",
+    robots="index, follow"
 ):
     canonical = f"{DOMINIO}/" if filename == "index.html" else f"{DOMINIO}/{filename}"
     adsense_script = ""
@@ -859,7 +923,10 @@ def render_page(
         "__PRECALC_TABLE_HTML__": table_html,
         "__SEO_TEXT_BLOCK__": seo_text,
         "__INTERNAL_LINKS_HTML__": internal_links,
-        "__AMAZON_TAG__": AMAZON_TAG
+        "__AMAZON_TAG__": AMAZON_TAG,
+        "__CAR_CONTEXT_NAME__": car_context_name,
+        "__CAR_RECAMBIO_QUERY__": car_recambio_query,
+        "__CAR_RECAMBIO_TITLE__": car_recambio_title
     }
 
     for k, v in replacements.items():
@@ -873,46 +940,49 @@ def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     sitemap_urls = []
 
-    # Crear icono SVG para evitar errores 404 en el navegador
     favicon_svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#0f172a" stroke="#f59e0b" stroke-width="4"/><circle cx="32" cy="32" r="14" fill="none" stroke="#f59e0b" stroke-width="3"/></svg>'
     with open(os.path.join(OUTPUT_DIR, "favicon.svg"), "w", encoding="utf-8") as f:
         f.write(favicon_svg)
 
     chips = []
+    for slug_c, nombre_c, _, _, _, _, _, _, _ in MODELOS_COCHES[:18]:
+        chips.append(f'<a href="neumaticos-itv-{slug_c}.html" class="text-xs bg-white hover:bg-amber-100 text-slate-700 px-2.5 py-1 rounded border border-slate-300 transition">ITV {nombre_c}</a>')
+
     vistas = set()
-    for a1, p1, l1, a2, p2, l2, _ in MEDIDAS_ESPANA:
-        if (a1, p1, l1) not in vistas:
+    for a1, p1, l1, _, _, _, _ in MEDIDAS_ESPANA:
+        if (a1, p1, l1) not in vistas and len(chips) < 38:
             vistas.add((a1, p1, l1))
             slug = f"equivalencia-neumaticos-{a1}-{p1}-r{l1}.html"
             chips.append(f'<a href="{slug}" class="text-xs bg-white hover:bg-amber-100 text-slate-700 px-2.5 py-1 rounded border border-slate-300 transition">Neumáticos {a1}/{p1} R{l1}</a>')
 
-    for orig, dest, _, _ in RUTAS_ESPANA[:10]:
+    for orig, dest, _, _ in RUTAS_ESPANA[:8]:
         slug_r = f"calcular-consumo-{orig.lower().replace(' ', '-')}-{dest.lower().replace(' ', '-')}.html"
         chips.append(f'<a href="{slug_r}" class="text-xs bg-white hover:bg-amber-100 text-slate-700 px-2.5 py-1 rounded border border-slate-300 transition">Viaje {orig} - {dest}</a>')
 
-    internal_links_html = "\n".join(chips[:38])
+    internal_links_html = "\n".join(chips)
 
     faqs_home = [
         ("¿Qué margen permite la ITV para neumáticos equivalentes en España?",
          "La ITV permite una tolerancia máxima del ±3 % en el diámetro exterior respecto a la medida en ficha técnica, manteniendo índice de carga y velocidad iguales o superiores."),
-        ("¿Cuándo están exentos los coches del impuesto de matriculación por CO2?",
-         "En España están exentos (0 %) todos los vehículos cuyas emisiones homologadas de CO2 sean iguales o inferiores a 120 g/km.")
+        ("¿Qué baliza V16 es obligatoria según la DGT en 2026?",
+         "Desde enero de 2026 es obligatorio llevar una baliza V16 conectada y homologada con geolocalización DGT 3.0 en sustitución de los triángulos de emergencia.")
     ]
     seo_home = """
         <h2 class="text-base font-bold text-slate-900">Guía técnica de equivalencia de neumáticos ITV, consumo y etiquetas DGT</h2>
-        <p>Con nuestras 4 calculadoras técnicas verificadas conforme al Manual de Procedimiento de Inspección de las Estaciones ITV y la Agencia Tributaria podrás comprobar equivalencias de ruedas sin homologar (±3 %), índice de carga, código de velocidad, ancho de garganta en pulgadas, gasto exacto de combustible por ocupante y tramos del impuesto de matriculación.</p>
+        <p>Con nuestras 5 herramientas técnicas verificadas conforme al Manual de Procedimiento de Inspección de las Estaciones ITV y la Agencia Tributaria podrás comprobar equivalencias de ruedas sin homologar (±3 %), índice de carga, código de velocidad, ancho de garganta en pulgadas, gasto exacto de combustible por ocupante y el checklist de puntos críticos antes de pasar la ITV.</p>
     """
     render_page(
         "index.html",
         f"Calculadora de equivalencia de neumáticos ITV, consumo y DGT | {SITE_NAME}",
-        "Comprueba la equivalencia de neumáticos para la ITV (±3 %), ancho de llanta, consumo de combustible por ruta y etiqueta ambiental DGT.",
+        "Comprueba la equivalencia de neumáticos para la ITV (±3 %), ancho de llanta, consumo de combustible por ruta, etiqueta DGT y checklist pre-ITV.",
         "Calculadoras técnicas de ITV, neumáticos, consumo y DGT",
-        "Comprueba al instante medidas equivalentes sin homologar (±3 %), gasto por viaje, amortización diésel/híbrido e impuesto CO₂.",
+        "Comprueba al instante medidas equivalentes sin homologar (±3 %), gasto por viaje, amortización diésel/híbrido, impuesto CO₂ y revisión pre-ITV.",
         205, 55, 16, 225, 45, 17, 450, 5.8, "itv",
         generar_tabla_equivalencias_html(205, 55, 16), seo_home, internal_links_html, faqs_home
     )
-    sitemap_urls.append(("index.html", f"{DOMINIO}/", "Portada principal - 4 calculadoras de motor e ITV"))
+    sitemap_urls.append(("index.html", f"{DOMINIO}/", "Portada principal - 5 calculadoras de motor e ITV"))
 
+    # Páginas por medida
     procesadas = set()
     for a1, p1, l1, a2, p2, l2, modelos in MEDIDAS_ESPANA:
         if (a1, p1, l1) in procesadas:
@@ -944,10 +1014,47 @@ def main():
             f"Equivalencia de neumáticos {a1}/{p1} R{l1} en ITV",
             f"Diámetro: {d1:.1f} mm · Garganta de llanta: {garganta} · Común en: {modelos}.",
             a1, p1, l1, a2, p2, l2, 450, 5.8, "itv",
-            generar_tabla_equivalencias_html(a1, p1, l1), seo_medida, internal_links_html, faqs_medida
+            generar_tabla_equivalencias_html(a1, p1, l1), seo_medida, internal_links_html, faqs_medida,
+            car_context_name=f"la medida {a1}/{p1} R{l1}"
         )
         sitemap_urls.append((slug, f"{DOMINIO}/{slug}", f"Equivalencia de neumáticos {a1}/{p1} R{l1} ({modelos})"))
 
+    # NUEVO v3.0: Páginas por modelo de coche (alta intención de compra de recambios y neumáticos)
+    for slug_c, nombre_c, a1, p1, l1, a2, p2, l2, l100 in MODELOS_COCHES:
+        archivo_c = f"neumaticos-itv-{slug_c}.html"
+        d1 = calcular_diametro(a1, p1, l1)
+        d2 = calcular_diametro(a2, p2, l2)
+        diff = ((d2 - d1) / d1) * 100.0
+        garganta = GARGANTA_POR_ANCHO.get(a1, '6.0" - 7.5"')
+        q_recambio = f"escobillas+limpiaparabrisas+y+bombillas+{nombre_c.replace(' ', '+')}"
+
+        seo_coche = f"""
+            <h2 class="text-base font-bold text-slate-900">Medidas de neumáticos equivalentes y revisión pre-ITV para {nombre_c}</h2>
+            <p>El <strong>{nombre_c}</strong> equipa habitualmente en ficha técnica la medida base <strong>{a1}/{p1} R{l1}</strong> ({d1:.1f} mm de diámetro exterior y garganta de {garganta}), con un consumo medio de referencia en torno a <strong>{l100} L/100 km</strong>.</p>
+            <p>Si deseas cambiar de llanta o montar un neumático más económico sin homologar en la ITV, cualquier medida entre <strong>{d1*0.97:.1f} mm y {d1*1.03:.1f} mm</strong> es 100 % legal, siendo la opción <strong>{a2}/{p2} R{l2}</strong> ({diff:+.2f} %) una de las más instaladas en este modelo.</p>
+        """
+        faqs_coche = [
+            (f"¿Qué neumáticos equivalentes puede montar un {nombre_c} para pasar la ITV?",
+             f"Partiendo de la medida habitual {a1}/{p1} R{l1} ({d1:.1f} mm), el {nombre_c} puede montar sin homologar medidas como {a2}/{p2} R{l2} ({diff:+.2f} %), siempre que se mantenga el índice de carga y velocidad."),
+            (f"¿Qué revisar en un {nombre_c} antes de ir a la ITV?",
+             f"Verifica que el dibujo del neumático supere los 1,6 mm, comprueba que las escobillas limpiaparabrisas no dejen rastro, revisa las bombillas de cruce/matrícula y lleva la baliza V16 conectada DGT.")
+        ]
+
+        render_page(
+            archivo_c,
+            f"Neumáticos equivalentes {nombre_c} ITV | Medidas, llantas y consumo",
+            f"Consulta las medidas de neumáticos equivalentes en ITV para {nombre_c} ({a1}/{p1} R{l1} a {a2}/{p2} R{l2}), consumo real y recambios pre-ITV.",
+            f"Neumáticos equivalentes e ITV para {nombre_c}",
+            f"Medida de referencia: {a1}/{p1} R{l1} ({d1:.1f} mm) · Equivalencia recomendada: {a2}/{p2} R{l2} ({diff:+.2f} %).",
+            a1, p1, l1, a2, p2, l2, 450, l100, "itv",
+            generar_tabla_equivalencias_html(a1, p1, l1), seo_coche, internal_links_html, faqs_coche,
+            car_context_name=nombre_c,
+            car_recambio_query=q_recambio,
+            car_recambio_title=f"Escobillas y recambios {nombre_c}"
+        )
+        sitemap_urls.append((archivo_c, f"{DOMINIO}/{archivo_c}", f"Neumáticos equivalentes e ITV para {nombre_c} ({a1}/{p1} R{l1})"))
+
+    # Páginas de rutas
     for orig, dest, km, l100 in RUTAS_ESPANA:
         slug_r = f"calcular-consumo-{orig.lower().replace(' ', '-')}-{dest.lower().replace(' ', '-')}.html"
         litros = (km / 100.0) * l100
@@ -973,6 +1080,7 @@ def main():
         )
         sitemap_urls.append((slug_r, f"{DOMINIO}/{slug_r}", f"Calculadora de viaje {orig} a {dest} ({km} km)"))
 
+    # Mapa web
     items_html = "".join([
         f'<li class="item-mapa py-2 px-3 bg-slate-50 rounded-lg border border-slate-200 hover:border-amber-400 transition">'
         f'<a href="{archivo}" class="text-slate-800 hover:text-amber-600 font-medium text-sm block">{label}</a></li>'
@@ -982,16 +1090,16 @@ def main():
     <div class="mt-8 bg-white p-6 rounded-2xl border border-slate-200">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <h2 class="text-lg font-bold text-slate-900">Buscador instantáneo ({len(sitemap_urls)} calculadoras activas)</h2>
-            <input type="text" id="buscador-mapa" oninput="filtrarMapaWeb()" placeholder="Buscar medida o modelo (ej. 175/65, Corsa, Primera, Madrid...)" class="p-2.5 border rounded-xl text-sm w-full sm:w-80">
+            <input type="text" id="buscador-mapa" oninput="filtrarMapaWeb()" placeholder="Buscar coche, medida o ruta (ej. León, Corsa, Primera, 205/55...)" class="p-2.5 border rounded-xl text-sm w-full sm:w-80">
         </div>
         <ul class="grid grid-cols-1 md:grid-cols-2 gap-2">{items_html}</ul>
     </div>
     """
     render_page(
         "mapa-web.html",
-        f"Buscador de medidas ITV y mapa web | {SITE_NAME}",
-        "Encuentra al instante la tabla de equivalencia de neumáticos de tu coche o calcula el gasto de combustible de tu ruta.",
-        "Índice general y buscador de medidas ITV",
+        f"Buscador de medidas ITV, modelos de coche y mapa web | {SITE_NAME}",
+        "Encuentra al instante la tabla de equivalencia de neumáticos de tu modelo de coche o calcula el gasto de combustible de tu ruta.",
+        "Índice general y buscador por coche y medida ITV",
         f"Filtra en tiempo real entre nuestras {len(sitemap_urls)} calculadoras técnicas preconfiguradas.",
         205, 55, 16, 225, 45, 17, 450, 5.8, "itv",
         bloque_mapa, "", internal_links_html, faqs_home
@@ -1031,12 +1139,11 @@ def main():
     with open(os.path.join(OUTPUT_DIR, "robots.txt"), "w", encoding="utf-8") as f:
         f.write(f"User-agent: *\nAllow: /\nSitemap: {DOMINIO}/sitemap.xml\n")
 
-    # Generar archivo ads.txt si hay cliente de AdSense configurado
     ads_pub = ADSENSE_CLIENT.replace("ca-", "") if ADSENSE_CLIENT else "pub-0000000000000000"
     with open(os.path.join(OUTPUT_DIR, "ads.txt"), "w", encoding="utf-8") as f:
         f.write(f"google.com, {ads_pub}, DIRECT, f08c47fec0942fa0\n")
 
-    print(f"[OK] Portal v2.0 generado en ./public con {len(sitemap_urls)} páginas SEO, gráfico SVG, ads.txt y ortotipografía corregida.")
+    print(f"[OK] Portal v3.0 generado en ./public con {len(sitemap_urls)} páginas SEO (incluye 38 fichas de coches y checklist pre-ITV).")
 
 
 if __name__ == "__main__":

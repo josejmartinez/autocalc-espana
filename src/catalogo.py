@@ -2,7 +2,6 @@
 """Catálogo de medidas ITV, modelos superventas y rutas de España."""
 
 MEDIDAS_ESPANA = [
-    # Compactos y berlinas (Llanta 16 y 17)
     (205, 55, 16, 225, 45, 17, "Seat León, VW Golf, Toyota Corolla, Ford Focus, Peugeot 308"),
     (205, 55, 16, 205, 50, 17, "Renault Mégane, Citroën C4, Hyundai i30, Kia Ceed"),
     (205, 60, 16, 215, 55, 16, "Renault Captur, Peugeot 2008, Citroën C4 Picasso, Mazda 3"),
@@ -18,7 +17,6 @@ MEDIDAS_ESPANA = [
     (225, 55, 17, 235, 50, 17, "BMW Serie 5, Audi A6, Mazda 6, Citroën C5 Aircross"),
     (235, 45, 17, 235, 40, 18, "VW Passat R-Line, Audi A4 Avant, Skoda Superb"),
     (215, 45, 17, 225, 45, 17, "Seat Ibiza FR, Polo GTI, Toyota Yaris GR Sport, Mini Cooper"),
-    # Utilitarios y clásicos (Llanta 13, 14 y 15)
     (195, 65, 15, 205, 55, 16, "Seat León I/II, VW Golf IV/V, Skoda Octavia, Audi A3 8L"),
     (185, 65, 15, 195, 60, 15, "Dacia Sandero, Renault Clio, Dacia Logan, Nissan Primera, Hyundai i20"),
     (185, 60, 15, 195, 55, 15, "Seat Ibiza, VW Polo, Skoda Fabia, Toyota Yaris"),
@@ -34,7 +32,6 @@ MEDIDAS_ESPANA = [
     (155, 65, 14, 165, 60, 14, "Toyota Aygo, Peugeot 107, Citroën C1, Twingo"),
     (175, 70, 13, 185, 65, 13, "Seat Toledo, Renault 19, Clio I, Ford Orion"),
     (165, 70, 13, 175, 65, 13, "Opel Corsa B, Fiat Uno, Peugeot 106, Citroën Saxo"),
-    # SUVs, Crossovers y Deportivos (Llanta 18, 19 y 20)
     (225, 40, 18, 235, 35, 19, "Cupra León, Golf R, Audi S3, BMW M135i, Focus ST"),
     (215, 55, 18, 225, 50, 18, "Nissan Qashqai, Peugeot 2008 GT, Opel Mokka, Mazda CX-30"),
     (225, 55, 18, 235, 50, 18, "Peugeot 3008/5008, Hyundai Tucson, Citroën C5 Aircross, Jeep Compass"),
@@ -50,13 +47,54 @@ MEDIDAS_ESPANA = [
     (235, 40, 19, 245, 35, 19, "Peugeot 508 GT, Passat R-Line, Alfa Romeo Tonale"),
     (245, 45, 19, 255, 40, 19, "BMW X3/X4, Tucson N-Line, Mercedes Clase S"),
     (255, 35, 19, 265, 30, 19, "Audi RS3/S4, BMW M3/M4, Mercedes C63 AMG"),
-    # Furgonetas, Camper y 4x4
     (205, 65, 16, 215, 60, 16, "VW Transporter T5/T6, Mercedes Vito, Renault Trafic, Ford Transit Custom"),
     (215, 65, 16, 225, 60, 16, "Dacia Duster 4x4, Citroën Jumpy, Peugeot Expert, Renault Trafic"),
     (225, 65, 16, 235, 60, 16, "Fiat Ducato, Renault Master, Iveco Daily, Peugeot Boxer"),
     (235, 65, 16, 225, 70, 16, "Mercedes Sprinter, VW Crafter, Ford Transit"),
     (195, 70, 15, 205, 65, 15, "VW Transporter T4, Ford Transit, Mercedes Sprinter Clásica"),
     (265, 65, 17, 265, 60, 18, "Toyota Land Cruiser, Toyota Hilux, Mitsubishi Montero, Ford Ranger")
+]
+
+# Formato: (slug, nombre_modelo, a1, p1, l1, a2, p2, l2, consumo_medio)
+MODELOS_COCHES = [
+    ("seat-leon", "Seat León", 205, 55, 16, 225, 45, 17, 5.4),
+    ("seat-ibiza", "Seat Ibiza", 185, 60, 15, 215, 45, 17, 5.2),
+    ("seat-ateca", "Seat Ateca", 215, 60, 16, 215, 55, 17, 5.8),
+    ("seat-arona", "Seat Arona", 205, 60, 16, 205, 55, 17, 5.3),
+    ("cupra-formentor", "Cupra Formentor", 245, 45, 18, 245, 40, 19, 6.4),
+    ("volkswagen-golf", "Volkswagen Golf", 205, 55, 16, 225, 45, 17, 5.5),
+    ("volkswagen-polo", "Volkswagen Polo", 185, 65, 15, 195, 55, 16, 5.2),
+    ("volkswagen-tiguan", "Volkswagen Tiguan", 235, 55, 18, 235, 50, 19, 6.2),
+    ("volkswagen-passat", "Volkswagen Passat", 215, 55, 17, 235, 45, 18, 5.3),
+    ("dacia-sandero", "Dacia Sandero", 185, 65, 15, 195, 55, 16, 5.3),
+    ("dacia-duster", "Dacia Duster", 215, 65, 16, 215, 60, 17, 5.8),
+    ("renault-clio", "Renault Clio", 185, 65, 15, 195, 55, 16, 5.1),
+    ("renault-megane", "Renault Mégane", 205, 55, 16, 205, 50, 17, 5.4),
+    ("renault-captur", "Renault Captur", 205, 60, 16, 215, 55, 17, 5.5),
+    ("peugeot-208", "Peugeot 208", 195, 55, 16, 205, 45, 17, 5.1),
+    ("peugeot-308", "Peugeot 308", 205, 55, 16, 225, 45, 17, 5.3),
+    ("peugeot-2008", "Peugeot 2008", 215, 60, 17, 215, 55, 18, 5.6),
+    ("peugeot-3008", "Peugeot 3008", 225, 55, 18, 235, 50, 18, 5.8),
+    ("citroen-c3", "Citroën C3", 195, 55, 16, 205, 50, 16, 5.2),
+    ("citroen-c4", "Citroën C4", 205, 55, 16, 195, 60, 18, 5.4),
+    ("citroen-berlingo", "Citroën Berlingo", 205, 60, 16, 215, 55, 16, 5.9),
+    ("opel-corsa", "Opel Corsa", 175, 65, 14, 195, 55, 16, 5.1),
+    ("opel-astra", "Opel Astra", 205, 55, 16, 225, 45, 17, 5.4),
+    ("ford-focus", "Ford Focus", 205, 55, 16, 215, 50, 17, 5.5),
+    ("ford-fiesta", "Ford Fiesta", 195, 55, 15, 195, 50, 16, 5.2),
+    ("ford-kuga", "Ford Kuga", 225, 60, 18, 235, 55, 18, 6.0),
+    ("toyota-corolla", "Toyota Corolla", 205, 55, 16, 225, 45, 17, 4.6),
+    ("toyota-yaris", "Toyota Yaris", 185, 60, 15, 195, 50, 16, 4.3),
+    ("toyota-chr", "Toyota C-HR", 215, 60, 17, 225, 50, 18, 4.9),
+    ("toyota-rav4", "Toyota RAV4", 225, 65, 17, 225, 60, 18, 5.6),
+    ("nissan-qashqai", "Nissan Qashqai", 215, 60, 17, 215, 55, 18, 5.7),
+    ("nissan-primera", "Nissan Primera", 185, 65, 15, 195, 60, 15, 5.8),
+    ("hyundai-tucson", "Hyundai Tucson", 215, 65, 17, 235, 55, 18, 5.9),
+    ("kia-sportage", "Kia Sportage", 215, 65, 17, 235, 55, 18, 5.9),
+    ("audi-a3", "Audi A3", 205, 55, 16, 225, 45, 17, 5.4),
+    ("bmw-serie-1", "BMW Serie 1", 205, 55, 16, 225, 45, 17, 5.6),
+    ("mercedes-clase-a", "Mercedes Clase A", 205, 55, 16, 225, 45, 17, 5.5),
+    ("skoda-octavia", "Skoda Octavia", 205, 55, 16, 225, 45, 17, 5.1)
 ]
 
 RUTAS_ESPANA = [
@@ -73,17 +111,17 @@ RUTAS_ESPANA = [
 ]
 
 GARGANTA_POR_ANCHO = {
-    155: "4.5\" - 5.5\"",
-    165: "4.5\" - 6.0\"",
-    175: "5.0\" - 6.0\"",
-    185: "5.0\" - 6.5\"",
-    195: "5.5\" - 7.0\"",
-    205: "5.5\" - 7.5\"",
-    215: "6.0\" - 7.5\"",
-    225: "6.0\" - 8.0\"",
-    235: "6.5\" - 8.5\"",
-    245: "7.0\" - 9.0\"",
-    255: "7.5\" - 9.5\"",
-    265: "8.0\" - 10.0\"",
-    275: "8.5\" - 10.5\""
+    155: '4.5" - 5.5"',
+    165: '4.5" - 6.0"',
+    175: '5.0" - 6.0"',
+    185: '5.0" - 6.5"',
+    195: '5.5" - 7.0"',
+    205: '5.5" - 7.5"',
+    215: '6.0" - 7.5"',
+    225: '6.0" - 8.0"',
+    235: '6.5" - 8.5"',
+    245: '7.0" - 9.0"',
+    255: '7.5" - 9.5"',
+    265: '8.0" - 10.0"',
+    275: '8.5" - 10.5"'
 }
