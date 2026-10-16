@@ -1848,7 +1848,7 @@ def main():
             )
         ads_pub = ADSENSE_CLIENT[3:]
         with open(ads_txt_path, "w", encoding="utf-8") as f:
-            f.write(f"google.com, {ads_pub}, DIRECT, f08c47fec0942fa0\\n")
+            f.write(f"google.com, {ads_pub}, DIRECT, f08c47fec0942fa0\n")
     elif os.path.exists(ads_txt_path):
         # No publicar un registro ads.txt ficticio si AdSense aún no está configurado.
         os.remove(ads_txt_path)
