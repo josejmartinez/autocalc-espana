@@ -1424,12 +1424,18 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
         function calcularConsumo() {
             const elKm = document.getElementById('km-viaje');
             if (!elKm) return;
-            const km = parseFloat(elKm.value) || 0;
-            const l100 = parseFloat(document.getElementById('litros-100').value) || 0;
-            const precio = parseFloat(document.getElementById('precio-litro').value) || 0;
-            const peajes = parseFloat(document.getElementById('peajes-viaje').value) || 0;
-            const vel = Math.max(1, parseFloat(document.getElementById('vel-viaje').value) || 100);
-            const personas = Math.max(1, parseInt(document.getElementById('ocupantes').value) || 1);
+            const km = leerNumeroCampo('km-viaje');
+            const l100 = leerNumeroCampo('litros-100');
+            const precio = leerNumeroCampo('precio-litro');
+            const peajes = leerNumeroCampo('peajes-viaje');
+            const vel = leerNumeroCampo('vel-viaje');
+            const personas = leerNumeroCampo('ocupantes');
+            if (km === null || l100 === null || precio === null || peajes === null || vel === null || personas === null ||
+                km < 0 || l100 < 0 || precio < 0 || peajes < 0 || vel <= 0 ||
+                !Number.isInteger(personas) || personas < 1) {
+                mostrarErrorCalculo('res-consumo', 'Revisa los datos: distancias, consumo, precio y peajes no pueden ser negativos; la velocidad debe ser mayor que cero y los ocupantes un entero positivo.');
+                return;
+            }
 
             const litrosTotales = (km / 100) * l100;
             const costeCombustible = litrosTotales * precio;
@@ -1470,15 +1476,21 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
         function calcularAmortizacion() {
             const elKmAnual = document.getElementById('km-anual');
             if (!elKmAnual) return;
-            const kmAnual = parseFloat(elKmAnual.value) || 1;
-            const difPrecio = parseFloat(document.getElementById('dif-precio').value) || 0;
-            const aniosUso = parseFloat(document.getElementById('anios-uso').value) || 8;
-            const consA = parseFloat(document.getElementById('cons-a').value) || 0;
-            const precA = parseFloat(document.getElementById('prec-a').value) || 0;
-            const mantA = parseFloat(document.getElementById('mant-a').value) || 0;
-            const consB = parseFloat(document.getElementById('cons-b').value) || 0;
-            const precB = parseFloat(document.getElementById('prec-b').value) || 0;
-            const mantB = parseFloat(document.getElementById('mant-b').value) || 0;
+            const kmAnual = leerNumeroCampo('km-anual');
+            const difPrecio = leerNumeroCampo('dif-precio');
+            const aniosUso = leerNumeroCampo('anios-uso');
+            const consA = leerNumeroCampo('cons-a');
+            const precA = leerNumeroCampo('prec-a');
+            const mantA = leerNumeroCampo('mant-a');
+            const consB = leerNumeroCampo('cons-b');
+            const precB = leerNumeroCampo('prec-b');
+            const mantB = leerNumeroCampo('mant-b');
+            const valores = [kmAnual, difPrecio, aniosUso, consA, precA, mantA, consB, precB, mantB];
+            if (valores.some(valor => valor === null) || kmAnual <= 0 || difPrecio < 0 || aniosUso <= 0 ||
+                [consA, precA, mantA, consB, precB, mantB].some(valor => valor < 0)) {
+                mostrarErrorCalculo('res-amortizacion', 'Introduce kilómetros anuales y años de uso mayores que cero. El sobreprecio, los consumos, precios de combustible y mantenimientos no pueden ser negativos.');
+                return;
+            }
 
             const gastoAnualA = ((kmAnual / 100) * consA * precA) + mantA;
             const gastoAnualB = ((kmAnual / 100) * consB * precB) + mantB;
@@ -1489,7 +1501,8 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const box = document.getElementById('res-amortizacion');
 
             if (ahorroAnualNeto <= 0) {
-                box.innerHTML = `<p class="text-rose-700 font-semibold text-sm">Con estos datos (incluyendo mantenimiento), el vehículo B no genera ahorro anual respecto al vehículo A.</p>`;
+                box.className = 'mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm font-semibold text-amber-900';
+                box.textContent = 'Con estos datos (incluyendo mantenimiento), el vehículo B no genera ahorro anual respecto al vehículo A. No existe un plazo de amortización positivo.';
                 return;
             }
 
