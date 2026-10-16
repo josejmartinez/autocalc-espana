@@ -573,20 +573,21 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                         <select id="dgt-motor" onchange="calcularDGT()" class="w-full p-2 border rounded-lg font-bold bg-white text-xs">
                             <option value="gasolina">Gasolina</option>
                             <option value="diesel" selected>Diésel</option>
-                            <option value="hibrido">Híbrido / GLP (posible ECO)</option>
-                            <option value="cero">Eléctrico / PHEV (comprobar autonomía)</option>
+                            <option value="hibrido">Híbrido no enchufable / GLP (posible ECO)</option>
+                            <option value="electrico">Eléctrico puro</option>
+                            <option value="phev">Híbrido enchufable (PHEV)</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1">Año 1.ª matr.</label>
-                        <input type="number" id="dgt-anio" value="2015" min="1980" max="2027" oninput="calcularDGT()" class="w-full p-2 border rounded-lg font-bold">
+                        <input type="number" id="dgt-anio" value="2015" min="1980" max="2100" oninput="calcularDGT()" class="w-full p-2 border rounded-lg font-bold">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">Cilindrada (cm³)</label>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Cilindrada térmica (cm³)</label>
                         <input type="number" id="dgt-cc" value="1968" oninput="calcularDGT()" class="w-full p-2 border rounded-lg font-bold">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">N.º cilindros</label>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Cilindros térmicos</label>
                         <input type="number" id="dgt-cil" value="4" min="2" max="12" oninput="calcularDGT()" class="w-full p-2 border rounded-lg font-bold">
                     </div>
                     <div>
@@ -1534,61 +1535,82 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             `;
         }
 
-        // 4B. Caballos fiscales (fórmula oficial BOE) + DGT + IVTM + CO2
+        // 4B. Caballos fiscales (fórmula del Anexo V del RGV) + orientación DGT + impuestos.
         function calcularDGT() {
             const elMotor = document.getElementById('dgt-motor');
             if (!elMotor) return;
             const motor = elMotor.value;
-            const anio = parseInt(document.getElementById('dgt-anio').value) || 2015;
-            const cc = parseFloat(document.getElementById('dgt-cc').value) || 1600;
-            const cil = Math.max(1, parseInt(document.getElementById('dgt-cil').value) || 4);
-            const co2 = parseFloat(document.getElementById('dgt-co2').value) || 0;
-            const base = parseFloat(document.getElementById('dgt-base').value) || 0;
+            const anio = leerNumeroCampo('dgt-anio');
+            const cc = leerNumeroCampo('dgt-cc');
+            const cil = leerNumeroCampo('dgt-cil');
+            const co2 = leerNumeroCampo('dgt-co2');
+            const base = leerNumeroCampo('dgt-base');
+            const anioActual = new Date().getFullYear();
+            const cvfNoEstimableConEstosDatos = motor === 'electrico' || motor === 'phev';
 
-            // Fórmula BOE Anexo V: CVF = 0.08 * (cc / N)^0.6 * N
-            const cvf = 0.08 * Math.pow(cc / cil, 0.6) * cil;
+            if (anio === null || !Number.isInteger(anio) || anio < 1980 || anio > anioActual + 1 ||
+                co2 === null || co2 < 0 || base === null || base < 0 ||
+                (!cvfNoEstimableConEstosDatos && (cc === null || cc <= 0 || cil === null || !Number.isInteger(cil) || cil < 1 || cil > 16))) {
+                mostrarErrorCalculo('res-dgt', 'Revisa año, cilindrada, cilindros, emisiones y base imponible. Usa valores numéricos no negativos y un año de matriculación válido.');
+                return;
+            }
 
-            // El tramo fiscal se muestra sin cuota: cada ayuntamiento puede aplicar coeficientes y bonificaciones.
-            let tramoIVTM = "12–15,99 CVF";
-            if (cvf < 8) tramoIVTM = "Menos de 8 CVF";
-            else if (cvf < 12) tramoIVTM = "8–11,99 CVF";
-            else if (cvf < 16) tramoIVTM = "12–15,99 CVF";
-            else if (cvf < 20) tramoIVTM = "16–19,99 CVF";
-            else tramoIVTM = "20 CVF o más";
+            // El Anexo V usa una fórmula distinta para motores eléctricos; para eléctricos puros y PHEV
+            // no inferimos la potencia fiscal a partir de la cilindrada térmica.
+            const cvf = cvfNoEstimableConEstosDatos
+                ? null
+                : Math.floor((0.08 * Math.pow(cc / cil, 0.6) * cil) * 100) / 100;
 
-            // Es una orientación por año y motorización; no sustituye la consulta oficial por matrícula.
+            // El tramo IVTM se muestra sin cuota; cada ayuntamiento puede aplicar coeficientes y bonificaciones.
+            let tramoIVTM = "Consulta la ficha técnica";
+            if (cvf !== null) {
+                if (cvf < 8) tramoIVTM = "Menos de 8 CVF";
+                else if (cvf < 12) tramoIVTM = "8–11,99 CVF";
+                else if (cvf < 16) tramoIVTM = "12–15,99 CVF";
+                else if (cvf < 20) tramoIVTM = "16–19,99 CVF";
+                else tramoIVTM = "20 CVF o más";
+            }
+
+            // Una clasificación por año/motor solo puede ser orientativa; confirma el distintivo por matrícula.
             let etiqueta = "Sin distintivo estimado; confirmar en DGT";
             let colorEtiqueta = "bg-slate-200 text-slate-800";
 
-            if (motor === "cero") {
-                etiqueta = "0 (si cumple categoría y autonomía exigida)";
+            if (motor === "electrico") {
+                etiqueta = "CERO probable para BEV; confirma por matrícula";
                 colorEtiqueta = "bg-sky-200 text-sky-950";
+            } else if (motor === "phev") {
+                etiqueta = "CERO si autonomía eléctrica homologada ≥40 km; si no, ECO sujeto a Euro";
+                colorEtiqueta = "bg-teal-200 text-teal-950";
             } else if (motor === "hibrido") {
-                etiqueta = "ECO (si cumple también Euro exigida)";
+                etiqueta = "ECO posible si cumple la norma Euro aplicable";
                 colorEtiqueta = "bg-teal-200 text-teal-950";
             } else if (motor === "gasolina") {
                 if (anio >= 2006) {
-                    etiqueta = "C probable por año; confirmar norma Euro";
+                    etiqueta = "C probable por año; confirma norma Euro";
                     colorEtiqueta = "bg-emerald-200 text-emerald-950";
                 } else if (anio >= 2001) {
-                    etiqueta = "B probable por año; confirmar norma Euro";
+                    etiqueta = "B probable por año; confirma norma Euro";
                     colorEtiqueta = "bg-amber-200 text-amber-950";
                 }
             } else if (motor === "diesel") {
-                if (anio >= 2015) {
-                    etiqueta = "C probable si es Euro 6";
+                if (anio >= 2016) {
+                    etiqueta = "C probable por año; confirma norma Euro";
                     colorEtiqueta = "bg-emerald-200 text-emerald-950";
+                } else if (anio === 2015) {
+                    etiqueta = "B o C según fecha y homologación; confirma en DGT";
+                    colorEtiqueta = "bg-amber-200 text-amber-950";
                 } else if (anio >= 2006) {
-                    etiqueta = "B probable si es Euro 4/5";
+                    etiqueta = "B probable por año; confirma norma Euro";
                     colorEtiqueta = "bg-amber-200 text-amber-950";
                 }
             }
 
             let tipoImpositivo = 0;
-            if (co2 > 120 && co2 <= 159) tipoImpositivo = 4.75;
-            else if (co2 >= 160 && co2 <= 199) tipoImpositivo = 9.75;
-            else if (co2 >= 200) tipoImpositivo = 14.75;
-
+            if (motor !== 'electrico') {
+                if (co2 > 120 && co2 < 160) tipoImpositivo = 4.75;
+                else if (co2 >= 160 && co2 < 200) tipoImpositivo = 9.75;
+                else if (co2 >= 200) tipoImpositivo = 14.75;
+            }
             const cuotaImpuesto = base * (tipoImpositivo / 100);
 
             document.getElementById('res-dgt').innerHTML = `
@@ -1599,7 +1621,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                     </div>
                     <div class="bg-white p-3 rounded-lg border">
                         <div class="text-xs text-slate-500">Potencia fiscal (BOE)</div>
-                        <div class="text-xl font-extrabold text-slate-900">${cvf.toFixed(2)} CVF</div>
+                        <div class="text-xl font-extrabold text-slate-900">${cvf === null ? 'No estimable con estos datos' : cvf.toFixed(2) + ' CVF'}</div>
                     </div>
                     <div class="bg-white p-3 rounded-lg border">
                         <div class="text-xs text-slate-500">Tramo fiscal IVTM (sin cuota local)</div>
