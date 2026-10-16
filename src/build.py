@@ -1130,13 +1130,21 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                 [5340, 2024.0], [5550, 2025.0], [5770, 2026.0], [6000, 2027.0]
             ];
 
-            let fechaEst = 2026.5;
+            let fechaEst = hitos[0][1];
+            let intervaloEncontrado = false;
             for (let i = 0; i < hitos.length - 1; i++) {
                 if (indice >= hitos[i][0] && indice <= hitos[i+1][0]) {
                     const ratio = (indice - hitos[i][0]) / (hitos[i+1][0] - hitos[i][0]);
                     fechaEst = hitos[i][1] + ratio * (hitos[i+1][1] - hitos[i][1]);
+                    intervaloEncontrado = true;
                     break;
                 }
+            }
+            if (!intervaloEncontrado && indice > hitos[hitos.length - 1][0]) {
+                const anterior = hitos[hitos.length - 2];
+                const ultimo = hitos[hitos.length - 1];
+                const ritmoAnual = (ultimo[1] - anterior[1]) / (ultimo[0] - anterior[0]);
+                fechaEst = ultimo[1] + (indice - ultimo[0]) * ritmoAnual;
             }
 
             const anioMat = Math.floor(fechaEst);
