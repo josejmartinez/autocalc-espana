@@ -17,10 +17,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build-and-validate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -86,7 +83,14 @@ jobs:
         with:
           path: './public'
 
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build-and-validate
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy to GitHub Pages
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         id: deployment
         uses: actions/deploy-pages@v4
