@@ -1120,7 +1120,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
 
             // Hitos históricos oficiales de la DGT (índice base 20 -> año.mes)
             const hitos = [
-                [0, 2000.75], [140, 2001.0], [420, 2002.0], [680, 2003.0],
+                [0, 2000.6666667], [140, 2001.0], [420, 2002.0], [680, 2003.0],
                 [980, 2004.0], [1310, 2005.0], [1650, 2006.0], [2010, 2007.0],
                 [2350, 2008.0], [2580, 2009.0], [2740, 2010.0], [2900, 2011.0],
                 [3040, 2012.0], [3150, 2013.0], [3260, 2014.0], [3420, 2015.0],
@@ -1141,7 +1141,10 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const anioMat = Math.floor(fechaEst);
             const mesIndex = Math.min(11, Math.max(0, Math.floor((fechaEst - anioMat) * 12)));
             const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
-            const edad = Math.max(0, (2026.78 - fechaEst));
+            const ahora = new Date();
+            const diasMes = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0).getDate();
+            const fraccionActual = (ahora.getMonth() + (ahora.getDate() / diasMes)) / 12;
+            const edad = Math.max(0, (ahora.getFullYear() + fraccionActual - fechaEst));
 
             let frecuenciaITV = "Anual (cada año por tener más de 10 años)";
             if (edad < 4) frecuenciaITV = `Exento hasta los 4 años (1.ª ITV en ${anioMat + 4})`;
@@ -1158,7 +1161,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                         <div class="text-lg font-extrabold text-slate-900 capitalize">${meses[mesIndex]} de ${anioMat}</div>
                     </div>
                     <div class="bg-white p-3 rounded-lg border">
-                        <div class="text-xs text-slate-500">Antigüedad del vehículo</div>
+                        <div class="text-xs text-slate-500">Antigüedad aproximada</div>
                         <div class="text-lg font-bold text-amber-600">${edad.toFixed(1)} años</div>
                     </div>
                     <div class="bg-white p-3 rounded-lg border">
