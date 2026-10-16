@@ -59,6 +59,15 @@ jobs:
                       print(f"Falta {marker!r} en {page}")
                       sys.exit(1)
 
+              head = html.split("</head>", 1)[0]
+              if "googletagmanager.com/gtag/js" in head:
+                  print(f"Analytics se carga en el head antes de gestionar el consentimiento: {page}")
+                  sys.exit(1)
+              for marker in ("autocalc_privacidad_v2", "Rechazar analítica", "Aceptar analítica", "Configurar cookies"):
+                  if marker not in html:
+                      print(f"Falta el control de privacidad {marker!r} en {page}")
+                      sys.exit(1)
+
           sitemap = (output / "sitemap.xml").read_text(encoding="utf-8")
           robots = (output / "robots.txt").read_text(encoding="utf-8")
           if "<loc>" not in sitemap or "Sitemap:" not in robots:
@@ -68,6 +77,10 @@ jobs:
           ads_file = output / "ads.txt"
           if ads_file.is_file() and "pub-0000000000000000" in ads_file.read_text(encoding="utf-8"):
               print("ads.txt contiene un identificador publicitario ficticio.")
+              sys.exit(1)
+
+          if any("contacto@tudominio.es" in page.read_text(encoding="utf-8") for page in html_pages):
+              print("Una página contiene un correo de contacto de ejemplo.")
               sys.exit(1)
 
           print(f"Validación correcta: {len(html_pages)} páginas HTML.")

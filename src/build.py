@@ -28,6 +28,17 @@ AMAZON_TAG = CFG["amazon_tag"]
 SITE_NAME = CFG["site_name"]
 EMAIL_CONTACTO = CFG["contact_email"]
 ADSENSE_CLIENT = CFG.get("adsense_client", "").strip()
+GOOGLE_ANALYTICS_ID = CFG.get("google_analytics_id", "").strip()
+GOOGLE_CERTIFIED_CMP_CONFIGURED = CFG.get("google_certified_cmp_configured", False) is True
+
+if ADSENSE_CLIENT:
+    if not GOOGLE_CERTIFIED_CMP_CONFIGURED:
+        raise RuntimeError(
+            "AdSense no se puede activar hasta integrar y verificar una CMP certificada de Google "
+            "compatible con el TCF para el tráfico del EEE/Reino Unido/Suiza."
+        )
+    if not (ADSENSE_CLIENT.startswith("ca-pub-") and ADSENSE_CLIENT[7:].isdigit()):
+        raise ValueError("adsense_client debe tener el formato ca-pub- seguido del identificador numérico.")
 
 ANCHOS_COMUNES = sorted(list(GARGANTA_POR_ANCHO.keys()))
 PERFILES_COMUNES = [35, 40, 45, 50, 55, 60, 65, 70, 75]
@@ -91,10 +102,10 @@ def generar_tabla_equivalencias_html(a_orig, p_orig, l_orig):
     <div class="mt-8 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 overflow-x-auto">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
             <div>
-                <h2 class="text-lg font-bold text-slate-900">Tabla oficial de equivalencias para {a_orig}/{p_orig} R{l_orig} (ITV ±3 %)</h2>
-                <p class="text-xs text-slate-500">Diámetro original: <strong>{d_orig:.1f} mm</strong> · Rango legal permitido en ITV: <strong>{d_orig*0.97:.1f} mm a {d_orig*1.03:.1f} mm</strong> (pulsa en cualquier medida para simularla en el gráfico)</p>
+                <h2 class="text-lg font-bold text-slate-900">Medidas candidatas por diámetro para {a_orig}/{p_orig} R{l_orig} (±3 % orientativo)</h2>
+                <p class="text-xs text-slate-500">Diámetro de referencia: <strong>{d_orig:.1f} mm</strong> · Intervalo matemático ±3 %: <strong>{d_orig*0.97:.1f} mm a {d_orig*1.03:.1f} mm</strong>. Este cálculo compara solo el diámetro exterior: no acredita homologación ni validez para ITV. Verifica ficha técnica, índice de carga, código de velocidad y compatibilidad.</p>
             </div>
-            <span class="text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-full font-semibold w-fit">Sin homologar</span>
+            <span class="text-xs bg-amber-50 text-amber-800 border border-amber-200 px-3 py-1 rounded-full font-semibold w-fit">Verificar ficha técnica</span>
         </div>
         <table class="w-full text-left text-sm">
             <thead>
@@ -102,7 +113,7 @@ def generar_tabla_equivalencias_html(a_orig, p_orig, l_orig):
                     <th class="py-2 px-3 font-semibold">Medida equivalente</th>
                     <th class="py-2 px-3 text-center font-semibold">Ancho de llanta</th>
                     <th class="py-2 px-3 text-center font-semibold">Diámetro</th>
-                    <th class="py-2 px-3 text-center font-semibold">Variación ITV</th>
+                    <th class="py-2 px-3 text-center font-semibold">Variación diámetro</th>
                     <th class="py-2 px-3 text-center font-semibold">Altura chasis</th>
                     <th class="py-2 px-3 text-right font-semibold">Comparar precios por tienda</th>
                 </tr>
@@ -116,8 +127,7 @@ def generar_tabla_equivalencias_html(a_orig, p_orig, l_orig):
 PLANTILLA_HTML = r"""<!DOCTYPE html>
 <html lang="es">
 <head>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-QN5542F4NX"></script>
-    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-QN5542F4NX');</script>
+    <!-- Google Analytics se carga únicamente después de aceptar analítica. -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>__PAGE_TITLE__</title>
@@ -786,22 +796,25 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                 <a href="mapa-web.html" class="hover:text-white transition">Mapa web</a>
                 <a href="aviso-legal.html" class="hover:text-white transition">Aviso legal</a>
                 <a href="privacidad-cookies.html" class="hover:text-white transition">Privacidad y cookies</a>
+                <button type="button" onclick="mostrarPreferenciasCookies()" class="hover:text-white transition underline">Configurar cookies</button>
             </div>
         </div>
     </footer>
 
-    <div id="cookie-banner" class="fixed bottom-0 inset-x-0 bg-slate-950/95 text-white p-4 border-t border-slate-800 z-50 hidden no-print">
+    <div id="cookie-banner" role="dialog" aria-label="Preferencias de privacidad" aria-live="polite" class="fixed bottom-0 inset-x-0 bg-slate-950/95 text-white p-4 border-t border-slate-800 z-50 hidden no-print">
         <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
-            <p class="text-slate-300">Utilizamos cookies propias y de terceros para recordar tus preferencias de cálculo, analizar el tráfico y mostrar enlaces patrocinados. Puedes consultar nuestra <a href="privacidad-cookies.html" class="underline text-amber-400">Política de privacidad y cookies</a>.</p>
+            <p class="text-slate-300">Google Analytics solo se cargará si aceptas la medición estadística. Si eliges rechazarla, la etiqueta no se carga. La decisión puede cambiarse desde «Configurar cookies». Consulta la <a href="privacidad-cookies.html" class="underline text-amber-400">Política de privacidad y cookies</a>.</p>
             <div class="flex gap-2 shrink-0">
-                <button onclick="gestionarCookies('essential')" class="px-3 py-2 rounded border border-slate-700 hover:bg-slate-800 transition">Solo necesarias</button>
-                <button onclick="gestionarCookies('all')" class="px-4 py-2 rounded bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold transition">Aceptar todas</button>
+                <button type="button" onclick="gestionarCookies('essential')" class="px-3 py-2 rounded border border-slate-500 hover:bg-slate-800 transition font-semibold">Rechazar analítica</button>
+                <button type="button" onclick="gestionarCookies('analytics')" class="px-3 py-2 rounded border border-slate-500 hover:bg-slate-800 transition font-semibold">Aceptar analítica</button>
             </div>
         </div>
     </div>
 
     <script>
         const AMAZON_TAG = "__AMAZON_TAG__";
+        const GOOGLE_ANALYTICS_ID = "__GOOGLE_ANALYTICS_ID__";
+        const AUTOCALC_CONSENT_KEY = "autocalc_privacidad_v2";
         const TAB_INICIAL = "__INITIAL_TAB__";
         const GARGANTAS = {155:'4.5"-5.5"',165:'4.5"-6.0"',175:'5.0"-6.0"',185:'5.0"-6.5"',195:'5.5"-7.0"',205:'5.5"-7.5"',215:'6.0"-7.5"',225:'6.0"-8.0"',235:'6.5"-8.5"',245:'7.0"-9.0"',255:'7.5"-9.5"',265:'8.0"-10.0"',275:'8.5"-10.5"'};
 
@@ -1256,20 +1269,21 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const gargantaRec = GARGANTAS[a2] || '6.0" - 8.5"';
 
             let motivoAviso = '';
-            if (!okDiametro) motivoAviso += '<li>El diámetro supera el margen legal del ±3 %.</li>';
-            if (!okCarga) motivoAviso += `<li>El índice de carga nuevo (${c2}) no puede ser inferior al original (${c1}).</li>`;
-            if (!okVelocidad) motivoAviso += '<li>El código de velocidad es inferior al original (solo permitido en neumáticos de invierno M+S con etiqueta de aviso).</li>';
+            if (!okDiametro) motivoAviso += '<li>La variación del diámetro supera el límite de referencia del ±3 %.</li>';
+            if (!okCarga) motivoAviso += `<li>El índice de carga introducido (${c2}) es inferior al de referencia (${c1}).</li>`;
+            if (!okVelocidad) motivoAviso += '<li>El índice de velocidad introducido es inferior al de referencia; comprueba las excepciones y condiciones aplicables con un especialista o la ITV.</li>';
 
             const box = document.getElementById('res-itv');
             box.className = 'mt-6 p-5 rounded-xl border ' + (esEquivalente ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-rose-50 border-rose-300 text-rose-950');
 
             box.innerHTML = `
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b ${esEquivalente ? 'border-emerald-200' : 'border-rose-200'}">
-                    <span class="text-lg font-extrabold">${esEquivalente ? 'APTO PARA ITV (medida equivalente legal)' : 'NO APTO PARA ITV (incumple requisitos)'}</span>
+                    <span class="text-lg font-extrabold">${esEquivalente ? 'CUMPLE LOS CRITERIOS BÁSICOS CALCULADOS' : 'NO CUMPLE UNO O MÁS CRITERIOS BÁSICOS'}</span>
                     <span class="text-sm font-bold px-3 py-1 rounded-full ${okDiametro ? 'bg-emerald-200 text-emerald-900' : 'bg-rose-200 text-rose-900'}">
                         Variación: ${diffPorcentaje > 0 ? '+' : ''}${diffPorcentaje.toFixed(2)} %
                     </span>
                 </div>
+                <p class="mt-3 text-xs leading-relaxed">Este resultado es un prechequeo dimensional y de índices con los valores introducidos; no es una aprobación oficial ni verifica por sí solo homologación, medidas admitidas en la ficha técnica, perfil de llanta, ausencia de interferencias u otros requisitos. Confirma la compatibilidad antes de comprar o montar.</p>
                 ${motivoAviso ? `<ul class="mt-3 text-xs list-disc list-inside text-rose-800 font-medium">${motivoAviso}</ul>` : ''}
                 <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-4 text-sm">
                     <div class="bg-white/80 p-2.5 rounded-lg">
@@ -1503,9 +1517,112 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             `;
         }
 
+        function leerPreferenciaPrivacidad() {
+            try {
+                const guardada = localStorage.getItem(AUTOCALC_CONSENT_KEY);
+                if (!guardada) return null;
+                const datos = JSON.parse(guardada);
+                const maxEdadMs = 180 * 24 * 60 * 60 * 1000;
+                if (!datos || !['analytics', 'essential'].includes(datos.choice) ||
+                    !Number.isFinite(datos.timestamp) || Date.now() - datos.timestamp > maxEdadMs ||
+                    datos.timestamp > Date.now()) {
+                    localStorage.removeItem(AUTOCALC_CONSENT_KEY);
+                    return null;
+                }
+                return datos.choice;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function guardarPreferenciaPrivacidad(valor) {
+            try {
+                localStorage.setItem(AUTOCALC_CONSENT_KEY, JSON.stringify({
+                    choice: valor,
+                    timestamp: Date.now()
+                }));
+            } catch (error) {
+                // Si el navegador bloquea el almacenamiento local, la elección solo se aplica en esta página.
+            }
+        }
+
+        function eliminarCookiesAnalitica() {
+            const cookies = document.cookie ? document.cookie.split(';') : [];
+            const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+            cookies.forEach((cookie) => {
+                const nombre = cookie.split('=')[0].trim();
+                if (!/^_ga(?:_|$)/.test(nombre)) return;
+                const expirada = nombre + '=; Max-Age=0; path=/; SameSite=Lax' + secure;
+                document.cookie = expirada;
+                if (window.location.hostname) {
+                    document.cookie = expirada + '; domain=' + window.location.hostname;
+                }
+            });
+        }
+
+        function actualizarAnalitica(permitir) {
+            if (!GOOGLE_ANALYTICS_ID) return;
+
+            const claveDesactivacion = 'ga-disable-' + GOOGLE_ANALYTICS_ID;
+            window[claveDesactivacion] = !permitir;
+
+            if (!permitir) {
+                if (typeof window.gtag === 'function') {
+                    window.gtag('consent', 'update', {
+                        analytics_storage: 'denied',
+                        ad_storage: 'denied',
+                        ad_user_data: 'denied',
+                        ad_personalization: 'denied'
+                    });
+                }
+                eliminarCookiesAnalitica();
+                return;
+            }
+
+            if (document.querySelector('script[data-autocalc-analytics]')) {
+                if (typeof window.gtag === 'function') {
+                    window.gtag('consent', 'update', { analytics_storage: 'granted' });
+                }
+                return;
+            }
+
+            window.dataLayer = window.dataLayer || [];
+            window.gtag = window.gtag || function() { window.dataLayer.push(arguments); };
+            window.gtag('consent', 'default', {
+                analytics_storage: 'denied',
+                ad_storage: 'denied',
+                ad_user_data: 'denied',
+                ad_personalization: 'denied',
+                wait_for_update: 500
+            });
+            window.gtag('js', new Date());
+            window.gtag('consent', 'update', {
+                analytics_storage: 'granted',
+                ad_storage: 'denied',
+                ad_user_data: 'denied',
+                ad_personalization: 'denied'
+            });
+            window.gtag('config', GOOGLE_ANALYTICS_ID, {
+                allow_google_signals: false,
+                allow_ad_personalization_signals: false
+            });
+
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(GOOGLE_ANALYTICS_ID);
+            script.dataset.autocalcAnalytics = 'true';
+            document.head.appendChild(script);
+        }
+
         function gestionarCookies(modo) {
-            localStorage.setItem('autocalc_cookies', modo);
+            const aceptarAnalitica = modo === 'analytics';
+            guardarPreferenciaPrivacidad(aceptarAnalitica ? 'analytics' : 'essential');
+            actualizarAnalitica(aceptarAnalitica);
             document.getElementById('cookie-banner').classList.add('hidden');
+        }
+
+        function mostrarPreferenciasCookies() {
+            document.getElementById('cookie-banner').classList.remove('hidden');
         }
 
         function filtrarMapaWeb() {
@@ -1530,7 +1647,15 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             mostrarFalloOBD();
             evaluarChecklist();
             calcularDesguace();
-            if (!localStorage.getItem('autocalc_cookies')) {
+            const preferenciaPrivacidad = leerPreferenciaPrivacidad();
+            if (preferenciaPrivacidad === 'analytics') {
+                actualizarAnalitica(true);
+            } else if (preferenciaPrivacidad === 'essential') {
+                // Analytics no se ha cargado; borrar posibles cookies heredadas de la versión anterior.
+                eliminarCookiesAnalitica();
+            } else {
+                // Los consentimientos antiguos no se consideran válidos y sus cookies se limpian antes de volver a preguntar.
+                eliminarCookiesAnalitica();
                 document.getElementById('cookie-banner').classList.remove('hidden');
             }
         });
@@ -1599,6 +1724,7 @@ def render_page(
         "__SEO_TEXT_BLOCK__": seo_text,
         "__INTERNAL_LINKS_HTML__": internal_links,
         "__AMAZON_TAG__": AMAZON_TAG,
+        "__GOOGLE_ANALYTICS_ID__": GOOGLE_ANALYTICS_ID,
         "__CAR_CONTEXT_NAME__": car_context_name,
         "__CAR_SHORT_NAME__": car_short_name,
         "__CAR_AUTODOC_QUERY__": car_autodoc_query
@@ -1670,21 +1796,21 @@ def main():
 
         seo_medida = f"""
             <h2 class="text-base font-bold text-slate-900">Ficha técnica y comparativa de precios del neumático {a1}/{p1} R{l1}</h2>
-            <p>La medida <strong>{a1}/{p1} R{l1}</strong> se monta de serie en modelos como <em>{modelos}</em>. Su diámetro exterior es de <strong>{d1:.1f} mm</strong> y requiere una garganta de llanta de <strong>{garganta}</strong>.</p>
-            <p>Puedes comparar ofertas online con envío gratis en <strong>Muchoneumático</strong> y <strong>Amazon</strong>, o reservar montaje directo en centros <strong>Norauto</strong> y <strong>Feu Vert</strong> tanto en la medida original como en su equivalente <strong>{a2}/{p2} R{l2}</strong> ({diff:+.2f} %).</p>
+            <p>Esta página usa <strong>{a1}/{p1} R{l1}</strong> como medida de referencia y relaciona modelos que pueden encontrarse en catálogos con esa medida: <em>{modelos}</em>. El montaje real depende de versión, año, acabado y ficha técnica; esta lista no garantiza que sea medida de serie. Su diámetro exterior calculado es <strong>{d1:.1f} mm</strong> y la garganta orientativa indicada es <strong>{garganta}</strong>.</p>
+            <p>Puedes comparar ofertas en <strong>Muchoneumático</strong>, <strong>Amazon</strong>, <strong>Norauto</strong> y <strong>Feu Vert</strong>. Comprueba que la medida que compres está admitida para tu versión antes de pedirla: la medida candidata <strong>{a2}/{p2} R{l2}</strong> presenta una variación de diámetro del {diff:+.2f} %, pero el porcentaje por sí solo no confirma la equivalencia reglamentaria ni la compatibilidad.</p>
         """
         faqs_medida = [
             (f"¿Qué medidas son equivalentes a {a1}/{p1} R{l1} en la ITV?",
-             f"Son equivalentes todas las medidas con un diámetro entre {d1*0.97:.1f} mm y {d1*1.03:.1f} mm (±3 %), destacando la {a2}/{p2} R{l2} ({diff:+.2f} %)."),
+             f"El intervalo entre {d1*0.97:.1f} mm y {d1*1.03:.1f} mm representa únicamente el ±3 % matemático del diámetro de referencia. No basta para declarar equivalencia ITV: confirma las medidas admitidas, índices de carga y velocidad, y el resto de requisitos aplicables."),
             (f"¿Dónde comprar neumáticos {a1}/{p1} R{l1} al mejor precio?",
              f"En la tabla superior puedes comparar precios directos en Muchoneumático (especialista en ruedas), Norauto y Feu Vert (con montaje en taller) y Amazon España.")
         ]
 
         render_page(
             slug,
-            f"Equivalencia de neumáticos {a1}/{p1} R{l1} en ITV | Precios y medidas",
-            f"Tabla de neumáticos equivalentes a {a1}/{p1} R{l1} ({d1:.1f} mm) aptos para ITV. Compara precios en Muchoneumático, Norauto, Feu Vert y Amazon.",
-            f"Equivalencia de neumáticos {a1}/{p1} R{l1} en ITV",
+            f"Comparador de neumáticos {a1}/{p1} R{l1} | Diámetro, medidas y precios",
+            f"Compara diámetros de neumáticos respecto a {a1}/{p1} R{l1} ({d1:.1f} mm), consulta medidas de referencia y precios. Verifica ficha técnica, homologación e índices antes de comprar.",
+            f"Comparador de diámetro de neumáticos {a1}/{p1} R{l1}",
             f"Diámetro: {d1:.1f} mm · Garganta: {garganta} · Común en: {modelos}.",
             a1, p1, l1, a2, p2, l2, 450, 5.8, "itv",
             generar_tabla_equivalencias_html(a1, p1, l1), seo_medida, internal_links_html, faqs_medida,
@@ -1704,12 +1830,12 @@ def main():
 
         seo_coche = f"""
             <h2 class="text-base font-bold text-slate-900">Neumáticos equivalentes, recambios Autodoc y desguaces para {nombre_c}</h2>
-            <p>El <strong>{nombre_c}</strong> equipa habitualmente en ficha técnica la medida <strong>{a1}/{p1} R{l1}</strong> ({d1:.1f} mm de diámetro y garganta de {garganta}), pudiendo montar sin homologar en ITV la medida <strong>{a2}/{p2} R{l2}</strong> ({diff:+.2f} %).</p>
+            <p>Como referencia inicial para el <strong>{nombre_c}</strong>, se comparan las medidas <strong>{a1}/{p1} R{l1}</strong> y <strong>{a2}/{p2} R{l2}</strong> (variación de diámetro: {diff:+.2f} %). Las medidas montadas y admitidas dependen de la versión, el año y la ficha técnica. El porcentaje de diámetro por sí solo no confirma equivalencia ni validez para ITV: verifica homologación, índice de carga, código de velocidad, llanta y espacio disponible.</p>
             <p><strong>Consejo de ahorro en mantenimiento para {nombre_c}:</strong> para recambios de desgaste (kits de filtros, pastillas de freno, amortiguadores o brazos de suspensión), <strong>Autodoc</strong> suele ofrecer el precio más bajo; para neumáticos tienes envío rápido en <strong>Muchoneumático</strong> o montaje en centros <strong>Norauto y Feu Vert</strong>; y para piezas de carrocería, faros o espejos retrovisores te compensa consultar stock en los grandes desguaces del sur de Madrid (San Martín de la Vega o La Torre).</p>
         """
         faqs_coche = [
             (f"¿Qué neumáticos equivalentes puede montar un {nombre_c} para pasar la ITV?",
-             f"Partiendo de la medida habitual {a1}/{p1} R{l1} ({d1:.1f} mm), el {nombre_c} puede montar sin homologar medidas como {a2}/{p2} R{l2} ({diff:+.2f} %)."),
+             f"Como referencia, {a2}/{p2} R{l2} presenta una variación de diámetro del {diff:+.2f} % respecto a {a1}/{p1} R{l1}. Es solo un filtro dimensional: confirma la medida en la ficha técnica y verifica los demás requisitos de homologación e ITV."),
             (f"¿Dónde comprar recambios baratos para {nombre_c}: Autodoc, Norauto o desguace?",
              f"Para consumibles y mecánica nueva (frenos, embrague, filtros) conviene Autodoc; para montaje rápido en el día destaca Norauto o Feu Vert; y para piezas de carrocería o módulos originales OEM de {nombre_c} el mayor ahorro está en desguaces.")
         ]
@@ -1719,7 +1845,7 @@ def main():
             f"Neumáticos equivalentes y recambios {nombre_c} ITV | Autodoc, Norauto y desguace",
             f"Medidas de neumáticos equivalentes en ITV para {nombre_c} ({a1}/{p1} R{l1} a {a2}/{p2} R{l2}) y comparador de recambios en Autodoc, Muchoneumático y Norauto.",
             f"Neumáticos equivalentes y recambios ITV para {nombre_c}",
-            f"Medida base: {a1}/{p1} R{l1} ({d1:.1f} mm) · Equivalencia ITV: {a2}/{p2} R{l2} ({diff:+.2f} %).",
+            f"Medidas de referencia: {a1}/{p1} R{l1} y {a2}/{p2} R{l2} · Variación de diámetro: {diff:+.2f} % (debe verificarse en ficha técnica; no certifica equivalencia ITV).",
             a1, p1, l1, a2, p2, l2, 450, l100, "itv",
             generar_tabla_equivalencias_html(a1, p1, l1), seo_coche, internal_links_html, faqs_coche,
             car_context_name=nombre_c,
@@ -1760,15 +1886,16 @@ def main():
     for orig, dest, km, l100 in RUTAS_ESPANA:
         slug_r = f"calcular-consumo-{orig.lower().replace(' ', '-')}-{dest.lower().replace(' ', '-')}.html"
         litros = (km / 100.0) * l100
-        coste = litros * 1.56
+        precio_referencia = 1.56  # Supuesto didáctico; no es el precio actual del combustible.
+        coste = litros * precio_referencia
 
         seo_ruta = f"""
             <h2 class="text-base font-bold text-slate-900">Gasto de combustible en la ruta {orig} - {dest} ({km} km)</h2>
-            <p>El trayecto por carretera entre <strong>{orig} y {dest}</strong> cubre unos <strong>{km} km</strong>. Con un consumo medio de {l100} L/100 km, necesitarás <strong>{litros:.1f} litros</strong>, lo que equivale a unos <strong>{coste:.2f} €</strong> ({coste/2:.2f} € por persona compartiendo viaje entre 2 ocupantes).</p>
+            <p>Estimación orientativa del trayecto entre <strong>{orig} y {dest}</strong>: unos <strong>{km} km</strong>. Con un consumo supuesto de {l100} L/100 km, necesitarías <strong>{litros:.1f} litros</strong>. El ejemplo arroja <strong>{coste:.2f} €</strong> usando un precio de referencia de {precio_referencia:.2f} €/L, que no representa el precio actual ni incluye peajes u otros gastos. Ajusta el precio en la calculadora según tu repostaje.</p>
         """
         faqs_ruta = [
             (f"¿Cuánto cuesta ir en coche de {orig} a {dest}?",
-             f"Para recorrer los {km} km entre {orig} y {dest} con un consumo medio de {l100} L/100 km gastarás unos {litros:.1f} litros ({coste:.2f} € aproximadamente).")
+             f"Ejemplo para {orig}–{dest}: {litros:.1f} litros con un consumo supuesto de {l100} L/100 km. El coste orientativo de {coste:.2f} € utiliza {precio_referencia:.2f} €/L como referencia, no un precio actual.")
         ]
 
         render_page(
@@ -1776,7 +1903,7 @@ def main():
             f"Calcular gasolina y coste de viaje {orig} - {dest} ({km} km)",
             f"Calcula cuántos litros y euros cuesta viajar en coche de {orig} a {dest} ({km} km) y divide el gasto por ocupante.",
             f"Coste de combustible: de {orig} a {dest} ({km} km)",
-            f"Consumo estimado para {km} km: {litros:.1f} litros ({coste:.2f} € en total / {coste/2:.2f} € entre dos).",
+            f"Estimación para {km} km: {litros:.1f} litros. Ejemplo con precio de referencia de {precio_referencia:.2f} €/L: {coste:.2f} €; actualiza el precio antes de usarlo para presupuestar.",
             205, 55, 16, 225, 45, 17, km, l100, "consumo",
             "", seo_ruta, internal_links_html, faqs_ruta
         )
@@ -1806,10 +1933,16 @@ def main():
         bloque_mapa, "", internal_links_html, faqs_home
     )
 
+    contacto_publico = (
+        f'<strong>{EMAIL_CONTACTO}</strong>'
+        if EMAIL_CONTACTO and "tudominio" not in EMAIL_CONTACTO.lower()
+        else '<strong>Pendiente de completar por el titular antes de la explotación comercial</strong>'
+    )
     texto_legal = f"""
         <h2 class="text-lg font-bold text-slate-900">Aviso legal y condiciones de uso</h2>
-        <p>En cumplimiento de la Ley 34/2002 (LSSI-CE), se informa de que el portal <strong>{SITE_NAME}</strong> ({DOMINIO}) es una herramienta informativa de cálculo técnico. Contacto: <strong>{EMAIL_CONTACTO}</strong>.</p>
-        <p>Los cálculos de equivalencia de neumáticos (±3 %) e impuestos son orientativos conforme a los manuales públicos de inspección técnica; verifique siempre el índice de carga, el código de velocidad y la ausencia de interferencias mecánicas en su estación ITV antes de realizar modificaciones.</p>
+        <p><strong>Portal:</strong> {SITE_NAME} ({DOMINIO}). <strong>Contacto:</strong> {contacto_publico}.</p>
+        <p>El titular debe completar y revisar la información identificativa y los datos de contacto de este aviso antes de la explotación comercial. Este sitio ofrece cálculos informativos, no asesoramiento técnico ni una certificación administrativa.</p>
+        <p>Los cálculos de equivalencia de neumáticos e impuestos son orientativos. Una diferencia de diámetro de ±3 % no demuestra por sí sola que una medida sea equivalente o admisible en ITV. Verifique ficha técnica, homologación, índice de carga, código de velocidad, compatibilidad mecánica y normativa aplicable antes de realizar modificaciones.</p>
     """
     render_page(
         "aviso-legal.html", f"Aviso legal | {SITE_NAME}", "Aviso legal y condiciones de uso del portal.",
@@ -1819,8 +1952,12 @@ def main():
 
     texto_privacidad = f"""
         <h2 class="text-lg font-bold text-slate-900">Política de privacidad, cookies y afiliación</h2>
-        <p><strong>1. Programas de afiliación:</strong> {SITE_NAME} participa en el Programa de Afiliados de Amazon de la UE y muestra enlaces comparativos a comercios especializados del sector de la automoción (como Muchoneumático, Autodoc, Norauto y Feu Vert) para facilitar la consulta de precios al usuario.</p>
-        <p><strong>2. Cookies y publicidad (Google AdSense):</strong> Utilizamos almacenamiento local para recordar su preferencia de privacidad y, en su caso, proveedores como Google utilizan cookies para mostrar anuncios relevantes basados en visitas anteriores. Puede desactivar las cookies personalizadas en la configuración de su navegador o en Configuración de anuncios de Google.</p>
+        <p><strong>1. Titular y contacto:</strong> {contacto_publico}. La identidad del responsable y los datos de contacto deben completarse y revisarse por el titular antes de la explotación comercial.</p>
+        <p><strong>2. Analítica:</strong> Google Analytics 4 (si está configurado) solo se carga tras aceptar expresamente la opción «Aceptar analítica». Si se elige «Rechazar analítica», la etiqueta no se carga; si se revoca una aceptación durante la visita, se envía la señal de denegación cuando procede y se intenta eliminar las cookies de Analytics accesibles desde este dominio. La elección se recuerda en el almacenamiento local del navegador.</p>
+        <p><strong>3. Cambiar la decisión:</strong> puede volver a abrir el aviso desde el enlace «Configurar cookies» del pie de página y cambiar su elección. Los enlaces a sitios de terceros se rigen también por las políticas de esos proveedores.</p>
+        <p><strong>4. Publicidad:</strong> Google AdSense no está activado en la configuración actual. No deberá habilitarse hasta integrar una plataforma de gestión del consentimiento certificada por Google y compatible con el marco TCF para servir anuncios personalizados en los territorios en los que Google lo exige.</p>
+        <p><strong>5. Afiliación:</strong> {SITE_NAME} incluye enlaces a comercios del sector del automóvil y participa en programas de afiliación, entre ellos Amazon. Si se compra desde algunos enlaces, el sitio puede recibir una comisión, sin coste adicional para el usuario. Las condiciones, precios, disponibilidad y posibles tecnologías de seguimiento dependen del comercio de destino.</p>
+        <p>Este texto describe la implementación técnica del sitio, pero no sustituye la revisión legal del titular ni completa por sí solo la información necesaria sobre responsable, base jurídica, conservación de datos y ejercicio de derechos.</p>
     """
     render_page(
         "privacidad-cookies.html", f"Política de privacidad y cookies | {SITE_NAME}", "Política de privacidad, cookies y divulgación de afiliados.",
