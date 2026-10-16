@@ -1020,29 +1020,44 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const cont = document.getElementById('contenedor-gasolineras');
             cont.innerHTML = `<div class="p-4 text-center text-slate-500">Conectando con la sede electrónica del Ministerio para obtener los precios de hoy...</div>`;
             try {
-                const resp = await fetch(`https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroMunicipio/${idMun}`);
+                const resp = await fetch(`https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroMunicipio/${encodeURIComponent(idMun)}`);
+                if (!resp.ok) throw new Error('La API de carburantes ha respondido con un error HTTP.');
                 const data = await resp.json();
                 const lista = data.ListaEESSPrecio || [];
                 if (!lista.length) {
                     cont.innerHTML = `<div class="p-3 bg-slate-100 rounded-lg">No hay estaciones registradas en este municipio en este momento.</div>`;
                     return;
                 }
-                const parsePrecio = (str) => str ? parseFloat(str.replace(',', '.')) : 999;
-                lista.sort((a, b) => parsePrecio(a["Precio Gasoleo A"]) - parsePrecio(b["Precio Gasoleo A"]));
+                const parsePrecio = (str) => {
+                    if (typeof str !== 'string') return null;
+                    const valor = str.trim().replace(',', '.');
+                    if (!/^\d{1,2}(?:\.\d{1,3})?$/.test(valor)) return null;
+                    const numero = Number(valor);
+                    return Number.isFinite(numero) && numero >= 0.5 && numero <= 10 ? numero : null;
+                };
+                lista.sort((a, b) =>
+                    (parsePrecio(a["Precio Gasoleo A"]) ?? parsePrecio(a["Precio Gasolina 95 E5"]) ?? 99) -
+                    (parsePrecio(b["Precio Gasoleo A"]) ?? parsePrecio(b["Precio Gasolina 95 E5"]) ?? 99)
+                );
 
                 const top = lista.slice(0, 8);
                 let filas = top.map(e => {
-                    const pDiesel = e["Precio Gasoleo A"] || "-";
-                    const pGas95 = e["Precio Gasolina 95 E5"] || "-";
+                    const pDieselNum = parsePrecio(e["Precio Gasoleo A"]);
+                    const pGas95Num = parsePrecio(e["Precio Gasolina 95 E5"]);
+                    const pDiesel = pDieselNum === null ? "—" : pDieselNum.toFixed(3).replace('.', ',');
+                    const pGas95 = pGas95Num === null ? "—" : pGas95Num.toFixed(3).replace('.', ',');
+                    const nombre = escaparHTML(e["Rótulo"] || "Estación sin nombre");
+                    const direccion = escaparHTML(e["Dirección"] || "Dirección no disponible");
+                    const localidad = escaparHTML(e["Localidad"] || "");
+                    const botonDiesel = pDieselNum === null ? "" : `<button type="button" onclick="usarPrecioViaje('diesel', ${pDieselNum})" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-white px-2 py-1 rounded">Usar diésel</button>`;
+                    const botonGasolina = pGas95Num === null ? "" : `<button type="button" onclick="usarPrecioViaje('gasolina', ${pGas95Num})" class="text-[11px] bg-amber-600 hover:bg-amber-700 text-white px-2 py-1 rounded">Usar gasolina</button>`;
                     return `
                         <tr class="border-b border-slate-100 hover:bg-slate-50">
-                            <td class="py-2 px-2 font-bold text-slate-900">${e["Rótulo"]}</td>
-                            <td class="py-2 px-2 text-slate-600">${e["Dirección"]} (${e["Localidad"]})</td>
+                            <td class="py-2 px-2 font-bold text-slate-900">${nombre}</td>
+                            <td class="py-2 px-2 text-slate-600">${direccion}${localidad ? ` (${localidad})` : ''}</td>
                             <td class="py-2 px-2 text-center font-bold text-emerald-700">${pDiesel} €/L</td>
                             <td class="py-2 px-2 text-center font-bold text-amber-700">${pGas95} €/L</td>
-                            <td class="py-2 px-2 text-right">
-                                <button onclick="usarPrecioGasolinera('${pDiesel}', '${pGas95}')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-white px-2 py-1 rounded">Usar precio</button>
-                            </td>
+                            <td class="py-2 px-2 text-right"><div class="flex flex-wrap justify-end gap-1">${botonDiesel}${botonGasolina}</div></td>
                         </tr>
                     `;
                 }).join('');
@@ -1068,13 +1083,19 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             }
         }
 
-        function usarPrecioGasolinera(dieselStr, gas95Str) {
-            const p = parseFloat((dieselStr !== "-" ? dieselStr : gas95Str).replace(',', '.'));
-            if (!isNaN(p)) {
-                document.getElementById('precio-litro').value = p.toFixed(3);
-                document.getElementById('real-precio').value = p.toFixed(3);
-                calcularConsumo();
-                calcularConsumoReal();
+        function usarPrecioViaje(tipoCombustible, precio) {
+            if (!['diesel', 'gasolina'].includes(tipoCombustible) ||
+                !Number.isFinite(precio) || precio < 0.5 || precio > 10) return;
+            const campoPrecioViaje = document.getElementById('precio-litro');
+            if (!campoPrecioViaje) return;
+            campoPrecioViaje.value = precio.toFixed(3);
+            calcularConsumo();
+            const caja = document.getElementById('res-consumo');
+            if (caja) {
+                const aviso = document.createElement('p');
+                aviso.className = 'mt-3 text-xs text-slate-500';
+                aviso.textContent = 'Precio de ' + (tipoCombustible === 'diesel' ? 'diésel A' : 'gasolina 95 E5') + ' aplicado solo a la calculadora del viaje. La calculadora de consumo real conserva el precio que hayas introducido.';
+                caja.appendChild(aviso);
             }
         }
 
