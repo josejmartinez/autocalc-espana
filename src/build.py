@@ -1840,9 +1840,18 @@ def main():
     with open(os.path.join(OUTPUT_DIR, "robots.txt"), "w", encoding="utf-8") as f:
         f.write(f"User-agent: *\nAllow: /\nSitemap: {DOMINIO}/sitemap.xml\n")
 
-    ads_pub = ADSENSE_CLIENT.replace("ca-", "") if ADSENSE_CLIENT else "pub-0000000000000000"
-    with open(os.path.join(OUTPUT_DIR, "ads.txt"), "w", encoding="utf-8") as f:
-        f.write(f"google.com, {ads_pub}, DIRECT, f08c47fec0942fa0\n")
+    ads_txt_path = os.path.join(OUTPUT_DIR, "ads.txt")
+    if ADSENSE_CLIENT:
+        if not (ADSENSE_CLIENT.startswith("ca-pub-") and ADSENSE_CLIENT[7:].isdigit()):
+            raise ValueError(
+                "El valor adsense_client debe tener el formato ca-pub- seguido del identificador numérico de editor."
+            )
+        ads_pub = ADSENSE_CLIENT[3:]
+        with open(ads_txt_path, "w", encoding="utf-8") as f:
+            f.write(f"google.com, {ads_pub}, DIRECT, f08c47fec0942fa0\\n")
+    elif os.path.exists(ads_txt_path):
+        # No publicar un registro ads.txt ficticio si AdSense aún no está configurado.
+        os.remove(ads_txt_path)
 
     print(f"[OK] Portal v5.0 (Edicion dieselogasolina.com) generado en ./public con {len(sitemap_urls)} paginas SEO.")
 
