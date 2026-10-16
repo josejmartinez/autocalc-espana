@@ -1775,21 +1775,21 @@ def main():
 
         seo_medida = f"""
             <h2 class="text-base font-bold text-slate-900">Ficha técnica y comparativa de precios del neumático {a1}/{p1} R{l1}</h2>
-            <p>La medida <strong>{a1}/{p1} R{l1}</strong> se monta de serie en modelos como <em>{modelos}</em>. Su diámetro exterior es de <strong>{d1:.1f} mm</strong> y requiere una garganta de llanta de <strong>{garganta}</strong>.</p>
-            <p>Puedes comparar ofertas online con envío gratis en <strong>Muchoneumático</strong> y <strong>Amazon</strong>, o reservar montaje directo en centros <strong>Norauto</strong> y <strong>Feu Vert</strong> tanto en la medida original como en su equivalente <strong>{a2}/{p2} R{l2}</strong> ({diff:+.2f} %).</p>
+            <p>Esta página usa <strong>{a1}/{p1} R{l1}</strong> como medida de referencia y relaciona modelos que pueden encontrarse en catálogos con esa medida: <em>{modelos}</em>. El montaje real depende de versión, año, acabado y ficha técnica; esta lista no garantiza que sea medida de serie. Su diámetro exterior calculado es <strong>{d1:.1f} mm</strong> y la garganta orientativa indicada es <strong>{garganta}</strong>.</p>
+            <p>Puedes comparar ofertas en <strong>Muchoneumático</strong>, <strong>Amazon</strong>, <strong>Norauto</strong> y <strong>Feu Vert</strong>. Comprueba que la medida que compres está admitida para tu versión antes de pedirla: la medida candidata <strong>{a2}/{p2} R{l2}</strong> presenta una variación de diámetro del {diff:+.2f} %, pero el porcentaje por sí solo no confirma la equivalencia reglamentaria ni la compatibilidad.</p>
         """
         faqs_medida = [
             (f"¿Qué medidas son equivalentes a {a1}/{p1} R{l1} en la ITV?",
-             f"Son equivalentes todas las medidas con un diámetro entre {d1*0.97:.1f} mm y {d1*1.03:.1f} mm (±3 %), destacando la {a2}/{p2} R{l2} ({diff:+.2f} %)."),
+             f"El intervalo entre {d1*0.97:.1f} mm y {d1*1.03:.1f} mm representa únicamente el ±3 % matemático del diámetro de referencia. No basta para declarar equivalencia ITV: confirma las medidas admitidas, índices de carga y velocidad, y el resto de requisitos aplicables."),
             (f"¿Dónde comprar neumáticos {a1}/{p1} R{l1} al mejor precio?",
              f"En la tabla superior puedes comparar precios directos en Muchoneumático (especialista en ruedas), Norauto y Feu Vert (con montaje en taller) y Amazon España.")
         ]
 
         render_page(
             slug,
-            f"Equivalencia de neumáticos {a1}/{p1} R{l1} en ITV | Precios y medidas",
-            f"Tabla de neumáticos equivalentes a {a1}/{p1} R{l1} ({d1:.1f} mm) aptos para ITV. Compara precios en Muchoneumático, Norauto, Feu Vert y Amazon.",
-            f"Equivalencia de neumáticos {a1}/{p1} R{l1} en ITV",
+            f"Comparador de neumáticos {a1}/{p1} R{l1} | Diámetro, medidas y precios",
+            f"Compara diámetros de neumáticos respecto a {a1}/{p1} R{l1} ({d1:.1f} mm), consulta medidas de referencia y precios. Verifica ficha técnica, homologación e índices antes de comprar.",
+            f"Comparador de diámetro de neumáticos {a1}/{p1} R{l1}",
             f"Diámetro: {d1:.1f} mm · Garganta: {garganta} · Común en: {modelos}.",
             a1, p1, l1, a2, p2, l2, 450, 5.8, "itv",
             generar_tabla_equivalencias_html(a1, p1, l1), seo_medida, internal_links_html, faqs_medida,
