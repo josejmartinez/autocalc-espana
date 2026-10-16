@@ -122,6 +122,10 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>__PAGE_TITLE__</title>
     <meta name="description" content="__META_DESC__">
+    <meta property="og:title" content="__PAGE_TITLE__">
+    <meta property="og:description" content="__META_DESC__">
+    <meta property="og:url" content="__CANONICAL_URL__">
+    <meta property="og:type" content="website">
     <link rel="canonical" href="__CANONICAL_URL__">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <meta name="robots" content="__ROBOTS_META__">

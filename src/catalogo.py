@@ -163,3 +163,29 @@ GARGANTA_POR_ANCHO = {
     265: '8.0" - 10.0"',
     275: '8.5" - 10.5"'
 }
+MEDIDAS_ESPANA.extend([
+    (195, 65, 15, 205, 55, 16, "VW Golf IV, Seat Toledo II, Audi A3 8L, Skoda Octavia I"),
+    (205, 55, 16, 225, 40, 18, "BMW Serie 3 E46/E90, Audi A4 B6/B7, Mercedes Clase C W203/W204"),
+    (185, 65, 15, 195, 65, 15, "Citroën Berlingo, Peugeot Partner, Renault Kangoo, Fiat Doblò"),
+    (215, 65, 16, 225, 60, 16, "Renault Trafic, Opel Vivaro, Nissan Primastar, Ford Transit"),
+    (175, 65, 14, 185, 55, 15, "Seat Ibiza III, VW Polo 9N, Skoda Fabia, Ford Fiesta MK5/MK6"),
+    (205, 70, 15, 215, 65, 16, "Suzuki Jimny, Suzuki Grand Vitara, Honda CR-V, Subaru Forester")
+])
+
+MODELOS_COCHES.extend([
+    ("bmw-serie-3", "BMW Serie 3", 205, 55, 16, 225, 45, 17, 5.7),
+    ("audi-a4", "Audi A4", 205, 55, 16, 225, 50, 17, 5.6),
+    ("mercedes-clase-c", "Mercedes Clase C", 205, 55, 16, 225, 45, 17, 5.6),
+    ("renault-kangoo", "Renault Kangoo", 185, 65, 15, 195, 65, 15, 5.8),
+    ("peugeot-partner", "Peugeot Partner", 195, 65, 15, 205, 60, 16, 5.8),
+    ("volkswagen-transporter", "Volkswagen Transporter", 205, 65, 16, 215, 60, 16, 6.9),
+    ("seat-toledo", "Seat Toledo", 195, 65, 15, 205, 55, 16, 5.2),
+    ("opel-zafira", "Opel Zafira", 205, 55, 16, 225, 45, 17, 5.9),
+    ("citroen-xsara", "Citroën Xsara", 195, 55, 15, 205, 50, 15, 5.5),
+    ("peugeot-206", "Peugeot 206", 175, 65, 14, 195, 50, 15, 5.3),
+    ("suzuki-vitara", "Suzuki Vitara", 215, 60, 16, 215, 55, 17, 5.7),
+    ("mazda-3", "Mazda 3", 205, 60, 16, 215, 45, 18, 5.5),
+    ("mazda-cx5", "Mazda CX-5", 225, 65, 17, 225, 55, 19, 6.1),
+    ("honda-civic", "Honda Civic", 205, 55, 16, 225, 45, 17, 5.4),
+    ("fiat-ducato", "Fiat Ducato Camper", 215, 70, 15, 225, 70, 15, 7.8)
+])
