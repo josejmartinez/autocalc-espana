@@ -573,20 +573,21 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                         <select id="dgt-motor" onchange="calcularDGT()" class="w-full p-2 border rounded-lg font-bold bg-white text-xs">
                             <option value="gasolina">Gasolina</option>
                             <option value="diesel" selected>Diésel</option>
-                            <option value="hibrido">Híbrido / GLP (posible ECO)</option>
-                            <option value="cero">Eléctrico / PHEV (comprobar autonomía)</option>
+                            <option value="hibrido">Híbrido no enchufable / GLP (posible ECO)</option>
+                            <option value="electrico">Eléctrico puro</option>
+                            <option value="phev">Híbrido enchufable (PHEV)</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1">Año 1.ª matr.</label>
-                        <input type="number" id="dgt-anio" value="2015" min="1980" max="2027" oninput="calcularDGT()" class="w-full p-2 border rounded-lg font-bold">
+                        <input type="number" id="dgt-anio" value="2015" min="1980" max="2100" oninput="calcularDGT()" class="w-full p-2 border rounded-lg font-bold">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">Cilindrada (cm³)</label>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Cilindrada térmica (cm³)</label>
                         <input type="number" id="dgt-cc" value="1968" oninput="calcularDGT()" class="w-full p-2 border rounded-lg font-bold">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">N.º cilindros</label>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Cilindros térmicos</label>
                         <input type="number" id="dgt-cil" value="4" min="2" max="12" oninput="calcularDGT()" class="w-full p-2 border rounded-lg font-bold">
                     </div>
                     <div>
@@ -677,27 +678,27 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
         <section id="sec-desguace" class="space-y-6 hidden">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                 <h2 class="text-lg font-bold mb-1 text-slate-900">6. Calculadora maestra de recambios: ¿desguace, Autodoc o taller (Norauto / Feu Vert)?</h2>
-                <p class="text-xs text-slate-500 mb-4">Selecciona la pieza exacta que necesitas sustituir para cargar sus precios medios reales en España y descubrir dónde te ahorras más dinero sin comprometer la seguridad:</p>
+                <p class="text-xs text-slate-500 mb-4">Compara una pieza usada, una nueva montada por tu cuenta y una reparación en taller. Los importes precargados son ejemplos editables, no precios en tiempo real ni ofertas verificadas. Sustitúyelos por presupuestos reales, confirma la referencia exacta y añade envío, desplazamientos, impuestos y cualquier gasto adicional que corresponda.</p>
 
                 <div class="mb-4">
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Seleccionar pieza del catálogo rápido (autocompleta precios reales y tiempos de taller):</label>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Seleccionar pieza del catálogo (carga valores ilustrativos editables):</label>
                     <select id="pieza-catalogo" onchange="cargarPiezaCatalogo()" class="w-full p-2.5 border rounded-xl font-bold text-xs sm:text-sm bg-slate-50">
-                        <option value="mecanica,50,145,1.5,alternador">Alternador (50 € desguace vs. 145 € nuevo Autodoc)</option>
-                        <option value="mecanica,40,115,1.2,motor+de+arranque">Motor de arranque (40 € desguace vs. 115 € nuevo Autodoc)</option>
-                        <option value="mecanica,85,240,2.5,compresor+aire+acondicionado">Compresor de aire acondicionado (85 € desguace vs. 240 € Autodoc)</option>
-                        <option value="mecanica,140,380,3.5,turbocompresor">Turbocompresor (140 € desguace vs. 380 € reconstruido/nuevo)</option>
-                        <option value="mecanica,220,950,5.0,caja+de+cambios">Caja de cambios manual (220 € desguace vs. 950 € reconstruida)</option>
-                        <option value="mecanica,75,230,2.5,cremallera+direccion">Cremallera de dirección (75 € desguace vs. 230 € Autodoc)</option>
-                        <option value="carroceria,35,110,0.5,faro+delantero">Faro delantero principal (35 € desguace vs. 110 € Autodoc)</option>
-                        <option value="carroceria,25,65,0.3,piloto+trasero">Piloto trasero (25 € desguace vs. 65 € Autodoc)</option>
-                        <option value="carroceria,30,85,0.4,retrovisor+exterior">Espejo retrovisor completo (30 € desguace vs. 85 € Autodoc)</option>
-                        <option value="carroceria,65,190,1.5,paragolpes">Paragolpes delantero o trasero (65 € desguace vs. 190 € nuevo)</option>
-                        <option value="carroceria,30,75,1.2,elevalunas+electrico">Mecanismo elevalunas eléctrico (30 € desguace vs. 75 € Autodoc)</option>
-                        <option value="desgaste,40,115,1.5,valvula+egr">Válvula EGR nueva recomendada (40 € desguace vs. 115 € Autodoc)</option>
-                        <option value="desgaste,35,85,1.5,discos+y+pastillas+de+freno">Juego de discos y pastillas de freno (¡Comprar siempre nuevo!)</option>
-                        <option value="desgaste,50,130,2.0,amortiguadores">Pareja de amortiguadores (¡Comprar siempre nuevo en Autodoc/Norauto!)</option>
-                        <option value="desgaste,90,340,5.5,kit+embrague+bimasa">Kit de embrague + volante bimasa (¡Comprar siempre nuevo en Autodoc!)</option>
-                        <option value="desgaste,45,110,3.5,kit+distribucion+bomba+agua">Kit correa de distribución + bomba de agua (¡Siempre nuevo!)</option>
+                        <option value="mecanica,50,145,1.5,alternador,0,0,52,0">Alternador (estimación editable)</option>
+                        <option value="mecanica,40,115,1.2,motor+de+arranque,0,0,52,0">Motor de arranque (estimación editable)</option>
+                        <option value="mecanica,85,240,2.5,compresor+aire+acondicionado,0,0,52,0">Compresor de aire acondicionado (estimación editable)</option>
+                        <option value="mecanica,140,380,3.5,turbocompresor,0,0,52,0">Turbocompresor (estimación editable)</option>
+                        <option value="mecanica,220,950,5.0,caja+de+cambios,0,0,52,0">Caja de cambios manual (estimación editable)</option>
+                        <option value="mecanica,75,230,2.5,cremallera+direccion,0,0,52,0">Cremallera de dirección (estimación editable)</option>
+                        <option value="carroceria,35,110,0.5,faro+delantero,0,0,52,0">Faro delantero principal (estimación editable)</option>
+                        <option value="carroceria,25,65,0.3,piloto+trasero,0,0,52,0">Piloto trasero (estimación editable)</option>
+                        <option value="carroceria,30,85,0.4,retrovisor+exterior,0,0,52,0">Espejo retrovisor completo (estimación editable)</option>
+                        <option value="carroceria,65,190,1.5,paragolpes,0,0,52,0">Paragolpes delantero o trasero (estimación editable)</option>
+                        <option value="carroceria,30,75,1.2,elevalunas+electrico,0,0,52,0">Mecanismo elevalunas eléctrico (estimación editable)</option>
+                        <option value="mecanica,40,115,1.5,valvula+egr,0,0,52,0">Válvula EGR (estimación editable; verifica diagnosis)</option>
+                        <option value="desgaste,35,85,1.5,discos+y+pastillas+de+freno,0,0,52,0">Juego de discos y pastillas de freno (compara piezas nuevas)</option>
+                        <option value="desgaste,50,130,2.0,amortiguadores,0,0,52,0">Pareja de amortiguadores (compara piezas nuevas)</option>
+                        <option value="desgaste,90,340,5.5,kit+embrague+bimasa,0,0,52,0">Kit de embrague + volante bimasa (compara piezas nuevas)</option>
+                        <option value="desgaste,45,110,3.5,kit+distribucion+bomba+agua,0,0,52,0">Kit correa de distribución + bomba de agua (compara piezas nuevas)</option>
                     </select>
                 </div>
 
@@ -712,22 +713,39 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1">Precio en desguace (€)</label>
-                        <input type="number" id="rep-desguace" value="50" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
+                        <input type="number" id="rep-desguace" value="50" min="0" max="100000" step="0.01" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1">Precio nuevo Autodoc (€)</label>
-                        <input type="number" id="rep-autodoc" value="145" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
+                        <input type="number" id="rep-autodoc" value="145" min="0" max="100000" step="0.01" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1">Horas de mano de obra</label>
-                        <input type="number" step="0.5" id="rep-horas" value="1.5" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
+                        <input type="number" step="0.1" min="0" max="100" id="rep-horas" value="1.5" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Transporte / envío pieza usada (€)</label>
+                        <input type="number" id="rep-logistica-usado" value="0" min="0" max="100000" step="0.01" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Envío pieza nueva (€)</label>
+                        <input type="number" id="rep-envio-nuevo" value="0" min="0" max="100000" step="0.01" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Tarifa estimada taller (€/h)</label>
+                        <input type="number" id="rep-tarifa-hora" value="52" min="0" max="1000" step="0.5" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Recargo de taller sobre pieza (%)</label>
+                        <input type="number" id="rep-recargo-taller" value="0" min="0" max="300" step="1" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
                     </div>
                 </div>
+                <p class="mt-3 text-xs text-slate-500">El coste de taller es una simulación: precio de la pieza nueva, envío, recargo editable y mano de obra. No sustituye un presupuesto cerrado y no incluye diagnosis, consumibles, impuestos ni trabajos adicionales salvo que los añadas a los importes.</p>
                 <div id="res-desguace" class="mt-6 p-5 rounded-xl bg-slate-50 border border-slate-200"></div>
 
                 <!-- Enlaces directos a los grandes desguaces cerca de Aranjuez / Madrid Sur y tiendas online -->
                 <div class="mt-6 pt-5 border-t border-slate-200">
-                    <h3 class="text-xs font-bold text-slate-700 mb-3">Consultar stock de esta pieza en grandes desguaces (Aranjuez / Madrid Sur / Toledo) y tiendas online:</h3>
+                    <h3 class="text-xs font-bold text-slate-700 mb-3">Buscar referencias y consultar disponibilidad (abre cada proveedor para confirmar stock, precio y condiciones):</h3>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                         <a id="link-pieza-autodoc" href="https://www.autodoc.es/search?keyword=alternador" target="_blank" rel="nofollow sponsored" class="p-2.5 bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold rounded-lg text-center transition">1. Ver nuevo en Autodoc →</a>
                         <a href="https://www.desguaceslatorre.es/" target="_blank" rel="nofollow" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-lg text-center transition">2. Desguaces La Torre (A-42)</a>
@@ -838,6 +856,30 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
         const TAB_INICIAL = "__INITIAL_TAB__";
         const GARGANTAS = {155:'4.5"-5.5"',165:'4.5"-6.0"',175:'5.0"-6.0"',185:'5.0"-6.5"',195:'5.5"-7.0"',205:'5.5"-7.5"',215:'6.0"-7.5"',225:'6.0"-8.0"',235:'6.5"-8.5"',245:'7.0"-9.0"',255:'7.5"-9.5"',265:'8.0"-10.0"',275:'8.5"-10.5"'};
 
+        function leerNumeroCampo(id) {
+            const campo = document.getElementById(id);
+            if (!campo || String(campo.value).trim() === '') return null;
+            const valor = Number(campo.value);
+            return Number.isFinite(valor) ? valor : null;
+        }
+
+        function mostrarErrorCalculo(id, mensaje) {
+            const caja = document.getElementById(id);
+            if (!caja) return;
+            caja.className = 'mt-4 p-4 rounded-xl bg-rose-50 border border-rose-200 text-sm font-semibold text-rose-800';
+            caja.textContent = mensaje;
+        }
+
+        function escaparHTML(valor) {
+            return String(valor ?? '').replace(/[&<>"']/g, caracter => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            })[caracter]);
+        }
+
         const DICCIONARIO_OBD = {
             "P0401": {
                 titulo: "P0401 / P0402 — Fallo de caudal en válvula EGR",
@@ -913,17 +955,23 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
 
         // 1B. Calculadora de ET y ancho de vías
         function calcularET() {
-            const j1 = parseFloat(document.getElementById('et-j1').value) || 6.5;
-            const et1 = parseFloat(document.getElementById('et-off1').value) || 45;
-            const j2 = parseFloat(document.getElementById('et-j2').value) || 7.5;
-            const et2 = parseFloat(document.getElementById('et-off2').value) || 35;
+            const j1 = leerNumeroCampo('et-j1');
+            const et1 = leerNumeroCampo('et-off1');
+            const j2 = leerNumeroCampo('et-j2');
+            const et2 = leerNumeroCampo('et-off2');
+            if (j1 === null || j2 === null || et1 === null || et2 === null ||
+                j1 < 4 || j1 > 15 || j2 < 4 || j2 > 15 ||
+                et1 < -100 || et1 > 150 || et2 < -100 || et2 > 150) {
+                mostrarErrorCalculo('res-et', 'Introduce anchuras de llanta de 4 a 15 pulgadas y ET entre −100 y 150 mm. El ET puede ser cero o negativo.');
+                return;
+            }
 
             const w1 = j1 * 25.4;
             const w2 = j2 * 25.4;
             const deltaInterior = ((w2 - w1) / 2) - (et1 - et2);
             const deltaExterior = ((w2 - w1) / 2) + (et1 - et2);
             const cambioAnchoVias = (et1 - et2) * 2;
-            const legalVias = Math.abs(cambioAnchoVias) <= 30;
+            const dentroUmbralOrientativo = Math.abs(cambioAnchoVias) <= 30;
 
             const txtInt = deltaInterior > 0
                 ? `Se acerca ${deltaInterior.toFixed(1)} mm al amortiguador`
@@ -942,19 +990,25 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                         <div class="text-xs text-slate-500">Borde exterior (aleta)</div>
                         <div class="font-bold text-amber-600 mt-1">${txtExt}</div>
                     </div>
-                    <div class="p-3 rounded-lg border ${legalVias ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-200 text-rose-900'}">
-                        <div class="text-xs opacity-75">Variación ancho de vías total</div>
-                        <div class="font-extrabold mt-1">${cambioAnchoVias > 0 ? '+' : ''}${cambioAnchoVias.toFixed(0)} mm (${legalVias ? 'Legal ITV ≤30 mm' : 'Requiere homologar >30 mm'})</div>
+                    <div class="p-3 rounded-lg border ${dentroUmbralOrientativo ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-200 text-rose-900'}">
+                        <div class="text-xs opacity-75">Variación estimada del ancho de vías</div>
+                        <div class="font-extrabold mt-1">${cambioAnchoVias > 0 ? '+' : ''}${cambioAnchoVias.toFixed(0)} mm (${dentroUmbralOrientativo ? 'dentro del umbral orientativo de 30 mm' : 'supera el umbral orientativo de 30 mm'})</div>
                     </div>
                 </div>
+                <p class="mt-3 text-xs text-slate-500">El umbral de 30 mm es una referencia inicial, no una declaración de legalidad. La admisión depende de la modificación completa, las medidas del vehículo, la ausencia de interferencias y los requisitos de homologación e ITV.</p>
             `;
         }
 
         // 2B. Consumo real del depósito
         function calcularConsumoReal() {
-            const litros = parseFloat(document.getElementById('real-litros').value) || 0;
-            const km = parseFloat(document.getElementById('real-km').value) || 1;
-            const precio = parseFloat(document.getElementById('real-precio').value) || 0;
+            const litros = leerNumeroCampo('real-litros');
+            const km = leerNumeroCampo('real-km');
+            const precio = leerNumeroCampo('real-precio');
+            if (litros === null || km === null || precio === null ||
+                litros < 0 || km <= 0 || precio < 0) {
+                mostrarErrorCalculo('res-consumo-real', 'Introduce litros y precio no negativos, y una distancia recorrida mayor que cero.');
+                return;
+            }
 
             const l100 = (litros / km) * 100;
             const coste100 = l100 * precio;
@@ -984,29 +1038,44 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const cont = document.getElementById('contenedor-gasolineras');
             cont.innerHTML = `<div class="p-4 text-center text-slate-500">Conectando con la sede electrónica del Ministerio para obtener los precios de hoy...</div>`;
             try {
-                const resp = await fetch(`https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroMunicipio/${idMun}`);
+                const resp = await fetch(`https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroMunicipio/${encodeURIComponent(idMun)}`);
+                if (!resp.ok) throw new Error('La API de carburantes ha respondido con un error HTTP.');
                 const data = await resp.json();
                 const lista = data.ListaEESSPrecio || [];
                 if (!lista.length) {
                     cont.innerHTML = `<div class="p-3 bg-slate-100 rounded-lg">No hay estaciones registradas en este municipio en este momento.</div>`;
                     return;
                 }
-                const parsePrecio = (str) => str ? parseFloat(str.replace(',', '.')) : 999;
-                lista.sort((a, b) => parsePrecio(a["Precio Gasoleo A"]) - parsePrecio(b["Precio Gasoleo A"]));
+                const parsePrecio = (str) => {
+                    if (typeof str !== 'string') return null;
+                    const valor = str.trim().replace(',', '.');
+                    if (!/^\d{1,2}(?:\.\d{1,3})?$/.test(valor)) return null;
+                    const numero = Number(valor);
+                    return Number.isFinite(numero) && numero >= 0.5 && numero <= 10 ? numero : null;
+                };
+                lista.sort((a, b) =>
+                    (parsePrecio(a["Precio Gasoleo A"]) ?? parsePrecio(a["Precio Gasolina 95 E5"]) ?? 99) -
+                    (parsePrecio(b["Precio Gasoleo A"]) ?? parsePrecio(b["Precio Gasolina 95 E5"]) ?? 99)
+                );
 
                 const top = lista.slice(0, 8);
                 let filas = top.map(e => {
-                    const pDiesel = e["Precio Gasoleo A"] || "-";
-                    const pGas95 = e["Precio Gasolina 95 E5"] || "-";
+                    const pDieselNum = parsePrecio(e["Precio Gasoleo A"]);
+                    const pGas95Num = parsePrecio(e["Precio Gasolina 95 E5"]);
+                    const pDiesel = pDieselNum === null ? "—" : pDieselNum.toFixed(3).replace('.', ',');
+                    const pGas95 = pGas95Num === null ? "—" : pGas95Num.toFixed(3).replace('.', ',');
+                    const nombre = escaparHTML(e["Rótulo"] || "Estación sin nombre");
+                    const direccion = escaparHTML(e["Dirección"] || "Dirección no disponible");
+                    const localidad = escaparHTML(e["Localidad"] || "");
+                    const botonDiesel = pDieselNum === null ? "" : `<button type="button" onclick="usarPrecioViaje('diesel', ${pDieselNum})" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-white px-2 py-1 rounded">Usar diésel</button>`;
+                    const botonGasolina = pGas95Num === null ? "" : `<button type="button" onclick="usarPrecioViaje('gasolina', ${pGas95Num})" class="text-[11px] bg-amber-600 hover:bg-amber-700 text-white px-2 py-1 rounded">Usar gasolina</button>`;
                     return `
                         <tr class="border-b border-slate-100 hover:bg-slate-50">
-                            <td class="py-2 px-2 font-bold text-slate-900">${e["Rótulo"]}</td>
-                            <td class="py-2 px-2 text-slate-600">${e["Dirección"]} (${e["Localidad"]})</td>
+                            <td class="py-2 px-2 font-bold text-slate-900">${nombre}</td>
+                            <td class="py-2 px-2 text-slate-600">${direccion}${localidad ? ` (${localidad})` : ''}</td>
                             <td class="py-2 px-2 text-center font-bold text-emerald-700">${pDiesel} €/L</td>
                             <td class="py-2 px-2 text-center font-bold text-amber-700">${pGas95} €/L</td>
-                            <td class="py-2 px-2 text-right">
-                                <button onclick="usarPrecioGasolinera('${pDiesel}', '${pGas95}')" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-white px-2 py-1 rounded">Usar precio</button>
-                            </td>
+                            <td class="py-2 px-2 text-right"><div class="flex flex-wrap justify-end gap-1">${botonDiesel}${botonGasolina}</div></td>
                         </tr>
                     `;
                 }).join('');
@@ -1032,13 +1101,21 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             }
         }
 
-        function usarPrecioGasolinera(dieselStr, gas95Str) {
-            const p = parseFloat((dieselStr !== "-" ? dieselStr : gas95Str).replace(',', '.'));
-            if (!isNaN(p)) {
-                document.getElementById('precio-litro').value = p.toFixed(3);
-                document.getElementById('real-precio').value = p.toFixed(3);
-                calcularConsumo();
-                calcularConsumoReal();
+        function usarPrecioViaje(tipoCombustible, precio) {
+            if (!['diesel', 'gasolina'].includes(tipoCombustible) ||
+                !Number.isFinite(precio) || precio < 0.5 || precio > 10) return;
+            const campoPrecioViaje = document.getElementById('precio-litro');
+            if (!campoPrecioViaje) return;
+            campoPrecioViaje.value = precio.toFixed(3);
+            calcularConsumo();
+            const caja = document.getElementById('res-consumo');
+            if (caja) {
+                const avisoAnterior = caja.querySelector('.aviso-precio-aplicado');
+                if (avisoAnterior) avisoAnterior.remove();
+                const aviso = document.createElement('p');
+                aviso.className = 'aviso-precio-aplicado mt-3 text-xs text-slate-500';
+                aviso.textContent = 'Precio de ' + (tipoCombustible === 'diesel' ? 'diésel A' : 'gasolina 95 E5') + ' aplicado solo a la calculadora del viaje. La calculadora de consumo real conserva el precio que hayas introducido.';
+                caja.appendChild(aviso);
             }
         }
 
@@ -1061,9 +1138,9 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const v3 = alfabeto.indexOf(letras[2]);
             const indice = (v1 * 400) + (v2 * 20) + v3; // 0 (BBB) a 7999
 
-            // Hitos históricos oficiales de la DGT (índice base 20 -> año.mes)
+            // Hitos orientativos de la serie alfanumérica (índice base 20 -> año.mes); la interpolación no es una consulta oficial por matrícula.
             const hitos = [
-                [0, 2000.75], [140, 2001.0], [420, 2002.0], [680, 2003.0],
+                [0, 2000.6666667], [140, 2001.0], [420, 2002.0], [680, 2003.0],
                 [980, 2004.0], [1310, 2005.0], [1650, 2006.0], [2010, 2007.0],
                 [2350, 2008.0], [2580, 2009.0], [2740, 2010.0], [2900, 2011.0],
                 [3040, 2012.0], [3150, 2013.0], [3260, 2014.0], [3420, 2015.0],
@@ -1072,19 +1149,30 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                 [5340, 2024.0], [5550, 2025.0], [5770, 2026.0], [6000, 2027.0]
             ];
 
-            let fechaEst = 2026.5;
+            let fechaEst = hitos[0][1];
+            let intervaloEncontrado = false;
             for (let i = 0; i < hitos.length - 1; i++) {
                 if (indice >= hitos[i][0] && indice <= hitos[i+1][0]) {
                     const ratio = (indice - hitos[i][0]) / (hitos[i+1][0] - hitos[i][0]);
                     fechaEst = hitos[i][1] + ratio * (hitos[i+1][1] - hitos[i][1]);
+                    intervaloEncontrado = true;
                     break;
                 }
+            }
+            if (!intervaloEncontrado && indice > hitos[hitos.length - 1][0]) {
+                const anterior = hitos[hitos.length - 2];
+                const ultimo = hitos[hitos.length - 1];
+                const ritmoAnual = (ultimo[1] - anterior[1]) / (ultimo[0] - anterior[0]);
+                fechaEst = ultimo[1] + (indice - ultimo[0]) * ritmoAnual;
             }
 
             const anioMat = Math.floor(fechaEst);
             const mesIndex = Math.min(11, Math.max(0, Math.floor((fechaEst - anioMat) * 12)));
             const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
-            const edad = Math.max(0, (2026.78 - fechaEst));
+            const ahora = new Date();
+            const diasMes = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0).getDate();
+            const fraccionActual = (ahora.getMonth() + (ahora.getDate() / diasMes)) / 12;
+            const edad = Math.max(0, (ahora.getFullYear() + fraccionActual - fechaEst));
 
             let frecuenciaITV = "Anual (cada año por tener más de 10 años)";
             if (edad < 4) frecuenciaITV = `Exento hasta los 4 años (1.ª ITV en ${anioMat + 4})`;
@@ -1095,13 +1183,14 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             calcularDGT();
 
             box.innerHTML = `
+                <p class="mb-3 text-xs text-slate-500">La fecha se calcula por interpolación entre hitos y puede diferir de la fecha real. No determina por sí sola la próxima ITV ni sustituye la consulta de la documentación del vehículo.</p>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                     <div class="bg-white p-3 rounded-lg border">
-                        <div class="text-xs text-slate-500">Fecha estimada de matriculación</div>
+                        <div class="text-xs text-slate-500">Fecha estimada de matriculación (aproximación)</div>
                         <div class="text-lg font-extrabold text-slate-900 capitalize">${meses[mesIndex]} de ${anioMat}</div>
                     </div>
                     <div class="bg-white p-3 rounded-lg border">
-                        <div class="text-xs text-slate-500">Antigüedad del vehículo</div>
+                        <div class="text-xs text-slate-500">Antigüedad aproximada</div>
                         <div class="text-lg font-bold text-amber-600">${edad.toFixed(1)} años</div>
                     </div>
                     <div class="bg-white p-3 rounded-lg border">
@@ -1136,76 +1225,148 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             if (!box) return;
             if (marcados === total) {
                 box.className = 'mt-4 p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-sm font-bold text-emerald-900';
-                box.innerText = '¡Vehículo listo para inspección! Has verificado los 6 puntos críticos de rechazo en ITV.';
+                box.innerText = `Checklist completado: ${total} comprobaciones revisadas. Esto no garantiza el resultado de la ITV.`;
             } else {
                 box.className = 'mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm font-semibold text-amber-900';
-                box.innerText = `Progreso pre-ITV: ${marcados} de ${total} puntos críticos verificados. Revisa los pendientes antes de tu cita.`;
+                box.innerText = `Progreso del checklist: ${marcados} de ${total} comprobaciones revisadas. Revisa las pendientes; el resultado depende de la inspección.`;
             }
         }
 
         // 6. Catálogo de piezas y calculadora Desguace vs. Autodoc vs. Taller
         function cargarPiezaCatalogo() {
-            const val = document.getElementById('pieza-catalogo').value;
-            if (!val) return;
-            const p = val.split(',');
-            document.getElementById('rep-tipo').value = p[0];
-            document.getElementById('rep-desguace').value = p[1];
-            document.getElementById('rep-autodoc').value = p[2];
-            document.getElementById('rep-horas').value = p[3];
+            const selector = document.getElementById('pieza-catalogo');
+            if (!selector || !selector.value) return;
+
+            const p = selector.value.split(',');
+            if (p.length < 9) {
+                mostrarErrorCalculo('res-desguace', 'No se han podido leer los valores del catálogo. Comprueba la opción seleccionada.');
+                return;
+            }
+
+            const campos = {
+                'rep-tipo': p[0],
+                'rep-desguace': p[1],
+                'rep-autodoc': p[2],
+                'rep-horas': p[3],
+                'rep-logistica-usado': p[5],
+                'rep-envio-nuevo': p[6],
+                'rep-tarifa-hora': p[7],
+                'rep-recargo-taller': p[8]
+            };
+            Object.entries(campos).forEach(([id, valor]) => {
+                const campo = document.getElementById(id);
+                if (campo) campo.value = valor;
+            });
+
+            const consulta = p[4].split('+').join(' ');
             const linkAutodoc = document.getElementById('link-pieza-autodoc');
-            if (linkAutodoc) linkAutodoc.href = `https://www.autodoc.es/search?keyword=${p[4]}`;
+            if (linkAutodoc) {
+                linkAutodoc.href = 'https://www.autodoc.es/search?keyword=' + encodeURIComponent(consulta);
+            }
+
             calcularDesguace();
         }
 
         function calcularDesguace() {
             const elTipo = document.getElementById('rep-tipo');
             if (!elTipo) return;
+
             const tipo = elTipo.value;
-            const pDesguace = parseFloat(document.getElementById('rep-desguace').value) || 0;
-            const pAutodoc = parseFloat(document.getElementById('rep-autodoc').value) || 0;
-            const horas = parseFloat(document.getElementById('rep-horas').value) || 0;
+            const precioUsado = leerNumeroCampo('rep-desguace');
+            const precioNuevo = leerNumeroCampo('rep-autodoc');
+            const horas = leerNumeroCampo('rep-horas');
+            const logisticaUsado = leerNumeroCampo('rep-logistica-usado');
+            const envioNuevo = leerNumeroCampo('rep-envio-nuevo');
+            const tarifaHora = leerNumeroCampo('rep-tarifa-hora');
+            const recargoTaller = leerNumeroCampo('rep-recargo-taller');
 
-            const manoObraTaller = horas * 52;
-            const totalDesguaceDIY = pDesguace;
-            const totalAutodocDIY = pAutodoc;
-            const totalTallerMontado = (pAutodoc * 1.25) + manoObraTaller;
-            const ahorroDesguace = pAutodoc - pDesguace;
-
-            let recomendacion = "";
-            let badgeColor = "bg-emerald-100 text-emerald-900 border-emerald-300";
-
-            if (tipo === "desgaste") {
-                recomendacion = "Elemento de desgaste o seguridad: NO se recomienda desguace. Pídelo nuevo en Autodoc (si lo montas tú) o acude a Norauto / Feu Vert con montaje incluido.";
-                badgeColor = "bg-rose-100 text-rose-900 border-rose-300";
-            } else if (ahorroDesguace < 25) {
-                recomendacion = "Por una diferencia menor de 25 €, compensa estrenar recambio nuevo en Autodoc con 2 años de garantía frente a pieza usada.";
-                badgeColor = "bg-amber-100 text-amber-900 border-amber-300";
-            } else {
-                recomendacion = `¡Compensa ir a desguace! Te ahorras ${ahorroDesguace.toFixed(0)} € respecto al recambio nuevo (ideal buscar en Polígono Aimayr de San Martín de la Vega, La Torre u Ocaña).`;
+            const valores = [precioUsado, precioNuevo, horas, logisticaUsado, envioNuevo, tarifaHora, recargoTaller];
+            if (valores.some(valor => valor === null) ||
+                valores.some(valor => valor < 0) ||
+                precioUsado > 100000 || precioNuevo > 100000 ||
+                logisticaUsado > 100000 || envioNuevo > 100000 ||
+                horas > 100 || tarifaHora > 1000 || recargoTaller > 300 ||
+                !['carroceria', 'mecanica', 'desgaste'].includes(tipo)) {
+                mostrarErrorCalculo('res-desguace', 'Revisa los importes: precios y costes entre 0 y 100.000 €, horas entre 0 y 100, tarifa entre 0 y 1.000 €/h y recargo entre 0 y 300 %.');
+                return;
             }
 
-            document.getElementById('res-desguace').innerHTML = `
-                <div class="p-3.5 rounded-xl border font-semibold text-xs sm:text-sm mb-4 ${badgeColor}">
-                    ${recomendacion}
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-                    <div class="bg-white p-3 rounded-lg border">
-                        <div class="text-xs text-slate-500">1. Desguace (montaje propio)</div>
-                        <div class="text-xl font-bold text-emerald-700">${totalDesguaceDIY.toFixed(0)} €</div>
-                        <div class="text-[11px] text-slate-400">Pieza original recuperada OEM</div>
-                    </div>
-                    <div class="bg-white p-3 rounded-lg border">
-                        <div class="text-xs text-slate-500">2. Nuevo en Autodoc (DIY)</div>
-                        <div class="text-xl font-bold text-orange-600">${totalAutodocDIY.toFixed(0)} €</div>
-                        <div class="text-[11px] text-slate-400">Pieza nueva con garantía</div>
-                    </div>
-                    <div class="bg-white p-3 rounded-lg border">
-                        <div class="text-xs text-slate-500">3. Taller rápido (pieza + M.O.)</div>
-                        <div class="text-xl font-bold text-slate-900">${totalTallerMontado.toFixed(0)} €</div>
-                        <div class="text-[11px] text-slate-400">Estimado con ${horas} h de taller</div>
-                    </div>
-                </div>
-            `;
+            const costeUsadoDIY = precioUsado + logisticaUsado;
+            const costeNuevoDIY = precioNuevo + envioNuevo;
+            const manoObraTaller = horas * tarifaHora;
+            const recargoPiezaTaller = precioNuevo * recargoTaller / 100;
+            const costeTaller = precioNuevo + envioNuevo + recargoPiezaTaller + manoObraTaller;
+
+            const opciones = [
+                { nombre: 'Pieza usada + montaje propio', total: costeUsadoDIY, clave: 'usado' },
+                { nombre: 'Pieza nueva + montaje propio', total: costeNuevoDIY, clave: 'nuevo' },
+                { nombre: 'Pieza nueva + taller', total: costeTaller, clave: 'taller' }
+            ];
+            const opcionesComparables = tipo === 'desgaste'
+                ? opciones.filter(opcion => opcion.clave !== 'usado')
+                : opciones;
+            const minimo = Math.min(...opcionesComparables.map(opcion => opcion.total));
+            const ganadoras = opcionesComparables.filter(opcion => Math.abs(opcion.total - minimo) < 0.01);
+            const fmt = valor => valor.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+
+            let recomendacion;
+            let claseRecomendacion;
+            if (tipo === 'desgaste') {
+                claseRecomendacion = 'bg-amber-50 text-amber-900 border-amber-200';
+                recomendacion = ganadoras.length > 1
+                    ? 'Las alternativas con pieza nueva están prácticamente empatadas (' + fmt(minimo) + '). Compara referencia exacta, garantía, calidad y montaje. Para frenos, amortiguadores, distribución y otros componentes críticos, evita la pieza usada.'
+                    : 'Según tus importes, la alternativa nueva más económica es ' + ganadoras[0].nombre.toLowerCase() + ' (' + fmt(minimo) + '). Para esta familia de seguridad/desgaste, no recomendamos la pieza usada.';
+            } else if (ganadoras.length > 1) {
+                claseRecomendacion = 'bg-amber-50 text-amber-900 border-amber-200';
+                recomendacion = 'Las alternativas más económicas están prácticamente empatadas (' + fmt(minimo) + '). Decide según compatibilidad, estado, garantía, plazo y coste de montaje.';
+            } else {
+                claseRecomendacion = 'bg-emerald-50 text-emerald-900 border-emerald-200';
+                recomendacion = 'Con los datos que has introducido, la opción más económica es ' + ganadoras[0].nombre.toLowerCase() + ' (' + fmt(minimo) + '), antes de los costes que falten. Verifica compatibilidad, estado, devolución y garantía antes de comprar.';
+            }
+
+            function tarjeta(titulo, total, detalle, nota, clave, advertencia) {
+                const seleccionada = ganadoras.some(opcion => opcion.clave === clave);
+                const borde = seleccionada ? 'border-emerald-400 ring-1 ring-emerald-200' : 'border-slate-200';
+                const aviso = advertencia ? '<div class="mt-3 text-xs font-bold text-rose-700">' + advertencia + '</div>' : '';
+                return '<div class="bg-white p-4 rounded-xl border ' + borde + '">' +
+                    '<div class="text-xs text-slate-500">' + titulo + '</div>' +
+                    '<div class="text-2xl font-extrabold text-slate-900 mt-1">' + fmt(total) + '</div>' +
+                    '<div class="mt-2 text-[11px] text-slate-500">' + detalle + '</div>' +
+                    '<div class="mt-2 text-[11px] text-slate-500">' + nota + '</div>' +
+                    aviso + '</div>';
+            }
+
+            const diferenciaUsadoNuevo = costeUsadoDIY - costeNuevoDIY;
+            const diferenciaNuevoTaller = costeNuevoDIY - costeTaller;
+            const cajaResultado = document.getElementById('res-desguace');
+            if (!cajaResultado) return;
+            cajaResultado.className = 'mt-6 p-5 rounded-xl bg-slate-50 border border-slate-200';
+            cajaResultado.innerHTML =
+                '<div class="p-3.5 rounded-xl border font-semibold text-xs sm:text-sm mb-4 ' + claseRecomendacion + '">' + recomendacion + '</div>' +
+                '<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">' +
+                    tarjeta('1. Pieza usada + montaje propio', costeUsadoDIY,
+                        'Pieza ' + fmt(precioUsado) + ' + transporte/gestión ' + fmt(logisticaUsado),
+                        'Verifica referencia OEM, estado, prueba, devolución y garantía ofrecida por el vendedor.',
+                        'usado',
+                        tipo === 'desgaste' ? 'No recomendada para esta familia crítica.' : '') +
+                    tarjeta('2. Pieza nueva + montaje propio', costeNuevoDIY,
+                        'Pieza ' + fmt(precioNuevo) + ' + envío ' + fmt(envioNuevo),
+                        'Confirma la referencia con marca, modelo, año, motor y número OEM/VIN cuando proceda.',
+                        'nuevo', '') +
+                    tarjeta('3. Pieza nueva + taller', costeTaller,
+                        'Pieza ' + fmt(precioNuevo) + ' + recargo ' + fmt(recargoPiezaTaller) + ' + envío ' + fmt(envioNuevo) + ' + mano de obra ' + fmt(manoObraTaller),
+                        horas.toLocaleString('es-ES') + ' h × ' + fmt(tarifaHora) + '/h. Simulación editable; no es una oferta de un taller real.',
+                        'taller', '') +
+                '</div>' +
+                '<div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">' +
+                    '<div class="p-3 rounded-lg bg-white border"><div class="text-slate-500">Diferencia usado frente a nuevo DIY</div><div class="font-bold ' + (diferenciaUsadoNuevo <= 0 ? 'text-emerald-700' : 'text-amber-700') + '">' +
+                        (diferenciaUsadoNuevo <= 0 ? 'Usado cuesta ' + fmt(Math.abs(diferenciaUsadoNuevo)) + ' menos o igual' : 'Usado cuesta ' + fmt(diferenciaUsadoNuevo) + ' más') +
+                    '</div></div>' +
+                    '<div class="p-3 rounded-lg bg-white border"><div class="text-slate-500">Diferencia nuevo DIY frente a taller</div><div class="font-bold">' +
+                        (diferenciaNuevoTaller > 0 ? 'El taller cuesta ' + fmt(diferenciaNuevoTaller) + ' menos' : diferenciaNuevoTaller < 0 ? 'El taller cuesta ' + fmt(Math.abs(diferenciaNuevoTaller)) + ' más' : 'Mismo coste estimado') +
+                    '</div></div>' +
+                '</div>' +
+                '<p class="mt-4 text-[11px] leading-relaxed text-slate-500">Estimación con tus datos. Los precios del catálogo son ejemplos y pueden no coincidir con el mercado. No incluye automáticamente IVA adicional, diagnosis, consumibles, devolución de casco, transporte imprevisto, herramienta, alineación, programación/codificación ni otras operaciones, salvo que las añadas a los importes. El coste final y la garantía dependen del vendedor y del taller.</p>';
         }
 
         function diametroNeumatico(ancho, perfil, llanta) {
@@ -1264,17 +1425,31 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
         function calcularITV() {
             const elA1 = document.getElementById('ancho1');
             if (!elA1) return;
-            const a1 = parseFloat(elA1.value) || 205;
-            const p1 = parseFloat(document.getElementById('perfil1').value) || 55;
-            const l1 = parseFloat(document.getElementById('llanta1').value) || 16;
-            const a2 = parseFloat(document.getElementById('ancho2').value) || 225;
-            const p2 = parseFloat(document.getElementById('perfil2').value) || 45;
-            const l2 = parseFloat(document.getElementById('llanta2').value) || 17;
-
-            const c1 = parseInt(document.getElementById('carga1').value) || 91;
-            const c2 = parseInt(document.getElementById('carga2').value) || 91;
-            const v1 = parseInt(document.getElementById('vel1').value) || 240;
-            const v2 = parseInt(document.getElementById('vel2').value) || 240;
+            const a1 = leerNumeroCampo('ancho1');
+            const p1 = leerNumeroCampo('perfil1');
+            const l1 = leerNumeroCampo('llanta1');
+            const a2 = leerNumeroCampo('ancho2');
+            const p2 = leerNumeroCampo('perfil2');
+            const l2 = leerNumeroCampo('llanta2');
+            const c1 = leerNumeroCampo('carga1');
+            const c2 = leerNumeroCampo('carga2');
+            const v1 = leerNumeroCampo('vel1');
+            const v2 = leerNumeroCampo('vel2');
+            const medidas = [a1, p1, l1, a2, p2, l2, c1, c2, v1, v2];
+            if (medidas.some(valor => valor === null) ||
+                !Number.isInteger(a1) || !Number.isInteger(a2) ||
+                !Number.isInteger(p1) || !Number.isInteger(p2) ||
+                !Number.isInteger(l1) || !Number.isInteger(l2) ||
+                !Number.isInteger(c1) || !Number.isInteger(c2) ||
+                !Number.isInteger(v1) || !Number.isInteger(v2) ||
+                a1 < 100 || a1 > 355 || a2 < 100 || a2 > 355 ||
+                p1 < 20 || p1 > 100 || p2 < 20 || p2 > 100 ||
+                l1 < 10 || l1 > 25 || l2 < 10 || l2 > 25 ||
+                c1 < 60 || c1 > 125 || c2 < 60 || c2 > 125 ||
+                v1 < 80 || v1 > 350 || v2 < 80 || v2 > 350) {
+                mostrarErrorCalculo('res-itv', 'Revisa las medidas y los índices: ancho 100–355 mm, perfil 20–100 %, llanta 10–25 pulgadas, carga 60–125 y velocidad 80–350 km/h. Usa enteros en estos campos.');
+                return;
+            }
 
             const d1 = diametroNeumatico(a1, p1, l1);
             const d2 = diametroNeumatico(a2, p2, l2);
@@ -1340,18 +1515,25 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             document.getElementById('txt-cta-orig').innerText = `Amazon: ${a1}/${p1} R${l1} y V16`;
         }
 
-        function copiarEnlaceCalculo() {
+        async function copiarEnlaceCalculo() {
             const a1 = document.getElementById('ancho1').value;
             const p1 = document.getElementById('perfil1').value;
             const l1 = document.getElementById('llanta1').value;
             const a2 = document.getElementById('ancho2').value;
             const p2 = document.getElementById('perfil2').value;
             const l2 = document.getElementById('llanta2').value;
-            const url = `${window.location.origin}${window.location.pathname}?a1=${a1}&p1=${p1}&l1=${l1}&a2=${a2}&p2=${p2}&l2=${l2}`;
-            navigator.clipboard.writeText(url);
+            const params = new URLSearchParams({a1, p1, l1, a2, p2, l2});
+            const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
             const btn = document.getElementById('btn-compartir');
-            btn.innerText = '¡Enlace copiado!';
-            setTimeout(() => { btn.innerText = 'Copiar enlace'; }, 2000);
+            try {
+                if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') throw new Error('Clipboard no disponible');
+                await navigator.clipboard.writeText(url);
+                btn.innerText = '¡Enlace copiado!';
+            } catch (error) {
+                window.prompt('Copia este enlace para compartir el cálculo:', url);
+                btn.innerText = 'Copia el enlace mostrado';
+            }
+            setTimeout(() => { btn.innerText = 'Copiar enlace'; }, 2500);
         }
 
         function leerParametrosURL() {
@@ -1367,12 +1549,18 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
         function calcularConsumo() {
             const elKm = document.getElementById('km-viaje');
             if (!elKm) return;
-            const km = parseFloat(elKm.value) || 0;
-            const l100 = parseFloat(document.getElementById('litros-100').value) || 0;
-            const precio = parseFloat(document.getElementById('precio-litro').value) || 0;
-            const peajes = parseFloat(document.getElementById('peajes-viaje').value) || 0;
-            const vel = Math.max(1, parseFloat(document.getElementById('vel-viaje').value) || 100);
-            const personas = Math.max(1, parseInt(document.getElementById('ocupantes').value) || 1);
+            const km = leerNumeroCampo('km-viaje');
+            const l100 = leerNumeroCampo('litros-100');
+            const precio = leerNumeroCampo('precio-litro');
+            const peajes = leerNumeroCampo('peajes-viaje');
+            const vel = leerNumeroCampo('vel-viaje');
+            const personas = leerNumeroCampo('ocupantes');
+            if (km === null || l100 === null || precio === null || peajes === null || vel === null || personas === null ||
+                km < 0 || l100 < 0 || precio < 0 || peajes < 0 || vel <= 0 ||
+                !Number.isInteger(personas) || personas < 1) {
+                mostrarErrorCalculo('res-consumo', 'Revisa los datos: distancias, consumo, precio y peajes no pueden ser negativos; la velocidad debe ser mayor que cero y los ocupantes un entero positivo.');
+                return;
+            }
 
             const litrosTotales = (km / 100) * l100;
             const costeCombustible = litrosTotales * precio;
@@ -1413,15 +1601,21 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
         function calcularAmortizacion() {
             const elKmAnual = document.getElementById('km-anual');
             if (!elKmAnual) return;
-            const kmAnual = parseFloat(elKmAnual.value) || 1;
-            const difPrecio = parseFloat(document.getElementById('dif-precio').value) || 0;
-            const aniosUso = parseFloat(document.getElementById('anios-uso').value) || 8;
-            const consA = parseFloat(document.getElementById('cons-a').value) || 0;
-            const precA = parseFloat(document.getElementById('prec-a').value) || 0;
-            const mantA = parseFloat(document.getElementById('mant-a').value) || 0;
-            const consB = parseFloat(document.getElementById('cons-b').value) || 0;
-            const precB = parseFloat(document.getElementById('prec-b').value) || 0;
-            const mantB = parseFloat(document.getElementById('mant-b').value) || 0;
+            const kmAnual = leerNumeroCampo('km-anual');
+            const difPrecio = leerNumeroCampo('dif-precio');
+            const aniosUso = leerNumeroCampo('anios-uso');
+            const consA = leerNumeroCampo('cons-a');
+            const precA = leerNumeroCampo('prec-a');
+            const mantA = leerNumeroCampo('mant-a');
+            const consB = leerNumeroCampo('cons-b');
+            const precB = leerNumeroCampo('prec-b');
+            const mantB = leerNumeroCampo('mant-b');
+            const valores = [kmAnual, difPrecio, aniosUso, consA, precA, mantA, consB, precB, mantB];
+            if (valores.some(valor => valor === null) || kmAnual <= 0 || difPrecio < 0 || aniosUso <= 0 ||
+                [consA, precA, mantA, consB, precB, mantB].some(valor => valor < 0)) {
+                mostrarErrorCalculo('res-amortizacion', 'Introduce kilómetros anuales y años de uso mayores que cero. El sobreprecio, los consumos, precios de combustible y mantenimientos no pueden ser negativos.');
+                return;
+            }
 
             const gastoAnualA = ((kmAnual / 100) * consA * precA) + mantA;
             const gastoAnualB = ((kmAnual / 100) * consB * precB) + mantB;
@@ -1432,7 +1626,8 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const box = document.getElementById('res-amortizacion');
 
             if (ahorroAnualNeto <= 0) {
-                box.innerHTML = `<p class="text-rose-700 font-semibold text-sm">Con estos datos (incluyendo mantenimiento), el vehículo B no genera ahorro anual respecto al vehículo A.</p>`;
+                box.className = 'mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm font-semibold text-amber-900';
+                box.textContent = 'Con estos datos (incluyendo mantenimiento), el vehículo B no genera ahorro anual respecto al vehículo A. No existe un plazo de amortización positivo.';
                 return;
             }
 
@@ -1461,61 +1656,82 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             `;
         }
 
-        // 4B. Caballos fiscales (fórmula oficial BOE) + DGT + IVTM + CO2
+        // 4B. Caballos fiscales (fórmula del Anexo V del RGV) + orientación DGT + impuestos.
         function calcularDGT() {
             const elMotor = document.getElementById('dgt-motor');
             if (!elMotor) return;
             const motor = elMotor.value;
-            const anio = parseInt(document.getElementById('dgt-anio').value) || 2015;
-            const cc = parseFloat(document.getElementById('dgt-cc').value) || 1600;
-            const cil = Math.max(1, parseInt(document.getElementById('dgt-cil').value) || 4);
-            const co2 = parseFloat(document.getElementById('dgt-co2').value) || 0;
-            const base = parseFloat(document.getElementById('dgt-base').value) || 0;
+            const anio = leerNumeroCampo('dgt-anio');
+            const cc = leerNumeroCampo('dgt-cc');
+            const cil = leerNumeroCampo('dgt-cil');
+            const co2 = leerNumeroCampo('dgt-co2');
+            const base = leerNumeroCampo('dgt-base');
+            const anioActual = new Date().getFullYear();
+            const cvfNoEstimableConEstosDatos = motor === 'electrico' || motor === 'phev';
 
-            // Fórmula BOE Anexo V: CVF = 0.08 * (cc / N)^0.6 * N
-            const cvf = 0.08 * Math.pow(cc / cil, 0.6) * cil;
+            if (anio === null || !Number.isInteger(anio) || anio < 1980 || anio > anioActual + 1 ||
+                co2 === null || co2 < 0 || base === null || base < 0 ||
+                (!cvfNoEstimableConEstosDatos && (cc === null || cc <= 0 || cil === null || !Number.isInteger(cil) || cil < 1 || cil > 16))) {
+                mostrarErrorCalculo('res-dgt', 'Revisa año, cilindrada, cilindros, emisiones y base imponible. Usa valores numéricos no negativos y un año de matriculación válido.');
+                return;
+            }
 
-            // El tramo fiscal se muestra sin cuota: cada ayuntamiento puede aplicar coeficientes y bonificaciones.
-            let tramoIVTM = "12–15,99 CVF";
-            if (cvf < 8) tramoIVTM = "Menos de 8 CVF";
-            else if (cvf < 12) tramoIVTM = "8–11,99 CVF";
-            else if (cvf < 16) tramoIVTM = "12–15,99 CVF";
-            else if (cvf < 20) tramoIVTM = "16–19,99 CVF";
-            else tramoIVTM = "20 CVF o más";
+            // El Anexo V usa una fórmula distinta para motores eléctricos; para eléctricos puros y PHEV
+            // no inferimos la potencia fiscal a partir de la cilindrada térmica.
+            const cvf = cvfNoEstimableConEstosDatos
+                ? null
+                : Math.floor((0.08 * Math.pow(cc / cil, 0.6) * cil) * 100) / 100;
 
-            // Es una orientación por año y motorización; no sustituye la consulta oficial por matrícula.
+            // El tramo IVTM se muestra sin cuota; cada ayuntamiento puede aplicar coeficientes y bonificaciones.
+            let tramoIVTM = "Consulta la ficha técnica";
+            if (cvf !== null) {
+                if (cvf < 8) tramoIVTM = "Menos de 8 CVF";
+                else if (cvf < 12) tramoIVTM = "8–11,99 CVF";
+                else if (cvf < 16) tramoIVTM = "12–15,99 CVF";
+                else if (cvf < 20) tramoIVTM = "16–19,99 CVF";
+                else tramoIVTM = "20 CVF o más";
+            }
+
+            // Una clasificación por año/motor solo puede ser orientativa; confirma el distintivo por matrícula.
             let etiqueta = "Sin distintivo estimado; confirmar en DGT";
             let colorEtiqueta = "bg-slate-200 text-slate-800";
 
-            if (motor === "cero") {
-                etiqueta = "0 (si cumple categoría y autonomía exigida)";
+            if (motor === "electrico") {
+                etiqueta = "CERO probable para BEV; confirma por matrícula";
                 colorEtiqueta = "bg-sky-200 text-sky-950";
+            } else if (motor === "phev") {
+                etiqueta = "CERO si autonomía eléctrica homologada ≥40 km; si no, ECO sujeto a Euro";
+                colorEtiqueta = "bg-teal-200 text-teal-950";
             } else if (motor === "hibrido") {
-                etiqueta = "ECO (si cumple también Euro exigida)";
+                etiqueta = "ECO posible si cumple la norma Euro aplicable";
                 colorEtiqueta = "bg-teal-200 text-teal-950";
             } else if (motor === "gasolina") {
                 if (anio >= 2006) {
-                    etiqueta = "C probable por año; confirmar norma Euro";
+                    etiqueta = "C probable por año; confirma norma Euro";
                     colorEtiqueta = "bg-emerald-200 text-emerald-950";
                 } else if (anio >= 2001) {
-                    etiqueta = "B probable por año; confirmar norma Euro";
+                    etiqueta = "B probable por año; confirma norma Euro";
                     colorEtiqueta = "bg-amber-200 text-amber-950";
                 }
             } else if (motor === "diesel") {
-                if (anio >= 2015) {
-                    etiqueta = "C probable si es Euro 6";
+                if (anio >= 2016) {
+                    etiqueta = "C probable por año; confirma norma Euro";
                     colorEtiqueta = "bg-emerald-200 text-emerald-950";
+                } else if (anio === 2015) {
+                    etiqueta = "B o C según fecha y homologación; confirma en DGT";
+                    colorEtiqueta = "bg-amber-200 text-amber-950";
                 } else if (anio >= 2006) {
-                    etiqueta = "B probable si es Euro 4/5";
+                    etiqueta = "B probable por año; confirma norma Euro";
                     colorEtiqueta = "bg-amber-200 text-amber-950";
                 }
             }
 
             let tipoImpositivo = 0;
-            if (co2 > 120 && co2 <= 159) tipoImpositivo = 4.75;
-            else if (co2 >= 160 && co2 <= 199) tipoImpositivo = 9.75;
-            else if (co2 >= 200) tipoImpositivo = 14.75;
-
+            if (motor !== 'electrico') {
+                if (co2 > 120 && co2 < 160) tipoImpositivo = 4.75;
+                else if (co2 >= 160 && co2 < 200) tipoImpositivo = 9.75;
+                else if (co2 >= 200) tipoImpositivo = 14.75;
+            }
             const cuotaImpuesto = base * (tipoImpositivo / 100);
 
             document.getElementById('res-dgt').innerHTML = `
@@ -1526,7 +1742,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                     </div>
                     <div class="bg-white p-3 rounded-lg border">
                         <div class="text-xs text-slate-500">Potencia fiscal (BOE)</div>
-                        <div class="text-xl font-extrabold text-slate-900">${cvf.toFixed(2)} CVF</div>
+                        <div class="text-xl font-extrabold text-slate-900">${cvf === null ? 'No estimable con estos datos' : cvf.toFixed(2) + ' CVF'}</div>
                     </div>
                     <div class="bg-white p-3 rounded-lg border">
                         <div class="text-xs text-slate-500">Tramo fiscal IVTM (sin cuota local)</div>
@@ -1855,13 +2071,13 @@ def main():
         seo_coche = f"""
             <h2 class="text-base font-bold text-slate-900">Neumáticos equivalentes, recambios Autodoc y desguaces para {nombre_c}</h2>
             <p>Como referencia inicial para el <strong>{nombre_c}</strong>, se comparan las medidas <strong>{a1}/{p1} R{l1}</strong> y <strong>{a2}/{p2} R{l2}</strong> (variación de diámetro: {diff:+.2f} %). Las medidas montadas y admitidas dependen de la versión, el año y la ficha técnica. El porcentaje de diámetro por sí solo no confirma equivalencia ni validez para ITV: verifica homologación, índice de carga, código de velocidad, llanta y espacio disponible.</p>
-            <p><strong>Consejo de ahorro en mantenimiento para {nombre_c}:</strong> para recambios de desgaste (kits de filtros, pastillas de freno, amortiguadores o brazos de suspensión), <strong>Autodoc</strong> suele ofrecer el precio más bajo; para neumáticos tienes envío rápido en <strong>Muchoneumático</strong> o montaje en centros <strong>Norauto y Feu Vert</strong>; y para piezas de carrocería, faros o espejos retrovisores te compensa consultar stock en los grandes desguaces del sur de Madrid (San Martín de la Vega o La Torre).</p>
+            <p><strong>Consejo de ahorro en mantenimiento para {nombre_c}:</strong> para recambios de desgaste, compara el precio final, la referencia exacta, el envío y el montaje en distintos proveedores; para neumáticos, comprueba también la disponibilidad de montaje; y para piezas de carrocería, faros o retrovisores, contrasta en los desguaces el estado, la garantía y la compatibilidad de la pieza.</p>
         """
         faqs_coche = [
             (f"¿Qué neumáticos equivalentes puede montar un {nombre_c} para pasar la ITV?",
              f"Como referencia, {a2}/{p2} R{l2} presenta una variación de diámetro del {diff:+.2f} % respecto a {a1}/{p1} R{l1}. Es solo un filtro dimensional: confirma la medida en la ficha técnica y verifica los demás requisitos de homologación e ITV."),
             (f"¿Dónde comprar recambios baratos para {nombre_c}: Autodoc, Norauto o desguace?",
-             f"Para consumibles y mecánica nueva (frenos, embrague, filtros) conviene Autodoc; para montaje rápido en el día destaca Norauto o Feu Vert; y para piezas de carrocería o módulos originales OEM de {nombre_c} el mayor ahorro está en desguaces.")
+             f"Para consumibles y mecánica nueva (frenos, embrague, filtros) conviene Autodoc; para montaje rápido en el día destaca Norauto o Feu Vert; y para piezas de carrocería o módulos originales OEM de {nombre_c} el coste puede ser menor en desguaces, según estado, compatibilidad, disponibilidad y garantía.")
         ]
 
         render_page(
@@ -1883,7 +2099,7 @@ def main():
         seo_zona = f"""
             <h2 class="text-base font-bold text-slate-900">Guía práctica de desguaces, recambios y estaciones ITV en {nombre_z}</h2>
             <p><strong>Distancia y accesos:</strong> {dist_z}.</p>
-            <p><strong>Principales núcleos de desguaces cercanos:</strong> {desguaces_z}. Son la mejor alternativa para adquirir piezas originales OEM de carrocería (paragolpes, aletas, faros, retrovisores), cajas de cambio, alternadores o motores de arranque con hasta un 70 % de ahorro.</p>
+            <p><strong>Principales núcleos de desguaces cercanos:</strong> {desguaces_z}. Pueden ser una alternativa para piezas de carrocería y componentes recuperados. El ahorro depende de la referencia, el estado, la disponibilidad, el transporte y la garantía; comprueba compatibilidad antes de comprar.</p>
             <p><strong>Estaciones ITV y talleres de montaje rápido en la zona:</strong> {itv_z}. Recuerda que para elementos de desgaste o seguridad (neumáticos, pastillas y discos de freno, amortiguadores, escobillas o filtros) siempre es recomendable pedir recambio nuevo en <strong>Autodoc</strong>, comprar neumáticos en <strong>Muchoneumático</strong> o acudir con cita a <strong>Norauto y Feu Vert</strong>.</p>
         """
         faqs_zona = [
