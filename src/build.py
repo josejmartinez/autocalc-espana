@@ -1119,7 +1119,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const v3 = alfabeto.indexOf(letras[2]);
             const indice = (v1 * 400) + (v2 * 20) + v3; // 0 (BBB) a 7999
 
-            // Hitos históricos oficiales de la DGT (índice base 20 -> año.mes)
+            // Hitos orientativos de la serie alfanumérica (índice base 20 -> año.mes); la interpolación no es una consulta oficial por matrícula.
             const hitos = [
                 [0, 2000.6666667], [140, 2001.0], [420, 2002.0], [680, 2003.0],
                 [980, 2004.0], [1310, 2005.0], [1650, 2006.0], [2010, 2007.0],
@@ -1164,9 +1164,10 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             calcularDGT();
 
             box.innerHTML = `
+                <p class="mb-3 text-xs text-slate-500">La fecha se calcula por interpolación entre hitos y puede diferir de la fecha real. No determina por sí sola la próxima ITV ni sustituye la consulta de la documentación del vehículo.</p>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                     <div class="bg-white p-3 rounded-lg border">
-                        <div class="text-xs text-slate-500">Fecha estimada de matriculación</div>
+                        <div class="text-xs text-slate-500">Fecha estimada de matriculación (aproximación)</div>
                         <div class="text-lg font-extrabold text-slate-900 capitalize">${meses[mesIndex]} de ${anioMat}</div>
                     </div>
                     <div class="bg-white p-3 rounded-lg border">
