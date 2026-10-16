@@ -566,7 +566,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             <!-- 4B. Calculadora oficial BOE de caballos fiscales (CVF), IVTM, etiqueta DGT y CO2 -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                 <h2 class="text-lg font-bold mb-1 text-slate-900">4B. Calculadora de caballos fiscales (CVF), etiqueta DGT e impuestos (IVTM y CO₂)</h2>
-                <p class="text-xs text-slate-500 mb-4">Calcula la potencia fiscal exacta según la fórmula del Anexo V del Reglamento General de Vehículos (BOE), el tramo del impuesto de circulación municipal (IVTM) y el impuesto de matriculación.</p>
+                <p class="text-xs text-slate-500 mb-4">Calcula la potencia fiscal con la fórmula del Anexo V del Reglamento General de Vehículos y obtiene una orientación inicial sobre el distintivo ambiental y el impuesto de matriculación. El IVTM depende del ayuntamiento: mostramos el tramo de potencia fiscal, no una cuota municipal.</p>
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1">Motorización</label>
@@ -594,11 +594,12 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                         <input type="number" id="dgt-co2" value="119" oninput="calcularDGT()" class="w-full p-2 border rounded-lg font-bold">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">Valor coche (€)</label>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Base imponible estimada (€)</label>
                         <input type="number" id="dgt-base" value="22000" oninput="calcularDGT()" class="w-full p-2 border rounded-lg font-bold">
                     </div>
                 </div>
                 <div id="res-dgt" class="mt-5 p-4 rounded-xl bg-slate-50 border border-slate-200"></div>
+                <p class="mt-3 text-xs leading-relaxed text-slate-500">Orientativo, no una liquidación oficial: la etiqueta DGT no se confirma solo con año y combustible; depende de la categoría, homologación y norma Euro. Consulta el distintivo por matrícula en <a href="https://www.dgt.es/nuestros-servicios/tu-vehiculo/tus-vehiculos/distintivo-ambiental/" target="_blank" rel="noopener noreferrer" class="underline font-semibold">la web oficial de la DGT</a>. El IVTM final depende de la ordenanza y bonificaciones municipales. El impuesto de matriculación puede variar según territorio, base imponible fiscal y exenciones o reducciones aplicables.</p>
             </div>
         </section>
 
@@ -606,8 +607,8 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
         <section id="sec-preitv" class="space-y-6 hidden">
             <!-- 5A. Buscador de códigos de avería OBD2 frecuentes en rechazo ITV -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <h2 class="text-lg font-bold mb-1 text-slate-900">5A. Consultor rápido de códigos de fallo OBD2 críticos en la ITV</h2>
-                <p class="text-xs text-slate-500 mb-4">Desde la entrada en vigor de la lectura OBD en las estaciones ITV, cualquier código de avería activo en la centralita (testigo MIL encendido) supone resultado desfavorable. Selecciona un código para ver causa y solución:</p>
+                <h2 class="text-lg font-bold mb-1 text-slate-900">5A. Consulta rápida de códigos de fallo OBD2 frecuentes</h2>
+                <p class="text-xs text-slate-500 mb-4">La lectura OBD se aplica según la categoría del vehículo y el procedimiento de inspección vigente. Algunos defectos relacionados con emisiones, el testigo MIL o los resultados de la lectura pueden afectar la ITV; el resultado depende del vehículo, del defecto detectado y del manual aplicable. Selecciona un código frecuente para consultar una posible causa:</p>
                 <select id="obd-select" onchange="mostrarFalloOBD()" class="w-full p-3 border rounded-xl font-bold text-sm bg-slate-50">
                     <option value="P0401">P0401 / P0402 — Flujo insuficiente o excesivo en válvula EGR (recirculación de gases)</option>
                     <option value="P2002">P2002 / P2463 — Eficiencia del filtro de partículas diésel (DPF / FAP) por debajo del umbral</option>
@@ -623,13 +624,13 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             <!-- 5B. Checklist de 8 puntos pre-ITV -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                 <h2 class="text-lg font-bold mb-1 text-slate-900">5B. Checklist interactivo de revisión pre-ITV en casa</h2>
-                <p class="text-xs text-slate-500 mb-4">Verifica estos 6 puntos antes de salir hacia la estación ITV para evitar el 85 % de los rechazos más habituales:</p>
+                <p class="text-xs text-slate-500 mb-4">Repasa estos puntos antes de acudir a la estación ITV. Son comprobaciones preventivas y no garantizan el resultado de la inspección:</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                     <label class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border cursor-pointer hover:bg-slate-100 transition">
                         <input type="checkbox" class="chk-itv mt-1 w-4 h-4" onchange="evaluarChecklist()" checked>
                         <div>
-                            <span class="font-bold block text-slate-900">1. Dibujo de neumáticos (>1,6 mm) y medida dentro del ±3 %</span>
-                            <span class="text-xs text-slate-500">Misma marca/modelo en cada eje, sin huevos ni cortes en los flancos.</span>
+                            <span class="font-bold block text-slate-900">1. Dibujo de neumáticos (más de 1,6 mm) y medida admitida</span>
+                            <span class="text-xs text-slate-500">Comprueba la medida en la ficha técnica y la compatibilidad; el ±3 % por sí solo no confirma una equivalencia ITV. Revisa también cortes, bultos y daños en los flancos.</span>
                         </div>
                     </label>
                     <label class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border cursor-pointer hover:bg-slate-100 transition">
@@ -1474,35 +1475,38 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             // Fórmula BOE Anexo V: CVF = 0.08 * (cc / N)^0.6 * N
             const cvf = 0.08 * Math.pow(cc / cil, 0.6) * cil;
 
-            let tramoIVTM = "De 12 a 15,99 CVF (~143 €/año)";
-            if (cvf < 8) tramoIVTM = "Menos de 8 CVF (~25 €/año)";
-            else if (cvf < 12) tramoIVTM = "De 8 a 11,99 CVF (~68 €/año)";
-            else if (cvf >= 16 && cvf < 20) tramoIVTM = "De 16 a 19,99 CVF (~179 €/año)";
-            else if (cvf >= 20) tramoIVTM = "20 CVF o más (~224 €/año)";
+            // El tramo fiscal se muestra sin cuota: cada ayuntamiento puede aplicar coeficientes y bonificaciones.
+            let tramoIVTM = "12–15,99 CVF";
+            if (cvf < 8) tramoIVTM = "Menos de 8 CVF";
+            else if (cvf < 12) tramoIVTM = "8–11,99 CVF";
+            else if (cvf < 16) tramoIVTM = "12–15,99 CVF";
+            else if (cvf < 20) tramoIVTM = "16–19,99 CVF";
+            else tramoIVTM = "20 CVF o más";
 
-            let etiqueta = "Sin distintivo (A)";
+            // Es una orientación por año y motorización; no sustituye la consulta oficial por matrícula.
+            let etiqueta = "Sin distintivo estimado; confirmar en DGT";
             let colorEtiqueta = "bg-slate-200 text-slate-800";
 
             if (motor === "cero") {
-                etiqueta = "CERO emisiones (azul)";
+                etiqueta = "0 (si cumple categoría y autonomía exigida)";
                 colorEtiqueta = "bg-sky-200 text-sky-950";
             } else if (motor === "hibrido") {
-                etiqueta = "Etiqueta ECO (verde/azul)";
+                etiqueta = "ECO (si cumple también Euro exigida)";
                 colorEtiqueta = "bg-teal-200 text-teal-950";
             } else if (motor === "gasolina") {
                 if (anio >= 2006) {
-                    etiqueta = "Etiqueta C (verde - Euro 4/5/6)";
+                    etiqueta = "C probable por año; confirmar norma Euro";
                     colorEtiqueta = "bg-emerald-200 text-emerald-950";
                 } else if (anio >= 2001) {
-                    etiqueta = "Etiqueta B (amarilla - Euro 3)";
+                    etiqueta = "B probable por año; confirmar norma Euro";
                     colorEtiqueta = "bg-amber-200 text-amber-950";
                 }
             } else if (motor === "diesel") {
                 if (anio >= 2015) {
-                    etiqueta = "Etiqueta C (verde - Euro 6)";
+                    etiqueta = "C probable si es Euro 6";
                     colorEtiqueta = "bg-emerald-200 text-emerald-950";
                 } else if (anio >= 2006) {
-                    etiqueta = "Etiqueta B (amarilla - Euro 4/5)";
+                    etiqueta = "B probable si es Euro 4/5";
                     colorEtiqueta = "bg-amber-200 text-amber-950";
                 }
             }
@@ -1517,7 +1521,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             document.getElementById('res-dgt').innerHTML = `
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center items-center">
                     <div class="p-3 rounded-lg font-bold ${colorEtiqueta}">
-                        <div class="text-xs opacity-75">Distintivo DGT</div>
+                        <div class="text-xs opacity-75">Distintivo DGT (orientativo)</div>
                         <div class="text-xs sm:text-sm mt-1">${etiqueta}</div>
                     </div>
                     <div class="bg-white p-3 rounded-lg border">
@@ -1525,11 +1529,11 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                         <div class="text-xl font-extrabold text-slate-900">${cvf.toFixed(2)} CVF</div>
                     </div>
                     <div class="bg-white p-3 rounded-lg border">
-                        <div class="text-xs text-slate-500">Tramo IVTM («numerito»)</div>
+                        <div class="text-xs text-slate-500">Tramo fiscal IVTM (sin cuota local)</div>
                         <div class="text-xs font-bold text-slate-800 mt-1">${tramoIVTM}</div>
                     </div>
                     <div class="bg-white p-3 rounded-lg border">
-                        <div class="text-xs text-slate-500">Imp. matriculación (${tipoImpositivo}%)</div>
+                        <div class="text-xs text-slate-500">IEDMT de referencia (${tipoImpositivo}%)</div>
                         <div class="text-xl font-bold text-amber-600">${cuotaImpuesto.toFixed(0)} €</div>
                     </div>
                 </div>
