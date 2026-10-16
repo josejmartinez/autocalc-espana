@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build-and-deploy:
@@ -29,8 +29,50 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Validate Python source
+        run: python -m py_compile src/build.py src/catalogo.py
+
       - name: Generate Programmatic SEO Pages
         run: python src/build.py
+
+      - name: Validate generated site
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import sys
+
+          output = Path("public")
+          required = ["index.html", "sitemap.xml", "robots.txt", "privacidad-cookies.html"]
+          missing = [name for name in required if not (output / name).is_file()]
+          if missing:
+              print("Faltan archivos generados:", ", ".join(missing))
+              sys.exit(1)
+
+          html_pages = list(output.glob("*.html"))
+          if not html_pages:
+              print("No se han generado páginas HTML.")
+              sys.exit(1)
+
+          for page in html_pages:
+              html = page.read_text(encoding="utf-8")
+              for marker in ('<html lang="es">', '<title>', '<meta name="description"', '<link rel="canonical"'):
+                  if marker not in html:
+                      print(f"Falta {marker!r} en {page}")
+                      sys.exit(1)
+
+          sitemap = (output / "sitemap.xml").read_text(encoding="utf-8")
+          robots = (output / "robots.txt").read_text(encoding="utf-8")
+          if "<loc>" not in sitemap or "Sitemap:" not in robots:
+              print("El sitemap o robots.txt no contiene las referencias esperadas.")
+              sys.exit(1)
+
+          ads_file = output / "ads.txt"
+          if ads_file.is_file() and "pub-0000000000000000" in ads_file.read_text(encoding="utf-8"):
+              print("ads.txt contiene un identificador publicitario ficticio.")
+              sys.exit(1)
+
+          print(f"Validación correcta: {len(html_pages)} páginas HTML.")
+          PY
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
