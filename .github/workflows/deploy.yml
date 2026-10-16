@@ -34,13 +34,21 @@ jobs:
       - name: Generate Programmatic SEO Pages
         run: python src/build.py
 
+      - name: Test domain migration in both modes
+        run: python scripts/test_domain_switch.py
+
       - name: Validate generated site
         run: |
           python - <<'PY'
           from pathlib import Path
+          import json
           import sys
 
           output = Path("public")
+          config = json.loads(Path("config.json").read_text(encoding="utf-8"))
+          custom_domain = config.get("custom_domain", "").strip().lower()
+          use_custom_domain = config.get("use_custom_domain", False) is True
+          expected_domain = f"https://{custom_domain}" if use_custom_domain else config.get("domain", "").rstrip("/")
           required = ["index.html", "sitemap.xml", "robots.txt", "privacidad-cookies.html"]
           missing = [name for name in required if not (output / name).is_file()]
           if missing:
@@ -68,10 +76,23 @@ jobs:
                       print(f"Falta el control de privacidad {marker!r} en {page}")
                       sys.exit(1)
 
+          index_html = (output / "index.html").read_text(encoding="utf-8")
           sitemap = (output / "sitemap.xml").read_text(encoding="utf-8")
           robots = (output / "robots.txt").read_text(encoding="utf-8")
-          if "<loc>" not in sitemap or "Sitemap:" not in robots:
-              print("El sitemap o robots.txt no contiene las referencias esperadas.")
+          if expected_domain not in index_html:
+              print(f"La portada no usa el dominio activo esperado: {expected_domain}")
+              sys.exit(1)
+          if "<loc>" not in sitemap or expected_domain not in sitemap or f"Sitemap: {expected_domain}/sitemap.xml" not in robots:
+              print("El sitemap o robots.txt no coincide con el dominio activo.")
+              sys.exit(1)
+
+          cname_file = output / "CNAME"
+          if use_custom_domain:
+              if not cname_file.is_file() or cname_file.read_text(encoding="utf-8").strip() != custom_domain:
+                  print("El modo de dominio propio está activado, pero CNAME falta o no coincide.")
+                  sys.exit(1)
+          elif cname_file.exists():
+              print("Hay un CNAME residual mientras el modo GitHub Pages está activo.")
               sys.exit(1)
 
           ads_file = output / "ads.txt"

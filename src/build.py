@@ -13,6 +13,8 @@ Incluye:
 
 import os
 import json
+import re
+from html import escape
 from datetime import date
 from catalogo import MEDIDAS_ESPANA, MODELOS_COCHES, RUTAS_ESPANA, ZONAS_DESGUACES_ITV, GARGANTA_POR_ANCHO
 
@@ -23,13 +25,30 @@ OUTPUT_DIR = os.path.join(BASE_DIR, "public")
 with open(CONFIG_PATH, "r", encoding="utf-8-sig") as f:
     CFG = json.load(f)
 
-DOMINIO = CFG["domain"].rstrip("/")
+GITHUB_PAGES_URL = CFG.get("github_pages_url", CFG.get("domain", "")).strip().rstrip("/")
+CUSTOM_DOMAIN = CFG.get("custom_domain", "autocalc.es").strip().lower().rstrip(".")
+USE_CUSTOM_DOMAIN = CFG.get("use_custom_domain", False) is True
+
+if not GITHUB_PAGES_URL.startswith("https://"):
+    raise ValueError("La URL de GitHub Pages debe ser HTTPS.")
+if USE_CUSTOM_DOMAIN:
+    if not re.fullmatch(r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}", CUSTOM_DOMAIN):
+        raise ValueError("custom_domain debe ser un nombre DNS válido, sin protocolo ni rutas.")
+    DOMINIO = f"https://{CUSTOM_DOMAIN}"
+else:
+    DOMINIO = GITHUB_PAGES_URL
+
 AMAZON_TAG = CFG["amazon_tag"]
 SITE_NAME = CFG["site_name"]
 EMAIL_CONTACTO = CFG["contact_email"]
 ADSENSE_CLIENT = CFG.get("adsense_client", "").strip()
 GOOGLE_ANALYTICS_ID = CFG.get("google_analytics_id", "").strip()
 GOOGLE_CERTIFIED_CMP_CONFIGURED = CFG.get("google_certified_cmp_configured", False) is True
+GOOGLE_SITE_VERIFICATION = CFG.get("google_site_verification", "").strip()
+GOOGLE_SITE_VERIFICATION_TAG = (
+    f'<meta name="google-site-verification" content="{escape(GOOGLE_SITE_VERIFICATION, quote=True)}" />'
+    if GOOGLE_SITE_VERIFICATION else ""
+)
 
 if ADSENSE_CLIENT:
     if not GOOGLE_CERTIFIED_CMP_CONFIGURED:
@@ -139,7 +158,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
     <link rel="canonical" href="__CANONICAL_URL__">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <meta name="robots" content="__ROBOTS_META__">
-    <meta name="google-site-verification" content="ygUlG2Pg9SCogkqx8g4IBREETgPeDhS9pRcb2wbhPxE" />
+    __GOOGLE_SITE_VERIFICATION_TAG__
     <link rel="preconnect" href="https://www.amazon.es">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -1725,6 +1744,7 @@ def render_page(
         "__INTERNAL_LINKS_HTML__": internal_links,
         "__AMAZON_TAG__": AMAZON_TAG,
         "__GOOGLE_ANALYTICS_ID__": GOOGLE_ANALYTICS_ID,
+        "__GOOGLE_SITE_VERIFICATION_TAG__": GOOGLE_SITE_VERIFICATION_TAG,
         "__CAR_CONTEXT_NAME__": car_context_name,
         "__CAR_SHORT_NAME__": car_short_name,
         "__CAR_AUTODOC_QUERY__": car_autodoc_query
@@ -1976,6 +1996,15 @@ def main():
 
     with open(os.path.join(OUTPUT_DIR, "robots.txt"), "w", encoding="utf-8") as f:
         f.write(f"User-agent: *\nAllow: /\nSitemap: {DOMINIO}/sitemap.xml\n")
+
+    # CNAME no configura GitHub Pages cuando se publica mediante Actions, pero
+    # queda en el artefacto como registro coherente del modo de dominio elegido.
+    cname_path = os.path.join(OUTPUT_DIR, "CNAME")
+    if USE_CUSTOM_DOMAIN:
+        with open(cname_path, "w", encoding="utf-8") as f:
+            f.write(f"{CUSTOM_DOMAIN}\n")
+    elif os.path.exists(cname_path):
+        os.remove(cname_path)
 
     ads_txt_path = os.path.join(OUTPUT_DIR, "ads.txt")
     if ADSENSE_CLIENT:
