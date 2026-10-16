@@ -678,27 +678,27 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
         <section id="sec-desguace" class="space-y-6 hidden">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                 <h2 class="text-lg font-bold mb-1 text-slate-900">6. Calculadora maestra de recambios: ¿desguace, Autodoc o taller (Norauto / Feu Vert)?</h2>
-                <p class="text-xs text-slate-500 mb-4">Selecciona la pieza exacta que necesitas sustituir para cargar sus precios medios reales en España y descubrir dónde te ahorras más dinero sin comprometer la seguridad:</p>
+                <p class="text-xs text-slate-500 mb-4">Compara una pieza usada, una nueva montada por tu cuenta y una reparación en taller. Los importes precargados son ejemplos editables, no precios en tiempo real ni ofertas verificadas. Sustitúyelos por presupuestos reales, confirma la referencia exacta y añade envío, desplazamientos, impuestos y cualquier gasto adicional que corresponda.</p>
 
                 <div class="mb-4">
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Seleccionar pieza del catálogo rápido (autocompleta precios reales y tiempos de taller):</label>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Seleccionar pieza del catálogo (carga valores ilustrativos editables):</label>
                     <select id="pieza-catalogo" onchange="cargarPiezaCatalogo()" class="w-full p-2.5 border rounded-xl font-bold text-xs sm:text-sm bg-slate-50">
-                        <option value="mecanica,50,145,1.5,alternador">Alternador (50 € desguace vs. 145 € nuevo Autodoc)</option>
-                        <option value="mecanica,40,115,1.2,motor+de+arranque">Motor de arranque (40 € desguace vs. 115 € nuevo Autodoc)</option>
-                        <option value="mecanica,85,240,2.5,compresor+aire+acondicionado">Compresor de aire acondicionado (85 € desguace vs. 240 € Autodoc)</option>
-                        <option value="mecanica,140,380,3.5,turbocompresor">Turbocompresor (140 € desguace vs. 380 € reconstruido/nuevo)</option>
-                        <option value="mecanica,220,950,5.0,caja+de+cambios">Caja de cambios manual (220 € desguace vs. 950 € reconstruida)</option>
-                        <option value="mecanica,75,230,2.5,cremallera+direccion">Cremallera de dirección (75 € desguace vs. 230 € Autodoc)</option>
-                        <option value="carroceria,35,110,0.5,faro+delantero">Faro delantero principal (35 € desguace vs. 110 € Autodoc)</option>
-                        <option value="carroceria,25,65,0.3,piloto+trasero">Piloto trasero (25 € desguace vs. 65 € Autodoc)</option>
-                        <option value="carroceria,30,85,0.4,retrovisor+exterior">Espejo retrovisor completo (30 € desguace vs. 85 € Autodoc)</option>
-                        <option value="carroceria,65,190,1.5,paragolpes">Paragolpes delantero o trasero (65 € desguace vs. 190 € nuevo)</option>
-                        <option value="carroceria,30,75,1.2,elevalunas+electrico">Mecanismo elevalunas eléctrico (30 € desguace vs. 75 € Autodoc)</option>
-                        <option value="desgaste,40,115,1.5,valvula+egr">Válvula EGR nueva recomendada (40 € desguace vs. 115 € Autodoc)</option>
-                        <option value="desgaste,35,85,1.5,discos+y+pastillas+de+freno">Juego de discos y pastillas de freno (¡Comprar siempre nuevo!)</option>
-                        <option value="desgaste,50,130,2.0,amortiguadores">Pareja de amortiguadores (¡Comprar siempre nuevo en Autodoc/Norauto!)</option>
-                        <option value="desgaste,90,340,5.5,kit+embrague+bimasa">Kit de embrague + volante bimasa (¡Comprar siempre nuevo en Autodoc!)</option>
-                        <option value="desgaste,45,110,3.5,kit+distribucion+bomba+agua">Kit correa de distribución + bomba de agua (¡Siempre nuevo!)</option>
+                        <option value="mecanica,50,145,1.5,alternador,0,0,52,0">Alternador (estimación editable)</option>Alternador (50 € desguace vs. 145 € nuevo Autodoc)</option>
+                        <option value="mecanica,40,115,1.2,motor+de+arranque,0,0,52,0">Motor de arranque (estimación editable)</option>Motor de arranque (40 € desguace vs. 115 € nuevo Autodoc)</option>
+                        <option value="mecanica,85,240,2.5,compresor+aire+acondicionado,0,0,52,0">Compresor de aire acondicionado (estimación editable)</option>Compresor de aire acondicionado (85 € desguace vs. 240 € Autodoc)</option>
+                        <option value="mecanica,140,380,3.5,turbocompresor,0,0,52,0">Turbocompresor (estimación editable)</option>Turbocompresor (140 € desguace vs. 380 € reconstruido/nuevo)</option>
+                        <option value="mecanica,220,950,5.0,caja+de+cambios,0,0,52,0">Caja de cambios manual (estimación editable)</option>Caja de cambios manual (220 € desguace vs. 950 € reconstruida)</option>
+                        <option value="mecanica,75,230,2.5,cremallera+direccion,0,0,52,0">Cremallera de dirección (estimación editable)</option>Cremallera de dirección (75 € desguace vs. 230 € Autodoc)</option>
+                        <option value="carroceria,35,110,0.5,faro+delantero,0,0,52,0">Faro delantero principal (estimación editable)</option>Faro delantero principal (35 € desguace vs. 110 € Autodoc)</option>
+                        <option value="carroceria,25,65,0.3,piloto+trasero,0,0,52,0">Piloto trasero (estimación editable)</option>Piloto trasero (25 € desguace vs. 65 € Autodoc)</option>
+                        <option value="carroceria,30,85,0.4,retrovisor+exterior,0,0,52,0">Espejo retrovisor completo (estimación editable)</option>Espejo retrovisor completo (30 € desguace vs. 85 € Autodoc)</option>
+                        <option value="carroceria,65,190,1.5,paragolpes,0,0,52,0">Paragolpes delantero o trasero (estimación editable)</option>Paragolpes delantero o trasero (65 € desguace vs. 190 € nuevo)</option>
+                        <option value="carroceria,30,75,1.2,elevalunas+electrico,0,0,52,0">Mecanismo elevalunas eléctrico (estimación editable)</option>Mecanismo elevalunas eléctrico (30 € desguace vs. 75 € Autodoc)</option>
+                        <option value="mecanica,40,115,1.5,valvula+egr,0,0,52,0">Válvula EGR (estimación editable; verifica diagnosis)</option>Válvula EGR nueva recomendada (40 € desguace vs. 115 € Autodoc)</option>
+                        <option value="desgaste,35,85,1.5,discos+y+pastillas+de+freno,0,0,52,0">Juego de discos y pastillas de freno (compara piezas nuevas)</option>Juego de discos y pastillas de freno (¡Comprar siempre nuevo!)</option>
+                        <option value="desgaste,50,130,2.0,amortiguadores,0,0,52,0">Pareja de amortiguadores (compara piezas nuevas)</option>Pareja de amortiguadores (¡Comprar siempre nuevo en Autodoc/Norauto!)</option>
+                        <option value="desgaste,90,340,5.5,kit+embrague+bimasa,0,0,52,0">Kit de embrague + volante bimasa (compara piezas nuevas)</option>Kit de embrague + volante bimasa (¡Comprar siempre nuevo en Autodoc!)</option>
+                        <option value="desgaste,45,110,3.5,kit+distribucion+bomba+agua,0,0,52,0">Kit correa de distribución + bomba de agua (compara piezas nuevas)</option>Kit correa de distribución + bomba de agua (¡Siempre nuevo!)</option>
                     </select>
                 </div>
 
@@ -713,22 +713,39 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1">Precio en desguace (€)</label>
-                        <input type="number" id="rep-desguace" value="50" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
+                        <input type="number" id="rep-desguace" value="50" min="0" max="100000" step="0.01" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1">Precio nuevo Autodoc (€)</label>
-                        <input type="number" id="rep-autodoc" value="145" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
+                        <input type="number" id="rep-autodoc" value="145" min="0" max="100000" step="0.01" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1">Horas de mano de obra</label>
-                        <input type="number" step="0.5" id="rep-horas" value="1.5" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
+                        <input type="number" step="0.1" min="0" max="100" id="rep-horas" value="1.5" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Transporte / envío pieza usada (€)</label>
+                        <input type="number" id="rep-logistica-usado" value="0" min="0" max="100000" step="0.01" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Envío pieza nueva (€)</label>
+                        <input type="number" id="rep-envio-nuevo" value="0" min="0" max="100000" step="0.01" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Tarifa estimada taller (€/h)</label>
+                        <input type="number" id="rep-tarifa-hora" value="52" min="0" max="1000" step="0.5" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Recargo de taller sobre pieza (%)</label>
+                        <input type="number" id="rep-recargo-taller" value="0" min="0" max="300" step="1" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
                     </div>
                 </div>
+                <p class="mt-3 text-xs text-slate-500">El coste de taller es una simulación: precio de la pieza nueva, envío, recargo editable y mano de obra. No sustituye un presupuesto cerrado y no incluye diagnosis, consumibles, impuestos ni trabajos adicionales salvo que los añadas a los importes.</p>
                 <div id="res-desguace" class="mt-6 p-5 rounded-xl bg-slate-50 border border-slate-200"></div>
 
                 <!-- Enlaces directos a los grandes desguaces cerca de Aranjuez / Madrid Sur y tiendas online -->
                 <div class="mt-6 pt-5 border-t border-slate-200">
-                    <h3 class="text-xs font-bold text-slate-700 mb-3">Consultar stock de esta pieza en grandes desguaces (Aranjuez / Madrid Sur / Toledo) y tiendas online:</h3>
+                    <h3 class="text-xs font-bold text-slate-700 mb-3">Buscar referencias y consultar disponibilidad (abre cada proveedor para confirmar stock, precio y condiciones):</h3>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                         <a id="link-pieza-autodoc" href="https://www.autodoc.es/search?keyword=alternador" target="_blank" rel="nofollow sponsored" class="p-2.5 bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold rounded-lg text-center transition">1. Ver nuevo en Autodoc →</a>
                         <a href="https://www.desguaceslatorre.es/" target="_blank" rel="nofollow" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-lg text-center transition">2. Desguaces La Torre (A-42)</a>
