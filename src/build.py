@@ -1230,9 +1230,14 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const elTipo = document.getElementById('rep-tipo');
             if (!elTipo) return;
             const tipo = elTipo.value;
-            const pDesguace = parseFloat(document.getElementById('rep-desguace').value) || 0;
-            const pAutodoc = parseFloat(document.getElementById('rep-autodoc').value) || 0;
-            const horas = parseFloat(document.getElementById('rep-horas').value) || 0;
+            const pDesguace = leerNumeroCampo('rep-desguace');
+            const pAutodoc = leerNumeroCampo('rep-autodoc');
+            const horas = leerNumeroCampo('rep-horas');
+            if (pDesguace === null || pAutodoc === null || horas === null ||
+                pDesguace < 0 || pAutodoc < 0 || horas < 0 || horas > 100) {
+                mostrarErrorCalculo('res-desguace', 'Introduce precios no negativos y horas de mano de obra entre 0 y 100.');
+                return;
+            }
 
             const manoObraTaller = horas * 52;
             const totalDesguaceDIY = pDesguace;
@@ -1247,10 +1252,10 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                 recomendacion = "Elemento de desgaste o seguridad: NO se recomienda desguace. Pídelo nuevo en Autodoc (si lo montas tú) o acude a Norauto / Feu Vert con montaje incluido.";
                 badgeColor = "bg-rose-100 text-rose-900 border-rose-300";
             } else if (ahorroDesguace < 25) {
-                recomendacion = "Por una diferencia menor de 25 €, compensa estrenar recambio nuevo en Autodoc con 2 años de garantía frente a pieza usada.";
+                recomendacion = "La diferencia frente a la pieza nueva es inferior a 25 €. Compara referencia exacta, estado, devolución, garantía aplicable y coste de montaje antes de decidir.";
                 badgeColor = "bg-amber-100 text-amber-900 border-amber-300";
             } else {
-                recomendacion = `¡Compensa ir a desguace! Te ahorras ${ahorroDesguace.toFixed(0)} € respecto al recambio nuevo (ideal buscar en Polígono Aimayr de San Martín de la Vega, La Torre u Ocaña).`;
+                recomendacion = `¡Compensa ir a desguace! El ahorro teórico frente al precio nuevo es de ${ahorroDesguace.toFixed(0)} €. Comprueba compatibilidad, estado, garantía y transporte; el cálculo no incluye costes adicionales que no hayas introducido.`;
             }
 
             document.getElementById('res-desguace').innerHTML = `
@@ -1333,17 +1338,31 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
         function calcularITV() {
             const elA1 = document.getElementById('ancho1');
             if (!elA1) return;
-            const a1 = parseFloat(elA1.value) || 205;
-            const p1 = parseFloat(document.getElementById('perfil1').value) || 55;
-            const l1 = parseFloat(document.getElementById('llanta1').value) || 16;
-            const a2 = parseFloat(document.getElementById('ancho2').value) || 225;
-            const p2 = parseFloat(document.getElementById('perfil2').value) || 45;
-            const l2 = parseFloat(document.getElementById('llanta2').value) || 17;
-
-            const c1 = parseInt(document.getElementById('carga1').value) || 91;
-            const c2 = parseInt(document.getElementById('carga2').value) || 91;
-            const v1 = parseInt(document.getElementById('vel1').value) || 240;
-            const v2 = parseInt(document.getElementById('vel2').value) || 240;
+            const a1 = leerNumeroCampo('ancho1');
+            const p1 = leerNumeroCampo('perfil1');
+            const l1 = leerNumeroCampo('llanta1');
+            const a2 = leerNumeroCampo('ancho2');
+            const p2 = leerNumeroCampo('perfil2');
+            const l2 = leerNumeroCampo('llanta2');
+            const c1 = leerNumeroCampo('carga1');
+            const c2 = leerNumeroCampo('carga2');
+            const v1 = leerNumeroCampo('vel1');
+            const v2 = leerNumeroCampo('vel2');
+            const medidas = [a1, p1, l1, a2, p2, l2, c1, c2, v1, v2];
+            if (medidas.some(valor => valor === null) ||
+                !Number.isInteger(a1) || !Number.isInteger(a2) ||
+                !Number.isInteger(p1) || !Number.isInteger(p2) ||
+                !Number.isInteger(l1) || !Number.isInteger(l2) ||
+                !Number.isInteger(c1) || !Number.isInteger(c2) ||
+                !Number.isInteger(v1) || !Number.isInteger(v2) ||
+                a1 < 100 || a1 > 355 || a2 < 100 || a2 > 355 ||
+                p1 < 20 || p1 > 100 || p2 < 20 || p2 > 100 ||
+                l1 < 10 || l1 > 25 || l2 < 10 || l2 > 25 ||
+                c1 < 60 || c1 > 125 || c2 < 60 || c2 > 125 ||
+                v1 < 80 || v1 > 350 || v2 < 80 || v2 > 350) {
+                mostrarErrorCalculo('res-itv', 'Revisa las medidas y los índices: ancho 100–355 mm, perfil 20–100 %, llanta 10–25 pulgadas, carga 60–125 y velocidad 80–350 km/h. Usa enteros en estos campos.');
+                return;
+            }
 
             const d1 = diametroNeumatico(a1, p1, l1);
             const d2 = diametroNeumatico(a2, p2, l2);
@@ -1409,18 +1428,25 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             document.getElementById('txt-cta-orig').innerText = `Amazon: ${a1}/${p1} R${l1} y V16`;
         }
 
-        function copiarEnlaceCalculo() {
+        async function copiarEnlaceCalculo() {
             const a1 = document.getElementById('ancho1').value;
             const p1 = document.getElementById('perfil1').value;
             const l1 = document.getElementById('llanta1').value;
             const a2 = document.getElementById('ancho2').value;
             const p2 = document.getElementById('perfil2').value;
             const l2 = document.getElementById('llanta2').value;
-            const url = `${window.location.origin}${window.location.pathname}?a1=${a1}&p1=${p1}&l1=${l1}&a2=${a2}&p2=${p2}&l2=${l2}`;
-            navigator.clipboard.writeText(url);
+            const params = new URLSearchParams({a1, p1, l1, a2, p2, l2});
+            const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
             const btn = document.getElementById('btn-compartir');
-            btn.innerText = '¡Enlace copiado!';
-            setTimeout(() => { btn.innerText = 'Copiar enlace'; }, 2000);
+            try {
+                if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') throw new Error('Clipboard no disponible');
+                await navigator.clipboard.writeText(url);
+                btn.innerText = '¡Enlace copiado!';
+            } catch (error) {
+                window.prompt('Copia este enlace para compartir el cálculo:', url);
+                btn.innerText = 'Copia el enlace mostrado';
+            }
+            setTimeout(() => { btn.innerText = 'Copiar enlace'; }, 2500);
         }
 
         function leerParametrosURL() {
