@@ -107,7 +107,7 @@ def main() -> int:
         "const costeNuevoDIY = precioNuevo + envioNuevo",
         "const costeTaller = precioNuevo + envioNuevo + recargoPiezaTaller + manoObraTaller",
         "opciones.filter(opcion => opcion.clave !== 'usado')",
-        "No se recomienda la pieza usada",
+        "no recomendamos la pieza usada",
     )
     for marker in required_logic:
         if marker not in build:
