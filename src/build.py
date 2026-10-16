@@ -683,22 +683,22 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                 <div class="mb-4">
                     <label class="block text-xs font-bold text-slate-700 mb-1">Seleccionar pieza del catálogo (carga valores ilustrativos editables):</label>
                     <select id="pieza-catalogo" onchange="cargarPiezaCatalogo()" class="w-full p-2.5 border rounded-xl font-bold text-xs sm:text-sm bg-slate-50">
-                        <option value="mecanica,50,145,1.5,alternador,0,0,52,0">Alternador (estimación editable)</option>Alternador (50 € desguace vs. 145 € nuevo Autodoc)</option>
-                        <option value="mecanica,40,115,1.2,motor+de+arranque,0,0,52,0">Motor de arranque (estimación editable)</option>Motor de arranque (40 € desguace vs. 115 € nuevo Autodoc)</option>
-                        <option value="mecanica,85,240,2.5,compresor+aire+acondicionado,0,0,52,0">Compresor de aire acondicionado (estimación editable)</option>Compresor de aire acondicionado (85 € desguace vs. 240 € Autodoc)</option>
-                        <option value="mecanica,140,380,3.5,turbocompresor,0,0,52,0">Turbocompresor (estimación editable)</option>Turbocompresor (140 € desguace vs. 380 € reconstruido/nuevo)</option>
-                        <option value="mecanica,220,950,5.0,caja+de+cambios,0,0,52,0">Caja de cambios manual (estimación editable)</option>Caja de cambios manual (220 € desguace vs. 950 € reconstruida)</option>
-                        <option value="mecanica,75,230,2.5,cremallera+direccion,0,0,52,0">Cremallera de dirección (estimación editable)</option>Cremallera de dirección (75 € desguace vs. 230 € Autodoc)</option>
-                        <option value="carroceria,35,110,0.5,faro+delantero,0,0,52,0">Faro delantero principal (estimación editable)</option>Faro delantero principal (35 € desguace vs. 110 € Autodoc)</option>
-                        <option value="carroceria,25,65,0.3,piloto+trasero,0,0,52,0">Piloto trasero (estimación editable)</option>Piloto trasero (25 € desguace vs. 65 € Autodoc)</option>
-                        <option value="carroceria,30,85,0.4,retrovisor+exterior,0,0,52,0">Espejo retrovisor completo (estimación editable)</option>Espejo retrovisor completo (30 € desguace vs. 85 € Autodoc)</option>
-                        <option value="carroceria,65,190,1.5,paragolpes,0,0,52,0">Paragolpes delantero o trasero (estimación editable)</option>Paragolpes delantero o trasero (65 € desguace vs. 190 € nuevo)</option>
-                        <option value="carroceria,30,75,1.2,elevalunas+electrico,0,0,52,0">Mecanismo elevalunas eléctrico (estimación editable)</option>Mecanismo elevalunas eléctrico (30 € desguace vs. 75 € Autodoc)</option>
-                        <option value="mecanica,40,115,1.5,valvula+egr,0,0,52,0">Válvula EGR (estimación editable; verifica diagnosis)</option>Válvula EGR nueva recomendada (40 € desguace vs. 115 € Autodoc)</option>
-                        <option value="desgaste,35,85,1.5,discos+y+pastillas+de+freno,0,0,52,0">Juego de discos y pastillas de freno (compara piezas nuevas)</option>Juego de discos y pastillas de freno (¡Comprar siempre nuevo!)</option>
-                        <option value="desgaste,50,130,2.0,amortiguadores,0,0,52,0">Pareja de amortiguadores (compara piezas nuevas)</option>Pareja de amortiguadores (¡Comprar siempre nuevo en Autodoc/Norauto!)</option>
-                        <option value="desgaste,90,340,5.5,kit+embrague+bimasa,0,0,52,0">Kit de embrague + volante bimasa (compara piezas nuevas)</option>Kit de embrague + volante bimasa (¡Comprar siempre nuevo en Autodoc!)</option>
-                        <option value="desgaste,45,110,3.5,kit+distribucion+bomba+agua,0,0,52,0">Kit correa de distribución + bomba de agua (compara piezas nuevas)</option>Kit correa de distribución + bomba de agua (¡Siempre nuevo!)</option>
+                        <option value="mecanica,50,145,1.5,alternador,0,0,52,0">Alternador (estimación editable)</option>
+                        <option value="mecanica,40,115,1.2,motor+de+arranque,0,0,52,0">Motor de arranque (estimación editable)</option>
+                        <option value="mecanica,85,240,2.5,compresor+aire+acondicionado,0,0,52,0">Compresor de aire acondicionado (estimación editable)</option>
+                        <option value="mecanica,140,380,3.5,turbocompresor,0,0,52,0">Turbocompresor (estimación editable)</option>
+                        <option value="mecanica,220,950,5.0,caja+de+cambios,0,0,52,0">Caja de cambios manual (estimación editable)</option>
+                        <option value="mecanica,75,230,2.5,cremallera+direccion,0,0,52,0">Cremallera de dirección (estimación editable)</option>
+                        <option value="carroceria,35,110,0.5,faro+delantero,0,0,52,0">Faro delantero principal (estimación editable)</option>
+                        <option value="carroceria,25,65,0.3,piloto+trasero,0,0,52,0">Piloto trasero (estimación editable)</option>
+                        <option value="carroceria,30,85,0.4,retrovisor+exterior,0,0,52,0">Espejo retrovisor completo (estimación editable)</option>
+                        <option value="carroceria,65,190,1.5,paragolpes,0,0,52,0">Paragolpes delantero o trasero (estimación editable)</option>
+                        <option value="carroceria,30,75,1.2,elevalunas+electrico,0,0,52,0">Mecanismo elevalunas eléctrico (estimación editable)</option>
+                        <option value="mecanica,40,115,1.5,valvula+egr,0,0,52,0">Válvula EGR (estimación editable; verifica diagnosis)</option>
+                        <option value="desgaste,35,85,1.5,discos+y+pastillas+de+freno,0,0,52,0">Juego de discos y pastillas de freno (compara piezas nuevas)</option>
+                        <option value="desgaste,50,130,2.0,amortiguadores,0,0,52,0">Pareja de amortiguadores (compara piezas nuevas)</option>
+                        <option value="desgaste,90,340,5.5,kit+embrague+bimasa,0,0,52,0">Kit de embrague + volante bimasa (compara piezas nuevas)</option>
+                        <option value="desgaste,45,110,3.5,kit+distribucion+bomba+agua,0,0,52,0">Kit correa de distribución + bomba de agua (compara piezas nuevas)</option>
                     </select>
                 </div>
 
