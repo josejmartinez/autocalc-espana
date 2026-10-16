@@ -838,6 +838,30 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
         const TAB_INICIAL = "__INITIAL_TAB__";
         const GARGANTAS = {155:'4.5"-5.5"',165:'4.5"-6.0"',175:'5.0"-6.0"',185:'5.0"-6.5"',195:'5.5"-7.0"',205:'5.5"-7.5"',215:'6.0"-7.5"',225:'6.0"-8.0"',235:'6.5"-8.5"',245:'7.0"-9.0"',255:'7.5"-9.5"',265:'8.0"-10.0"',275:'8.5"-10.5"'};
 
+        function leerNumeroCampo(id) {
+            const campo = document.getElementById(id);
+            if (!campo || String(campo.value).trim() === '') return null;
+            const valor = Number(campo.value);
+            return Number.isFinite(valor) ? valor : null;
+        }
+
+        function mostrarErrorCalculo(id, mensaje) {
+            const caja = document.getElementById(id);
+            if (!caja) return;
+            caja.className = 'mt-4 p-4 rounded-xl bg-rose-50 border border-rose-200 text-sm font-semibold text-rose-800';
+            caja.textContent = mensaje;
+        }
+
+        function escaparHTML(valor) {
+            return String(valor ?? '').replace(/[&<>"']/g, caracter => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            })[caracter]);
+        }
+
         const DICCIONARIO_OBD = {
             "P0401": {
                 titulo: "P0401 / P0402 — Fallo de caudal en válvula EGR",
@@ -913,17 +937,23 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
 
         // 1B. Calculadora de ET y ancho de vías
         function calcularET() {
-            const j1 = parseFloat(document.getElementById('et-j1').value) || 6.5;
-            const et1 = parseFloat(document.getElementById('et-off1').value) || 45;
-            const j2 = parseFloat(document.getElementById('et-j2').value) || 7.5;
-            const et2 = parseFloat(document.getElementById('et-off2').value) || 35;
+            const j1 = leerNumeroCampo('et-j1');
+            const et1 = leerNumeroCampo('et-off1');
+            const j2 = leerNumeroCampo('et-j2');
+            const et2 = leerNumeroCampo('et-off2');
+            if (j1 === null || j2 === null || et1 === null || et2 === null ||
+                j1 < 4 || j1 > 15 || j2 < 4 || j2 > 15 ||
+                et1 < -100 || et1 > 150 || et2 < -100 || et2 > 150) {
+                mostrarErrorCalculo('res-et', 'Introduce anchuras de llanta de 4 a 15 pulgadas y ET entre −100 y 150 mm. El ET puede ser cero o negativo.');
+                return;
+            }
 
             const w1 = j1 * 25.4;
             const w2 = j2 * 25.4;
             const deltaInterior = ((w2 - w1) / 2) - (et1 - et2);
             const deltaExterior = ((w2 - w1) / 2) + (et1 - et2);
             const cambioAnchoVias = (et1 - et2) * 2;
-            const legalVias = Math.abs(cambioAnchoVias) <= 30;
+            const dentroUmbralOrientativo = Math.abs(cambioAnchoVias) <= 30;
 
             const txtInt = deltaInterior > 0
                 ? `Se acerca ${deltaInterior.toFixed(1)} mm al amortiguador`
@@ -942,11 +972,12 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                         <div class="text-xs text-slate-500">Borde exterior (aleta)</div>
                         <div class="font-bold text-amber-600 mt-1">${txtExt}</div>
                     </div>
-                    <div class="p-3 rounded-lg border ${legalVias ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-200 text-rose-900'}">
-                        <div class="text-xs opacity-75">Variación ancho de vías total</div>
-                        <div class="font-extrabold mt-1">${cambioAnchoVias > 0 ? '+' : ''}${cambioAnchoVias.toFixed(0)} mm (${legalVias ? 'Legal ITV ≤30 mm' : 'Requiere homologar >30 mm'})</div>
+                    <div class="p-3 rounded-lg border ${dentroUmbralOrientativo ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-200 text-rose-900'}">
+                        <div class="text-xs opacity-75">Variación estimada del ancho de vías</div>
+                        <div class="font-extrabold mt-1">${cambioAnchoVias > 0 ? '+' : ''}${cambioAnchoVias.toFixed(0)} mm (${dentroUmbralOrientativo ? 'dentro del umbral orientativo de 30 mm' : 'supera el umbral orientativo de 30 mm'})</div>
                     </div>
                 </div>
+                <p class="mt-3 text-xs text-slate-500">El umbral de 30 mm es una referencia inicial, no una declaración de legalidad. La admisión depende de la modificación completa, las medidas del vehículo, la ausencia de interferencias y los requisitos de homologación e ITV.</p>
             `;
         }
 
