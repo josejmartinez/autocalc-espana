@@ -716,7 +716,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                         <input type="number" id="rep-desguace" value="50" min="0" max="100000" step="0.01" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">Precio nuevo Autodoc (€)</label>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Precio pieza nueva de referencia (€)</label>
                         <input type="number" id="rep-autodoc" value="145" min="0" max="100000" step="0.01" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
                     </div>
                     <div>
@@ -740,14 +740,14 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                         <input type="number" id="rep-recargo-taller" value="0" min="0" max="300" step="1" oninput="calcularDesguace()" class="w-full p-2.5 border rounded-lg font-bold">
                     </div>
                 </div>
-                <p class="mt-3 text-xs text-slate-500">El coste de taller es una simulación: precio de la pieza nueva, envío, recargo editable y mano de obra. No sustituye un presupuesto cerrado y no incluye diagnosis, consumibles, impuestos ni trabajos adicionales salvo que los añadas a los importes.</p>
+                <p class="mt-3 text-xs text-slate-500">El coste de taller es una simulación: precio de la pieza nueva de referencia, recargo editable y mano de obra. El envío online solo se suma a la compra por cuenta propia, no al taller. No sustituye un presupuesto cerrado y no incluye diagnosis, consumibles, impuestos ni trabajos adicionales salvo que los añadas a los importes.</p>
                 <div id="res-desguace" class="mt-6 p-5 rounded-xl bg-slate-50 border border-slate-200"></div>
 
                 <!-- Enlaces directos a los grandes desguaces cerca de Aranjuez / Madrid Sur y tiendas online -->
                 <div class="mt-6 pt-5 border-t border-slate-200">
                     <h3 class="text-xs font-bold text-slate-700 mb-3">Buscar referencias y consultar disponibilidad (abre cada proveedor para confirmar stock, precio y condiciones):</h3>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                        <a id="link-pieza-autodoc" href="https://www.autodoc.es/search?keyword=alternador" target="_blank" rel="nofollow sponsored" class="p-2.5 bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold rounded-lg text-center transition">1. Ver nuevo en Autodoc →</a>
+                        <a id="link-pieza-autodoc" href="https://www.autodoc.es/search?keyword=alternador" target="_blank" rel="nofollow sponsored" class="p-2.5 bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold rounded-lg text-center transition">1. Buscar recambio nuevo →</a>
                         <a href="https://www.desguaceslatorre.es/" target="_blank" rel="nofollow" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-lg text-center transition">2. Desguaces La Torre (A-42)</a>
                         <a href="https://www.elchoque.com/" target="_blank" rel="nofollow" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-lg text-center transition">3. Pol. Aimayr (S. Martín Vega)</a>
                         <a href="https://www.recambioverde.es/" target="_blank" rel="nofollow" class="p-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold rounded-lg text-center transition">4. Buscador RecambioVerde</a>
@@ -1295,7 +1295,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const costeNuevoDIY = precioNuevo + envioNuevo;
             const manoObraTaller = horas * tarifaHora;
             const recargoPiezaTaller = precioNuevo * recargoTaller / 100;
-            const costeTaller = precioNuevo + envioNuevo + recargoPiezaTaller + manoObraTaller;
+            const costeTaller = precioNuevo + recargoPiezaTaller + manoObraTaller;
 
             const opciones = [
                 { nombre: 'Pieza usada + montaje propio', total: costeUsadoDIY, clave: 'usado' },
@@ -1354,7 +1354,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                         'Confirma la referencia con marca, modelo, año, motor y número OEM/VIN cuando proceda.',
                         'nuevo', '') +
                     tarjeta('3. Pieza nueva + taller', costeTaller,
-                        'Pieza ' + fmt(precioNuevo) + ' + recargo ' + fmt(recargoPiezaTaller) + ' + envío ' + fmt(envioNuevo) + ' + mano de obra ' + fmt(manoObraTaller),
+                        'Pieza ' + fmt(precioNuevo) + ' + recargo ' + fmt(recargoPiezaTaller) + ' + mano de obra ' + fmt(manoObraTaller),
                         horas.toLocaleString('es-ES') + ' h × ' + fmt(tarifaHora) + '/h. Simulación editable; no es una oferta de un taller real.',
                         'taller', '') +
                 '</div>' +

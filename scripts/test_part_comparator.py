@@ -105,7 +105,7 @@ def main() -> int:
         "function calcularDesguace()",
         "const costeUsadoDIY = precioUsado + logisticaUsado",
         "const costeNuevoDIY = precioNuevo + envioNuevo",
-        "const costeTaller = precioNuevo + envioNuevo + recargoPiezaTaller + manoObraTaller",
+        "const costeTaller = precioNuevo + recargoPiezaTaller + manoObraTaller",
         "opciones.filter(opcion => opcion.clave !== 'usado')",
         "no recomendamos la pieza usada",
     )
