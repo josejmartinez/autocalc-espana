@@ -983,9 +983,14 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
 
         // 2B. Consumo real del depósito
         function calcularConsumoReal() {
-            const litros = parseFloat(document.getElementById('real-litros').value) || 0;
-            const km = parseFloat(document.getElementById('real-km').value) || 1;
-            const precio = parseFloat(document.getElementById('real-precio').value) || 0;
+            const litros = leerNumeroCampo('real-litros');
+            const km = leerNumeroCampo('real-km');
+            const precio = leerNumeroCampo('real-precio');
+            if (litros === null || km === null || precio === null ||
+                litros < 0 || km <= 0 || precio < 0) {
+                mostrarErrorCalculo('res-consumo-real', 'Introduce litros y precio no negativos, y una distancia recorrida mayor que cero.');
+                return;
+            }
 
             const l100 = (litros / km) * 100;
             const coste100 = l100 * precio;
