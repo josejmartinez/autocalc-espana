@@ -573,8 +573,8 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                         <select id="dgt-motor" onchange="calcularDGT()" class="w-full p-2 border rounded-lg font-bold bg-white text-xs">
                             <option value="gasolina">Gasolina</option>
                             <option value="diesel" selected>Diésel</option>
-                            <option value="hibrido">Híbrido / GLP (ECO)</option>
-                            <option value="cero">Eléctrico / PHEV (0)</option>
+                            <option value="hibrido">Híbrido / GLP (posible ECO)</option>
+                            <option value="cero">Eléctrico / PHEV (comprobar autonomía)</option>
                         </select>
                     </div>
                     <div>
