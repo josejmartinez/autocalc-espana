@@ -32,7 +32,7 @@ USE_CUSTOM_DOMAIN = CFG.get("use_custom_domain", False) is True
 if not GITHUB_PAGES_URL.startswith("https://"):
     raise ValueError("La URL de GitHub Pages debe ser HTTPS.")
 if USE_CUSTOM_DOMAIN:
-    if not re.fullmatch(r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}", CUSTOM_DOMAIN):
+    if not re.fullmatch(r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}", CUSTOM_DOMAIN):
         raise ValueError("custom_domain debe ser un nombre DNS válido, sin protocolo ni rutas.")
     DOMINIO = f"https://{CUSTOM_DOMAIN}"
 else:
