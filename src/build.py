@@ -1205,10 +1205,10 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             if (!box) return;
             if (marcados === total) {
                 box.className = 'mt-4 p-4 rounded-xl bg-emerald-50 border border-emerald-300 text-sm font-bold text-emerald-900';
-                box.innerText = '¡Vehículo listo para inspección! Has verificado los 6 puntos críticos de rechazo en ITV.';
+                box.innerText = `Checklist completado: ${total} comprobaciones revisadas. Esto no garantiza el resultado de la ITV.`;
             } else {
                 box.className = 'mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm font-semibold text-amber-900';
-                box.innerText = `Progreso pre-ITV: ${marcados} de ${total} puntos críticos verificados. Revisa los pendientes antes de tu cita.`;
+                box.innerText = `Progreso del checklist: ${marcados} de ${total} comprobaciones revisadas. Revisa las pendientes; el resultado depende de la inspección.`;
             }
         }
 
@@ -1958,13 +1958,13 @@ def main():
         seo_coche = f"""
             <h2 class="text-base font-bold text-slate-900">Neumáticos equivalentes, recambios Autodoc y desguaces para {nombre_c}</h2>
             <p>Como referencia inicial para el <strong>{nombre_c}</strong>, se comparan las medidas <strong>{a1}/{p1} R{l1}</strong> y <strong>{a2}/{p2} R{l2}</strong> (variación de diámetro: {diff:+.2f} %). Las medidas montadas y admitidas dependen de la versión, el año y la ficha técnica. El porcentaje de diámetro por sí solo no confirma equivalencia ni validez para ITV: verifica homologación, índice de carga, código de velocidad, llanta y espacio disponible.</p>
-            <p><strong>Consejo de ahorro en mantenimiento para {nombre_c}:</strong> para recambios de desgaste (kits de filtros, pastillas de freno, amortiguadores o brazos de suspensión), <strong>Autodoc</strong> suele ofrecer el precio más bajo; para neumáticos tienes envío rápido en <strong>Muchoneumático</strong> o montaje en centros <strong>Norauto y Feu Vert</strong>; y para piezas de carrocería, faros o espejos retrovisores te compensa consultar stock en los grandes desguaces del sur de Madrid (San Martín de la Vega o La Torre).</p>
+            <p><strong>Consejo de ahorro en mantenimiento para {nombre_c}:</strong> para recambios de desgaste, compara el precio final, la referencia exacta, el envío y el montaje en distintos proveedores; para neumáticos, comprueba también la disponibilidad de montaje; y para piezas de carrocería, faros o retrovisores, contrasta en los desguaces el estado, la garantía y la compatibilidad de la pieza.</p>
         """
         faqs_coche = [
             (f"¿Qué neumáticos equivalentes puede montar un {nombre_c} para pasar la ITV?",
              f"Como referencia, {a2}/{p2} R{l2} presenta una variación de diámetro del {diff:+.2f} % respecto a {a1}/{p1} R{l1}. Es solo un filtro dimensional: confirma la medida en la ficha técnica y verifica los demás requisitos de homologación e ITV."),
             (f"¿Dónde comprar recambios baratos para {nombre_c}: Autodoc, Norauto o desguace?",
-             f"Para consumibles y mecánica nueva (frenos, embrague, filtros) conviene Autodoc; para montaje rápido en el día destaca Norauto o Feu Vert; y para piezas de carrocería o módulos originales OEM de {nombre_c} el mayor ahorro está en desguaces.")
+             f"Para consumibles y mecánica nueva (frenos, embrague, filtros) conviene Autodoc; para montaje rápido en el día destaca Norauto o Feu Vert; y para piezas de carrocería o módulos originales OEM de {nombre_c} el coste puede ser menor en desguaces, según estado, compatibilidad, disponibilidad y garantía.")
         ]
 
         render_page(
@@ -1986,7 +1986,7 @@ def main():
         seo_zona = f"""
             <h2 class="text-base font-bold text-slate-900">Guía práctica de desguaces, recambios y estaciones ITV en {nombre_z}</h2>
             <p><strong>Distancia y accesos:</strong> {dist_z}.</p>
-            <p><strong>Principales núcleos de desguaces cercanos:</strong> {desguaces_z}. Son la mejor alternativa para adquirir piezas originales OEM de carrocería (paragolpes, aletas, faros, retrovisores), cajas de cambio, alternadores o motores de arranque con hasta un 70 % de ahorro.</p>
+            <p><strong>Principales núcleos de desguaces cercanos:</strong> {desguaces_z}. Pueden ser una alternativa para piezas de carrocería y componentes recuperados. El ahorro depende de la referencia, el estado, la disponibilidad, el transporte y la garantía; comprueba compatibilidad antes de comprar.</p>
             <p><strong>Estaciones ITV y talleres de montaje rápido en la zona:</strong> {itv_z}. Recuerda que para elementos de desgaste o seguridad (neumáticos, pastillas y discos de freno, amortiguadores, escobillas o filtros) siempre es recomendable pedir recambio nuevo en <strong>Autodoc</strong>, comprar neumáticos en <strong>Muchoneumático</strong> o acudir con cita a <strong>Norauto y Feu Vert</strong>.</p>
         """
         faqs_zona = [
