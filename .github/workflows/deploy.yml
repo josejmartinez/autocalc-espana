@@ -79,6 +79,10 @@ jobs:
               print("ads.txt contiene un identificador publicitario ficticio.")
               sys.exit(1)
 
+          if any("contacto@tudominio.es" in page.read_text(encoding="utf-8") for page in html_pages):
+              print("Una página contiene un correo de contacto de ejemplo.")
+              sys.exit(1)
+
           print(f"Validación correcta: {len(html_pages)} páginas HTML.")
           PY
 
