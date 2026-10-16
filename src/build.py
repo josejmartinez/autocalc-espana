@@ -1093,8 +1093,10 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             calcularConsumo();
             const caja = document.getElementById('res-consumo');
             if (caja) {
+                const avisoAnterior = caja.querySelector('.aviso-precio-aplicado');
+                if (avisoAnterior) avisoAnterior.remove();
                 const aviso = document.createElement('p');
-                aviso.className = 'mt-3 text-xs text-slate-500';
+                aviso.className = 'aviso-precio-aplicado mt-3 text-xs text-slate-500';
                 aviso.textContent = 'Precio de ' + (tipoCombustible === 'diesel' ? 'diésel A' : 'gasolina 95 E5') + ' aplicado solo a la calculadora del viaje. La calculadora de consumo real conserva el precio que hayas introducido.';
                 caja.appendChild(aviso);
             }
