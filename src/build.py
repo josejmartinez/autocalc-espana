@@ -113,7 +113,7 @@ def generar_tabla_equivalencias_html(a_orig, p_orig, l_orig):
                     <th class="py-2 px-3 font-semibold">Medida equivalente</th>
                     <th class="py-2 px-3 text-center font-semibold">Ancho de llanta</th>
                     <th class="py-2 px-3 text-center font-semibold">Diámetro</th>
-                    <th class="py-2 px-3 text-center font-semibold">Variación ITV</th>
+                    <th class="py-2 px-3 text-center font-semibold">Variación diámetro</th>
                     <th class="py-2 px-3 text-center font-semibold">Altura chasis</th>
                     <th class="py-2 px-3 text-right font-semibold">Comparar precios por tienda</th>
                 </tr>
@@ -1269,20 +1269,21 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const gargantaRec = GARGANTAS[a2] || '6.0" - 8.5"';
 
             let motivoAviso = '';
-            if (!okDiametro) motivoAviso += '<li>El diámetro supera el margen legal del ±3 %.</li>';
-            if (!okCarga) motivoAviso += `<li>El índice de carga nuevo (${c2}) no puede ser inferior al original (${c1}).</li>`;
-            if (!okVelocidad) motivoAviso += '<li>El código de velocidad es inferior al original (solo permitido en neumáticos de invierno M+S con etiqueta de aviso).</li>';
+            if (!okDiametro) motivoAviso += '<li>La variación del diámetro supera el límite de referencia del ±3 %.</li>';
+            if (!okCarga) motivoAviso += `<li>El índice de carga introducido (${c2}) es inferior al de referencia (${c1}).</li>`;
+            if (!okVelocidad) motivoAviso += '<li>El índice de velocidad introducido es inferior al de referencia; comprueba las excepciones y condiciones aplicables con un especialista o la ITV.</li>';
 
             const box = document.getElementById('res-itv');
             box.className = 'mt-6 p-5 rounded-xl border ' + (esEquivalente ? 'bg-emerald-50 border-emerald-300 text-emerald-950' : 'bg-rose-50 border-rose-300 text-rose-950');
 
             box.innerHTML = `
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b ${esEquivalente ? 'border-emerald-200' : 'border-rose-200'}">
-                    <span class="text-lg font-extrabold">${esEquivalente ? 'APTO PARA ITV (medida equivalente legal)' : 'NO APTO PARA ITV (incumple requisitos)'}</span>
+                    <span class="text-lg font-extrabold">${esEquivalente ? 'CUMPLE LOS CRITERIOS BÁSICOS CALCULADOS' : 'NO CUMPLE UNO O MÁS CRITERIOS BÁSICOS'}</span>
                     <span class="text-sm font-bold px-3 py-1 rounded-full ${okDiametro ? 'bg-emerald-200 text-emerald-900' : 'bg-rose-200 text-rose-900'}">
                         Variación: ${diffPorcentaje > 0 ? '+' : ''}${diffPorcentaje.toFixed(2)} %
                     </span>
                 </div>
+                <p class="mt-3 text-xs leading-relaxed">Este resultado es un prechequeo dimensional y de índices con los valores introducidos; no es una aprobación oficial ni verifica por sí solo homologación, medidas admitidas en la ficha técnica, perfil de llanta, ausencia de interferencias u otros requisitos. Confirma la compatibilidad antes de comprar o montar.</p>
                 ${motivoAviso ? `<ul class="mt-3 text-xs list-disc list-inside text-rose-800 font-medium">${motivoAviso}</ul>` : ''}
                 <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-4 text-sm">
                     <div class="bg-white/80 p-2.5 rounded-lg">
