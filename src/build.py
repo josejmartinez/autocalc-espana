@@ -1234,72 +1234,139 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
 
         // 6. Catálogo de piezas y calculadora Desguace vs. Autodoc vs. Taller
         function cargarPiezaCatalogo() {
-            const val = document.getElementById('pieza-catalogo').value;
-            if (!val) return;
-            const p = val.split(',');
-            document.getElementById('rep-tipo').value = p[0];
-            document.getElementById('rep-desguace').value = p[1];
-            document.getElementById('rep-autodoc').value = p[2];
-            document.getElementById('rep-horas').value = p[3];
+            const selector = document.getElementById('pieza-catalogo');
+            if (!selector || !selector.value) return;
+
+            const p = selector.value.split(',');
+            if (p.length < 9) {
+                mostrarErrorCalculo('res-desguace', 'No se han podido leer los valores del catálogo. Comprueba la opción seleccionada.');
+                return;
+            }
+
+            const campos = {
+                'rep-tipo': p[0],
+                'rep-desguace': p[1],
+                'rep-autodoc': p[2],
+                'rep-horas': p[3],
+                'rep-logistica-usado': p[5],
+                'rep-envio-nuevo': p[6],
+                'rep-tarifa-hora': p[7],
+                'rep-recargo-taller': p[8]
+            };
+            Object.entries(campos).forEach(([id, valor]) => {
+                const campo = document.getElementById(id);
+                if (campo) campo.value = valor;
+            });
+
+            const consulta = p[4].split('+').join(' ');
             const linkAutodoc = document.getElementById('link-pieza-autodoc');
-            if (linkAutodoc) linkAutodoc.href = `https://www.autodoc.es/search?keyword=${p[4]}`;
+            if (linkAutodoc) {
+                linkAutodoc.href = 'https://www.autodoc.es/search?keyword=' + encodeURIComponent(consulta);
+            }
+
             calcularDesguace();
         }
 
         function calcularDesguace() {
             const elTipo = document.getElementById('rep-tipo');
             if (!elTipo) return;
+
             const tipo = elTipo.value;
-            const pDesguace = leerNumeroCampo('rep-desguace');
-            const pAutodoc = leerNumeroCampo('rep-autodoc');
+            const precioUsado = leerNumeroCampo('rep-desguace');
+            const precioNuevo = leerNumeroCampo('rep-autodoc');
             const horas = leerNumeroCampo('rep-horas');
-            if (pDesguace === null || pAutodoc === null || horas === null ||
-                pDesguace < 0 || pAutodoc < 0 || horas < 0 || horas > 100) {
-                mostrarErrorCalculo('res-desguace', 'Introduce precios no negativos y horas de mano de obra entre 0 y 100.');
+            const logisticaUsado = leerNumeroCampo('rep-logistica-usado');
+            const envioNuevo = leerNumeroCampo('rep-envio-nuevo');
+            const tarifaHora = leerNumeroCampo('rep-tarifa-hora');
+            const recargoTaller = leerNumeroCampo('rep-recargo-taller');
+
+            const valores = [precioUsado, precioNuevo, horas, logisticaUsado, envioNuevo, tarifaHora, recargoTaller];
+            if (valores.some(valor => valor === null) ||
+                valores.some(valor => valor < 0) ||
+                precioUsado > 100000 || precioNuevo > 100000 ||
+                logisticaUsado > 100000 || envioNuevo > 100000 ||
+                horas > 100 || tarifaHora > 1000 || recargoTaller > 300 ||
+                !['carroceria', 'mecanica', 'desgaste'].includes(tipo)) {
+                mostrarErrorCalculo('res-desguace', 'Revisa los importes: precios y costes entre 0 y 100.000 €, horas entre 0 y 100, tarifa entre 0 y 1.000 €/h y recargo entre 0 y 300 %.');
                 return;
             }
 
-            const manoObraTaller = horas * 52;
-            const totalDesguaceDIY = pDesguace;
-            const totalAutodocDIY = pAutodoc;
-            const totalTallerMontado = (pAutodoc * 1.25) + manoObraTaller;
-            const ahorroDesguace = pAutodoc - pDesguace;
+            const costeUsadoDIY = precioUsado + logisticaUsado;
+            const costeNuevoDIY = precioNuevo + envioNuevo;
+            const manoObraTaller = horas * tarifaHora;
+            const recargoPiezaTaller = precioNuevo * recargoTaller / 100;
+            const costeTaller = precioNuevo + envioNuevo + recargoPiezaTaller + manoObraTaller;
 
-            let recomendacion = "";
-            let badgeColor = "bg-emerald-100 text-emerald-900 border-emerald-300";
+            const opciones = [
+                { nombre: 'Pieza usada + montaje propio', total: costeUsadoDIY, clave: 'usado' },
+                { nombre: 'Pieza nueva + montaje propio', total: costeNuevoDIY, clave: 'nuevo' },
+                { nombre: 'Pieza nueva + taller', total: costeTaller, clave: 'taller' }
+            ];
+            const opcionesComparables = tipo === 'desgaste'
+                ? opciones.filter(opcion => opcion.clave !== 'usado')
+                : opciones;
+            const minimo = Math.min(...opcionesComparables.map(opcion => opcion.total));
+            const ganadoras = opcionesComparables.filter(opcion => Math.abs(opcion.total - minimo) < 0.01);
+            const fmt = valor => valor.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
 
-            if (tipo === "desgaste") {
-                recomendacion = "Elemento de desgaste o seguridad: NO se recomienda desguace. Pídelo nuevo en Autodoc (si lo montas tú) o acude a Norauto / Feu Vert con montaje incluido.";
-                badgeColor = "bg-rose-100 text-rose-900 border-rose-300";
-            } else if (ahorroDesguace < 25) {
-                recomendacion = "La diferencia frente a la pieza nueva es inferior a 25 €. Compara referencia exacta, estado, devolución, garantía aplicable y coste de montaje antes de decidir.";
-                badgeColor = "bg-amber-100 text-amber-900 border-amber-300";
+            let recomendacion;
+            let claseRecomendacion;
+            if (tipo === 'desgaste') {
+                claseRecomendacion = 'bg-amber-50 text-amber-900 border-amber-200';
+                recomendacion = ganadoras.length > 1
+                    ? 'Las alternativas con pieza nueva están prácticamente empatadas (' + fmt(minimo) + '). Compara referencia exacta, garantía, calidad y montaje. Para frenos, amortiguadores, distribución y otros componentes críticos, evita la pieza usada.'
+                    : 'Según tus importes, la alternativa nueva más económica es ' + ganadoras[0].nombre.toLowerCase() + ' (' + fmt(minimo) + '). Para esta familia de seguridad/desgaste, no recomendamos la pieza usada.';
+            } else if (ganadoras.length > 1) {
+                claseRecomendacion = 'bg-amber-50 text-amber-900 border-amber-200';
+                recomendacion = 'Las alternativas más económicas están prácticamente empatadas (' + fmt(minimo) + '). Decide según compatibilidad, estado, garantía, plazo y coste de montaje.';
             } else {
-                recomendacion = `¡Compensa ir a desguace! El ahorro teórico frente al precio nuevo es de ${ahorroDesguace.toFixed(0)} €. Comprueba compatibilidad, estado, garantía y transporte; el cálculo no incluye costes adicionales que no hayas introducido.`;
+                claseRecomendacion = 'bg-emerald-50 text-emerald-900 border-emerald-200';
+                recomendacion = 'Con los datos que has introducido, la opción más económica es ' + ganadoras[0].nombre.toLowerCase() + ' (' + fmt(minimo) + '), antes de los costes que falten. Verifica compatibilidad, estado, devolución y garantía antes de comprar.';
             }
 
-            document.getElementById('res-desguace').innerHTML = `
-                <div class="p-3.5 rounded-xl border font-semibold text-xs sm:text-sm mb-4 ${badgeColor}">
-                    ${recomendacion}
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-                    <div class="bg-white p-3 rounded-lg border">
-                        <div class="text-xs text-slate-500">1. Desguace (montaje propio)</div>
-                        <div class="text-xl font-bold text-emerald-700">${totalDesguaceDIY.toFixed(0)} €</div>
-                        <div class="text-[11px] text-slate-400">Pieza original recuperada OEM</div>
-                    </div>
-                    <div class="bg-white p-3 rounded-lg border">
-                        <div class="text-xs text-slate-500">2. Nuevo en Autodoc (DIY)</div>
-                        <div class="text-xl font-bold text-orange-600">${totalAutodocDIY.toFixed(0)} €</div>
-                        <div class="text-[11px] text-slate-400">Pieza nueva con garantía</div>
-                    </div>
-                    <div class="bg-white p-3 rounded-lg border">
-                        <div class="text-xs text-slate-500">3. Taller rápido (pieza + M.O.)</div>
-                        <div class="text-xl font-bold text-slate-900">${totalTallerMontado.toFixed(0)} €</div>
-                        <div class="text-[11px] text-slate-400">Estimado con ${horas} h de taller</div>
-                    </div>
-                </div>
-            `;
+            function tarjeta(titulo, total, detalle, nota, clave, advertencia) {
+                const seleccionada = ganadoras.some(opcion => opcion.clave === clave);
+                const borde = seleccionada ? 'border-emerald-400 ring-1 ring-emerald-200' : 'border-slate-200';
+                const aviso = advertencia ? '<div class="mt-3 text-xs font-bold text-rose-700">' + advertencia + '</div>' : '';
+                return '<div class="bg-white p-4 rounded-xl border ' + borde + '">' +
+                    '<div class="text-xs text-slate-500">' + titulo + '</div>' +
+                    '<div class="text-2xl font-extrabold text-slate-900 mt-1">' + fmt(total) + '</div>' +
+                    '<div class="mt-2 text-[11px] text-slate-500">' + detalle + '</div>' +
+                    '<div class="mt-2 text-[11px] text-slate-500">' + nota + '</div>' +
+                    aviso + '</div>';
+            }
+
+            const diferenciaUsadoNuevo = costeUsadoDIY - costeNuevoDIY;
+            const diferenciaNuevoTaller = costeNuevoDIY - costeTaller;
+            const cajaResultado = document.getElementById('res-desguace');
+            if (!cajaResultado) return;
+            cajaResultado.className = 'mt-6 p-5 rounded-xl bg-slate-50 border border-slate-200';
+            cajaResultado.innerHTML =
+                '<div class="p-3.5 rounded-xl border font-semibold text-xs sm:text-sm mb-4 ' + claseRecomendacion + '">' + recomendacion + '</div>' +
+                '<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">' +
+                    tarjeta('1. Pieza usada + montaje propio', costeUsadoDIY,
+                        'Pieza ' + fmt(precioUsado) + ' + transporte/gestión ' + fmt(logisticaUsado),
+                        'Verifica referencia OEM, estado, prueba, devolución y garantía ofrecida por el vendedor.',
+                        'usado',
+                        tipo === 'desgaste' ? 'No recomendada para esta familia crítica.' : '') +
+                    tarjeta('2. Pieza nueva + montaje propio', costeNuevoDIY,
+                        'Pieza ' + fmt(precioNuevo) + ' + envío ' + fmt(envioNuevo),
+                        'Confirma la referencia con marca, modelo, año, motor y número OEM/VIN cuando proceda.',
+                        'nuevo', '') +
+                    tarjeta('3. Pieza nueva + taller', costeTaller,
+                        'Pieza ' + fmt(precioNuevo) + ' + recargo ' + fmt(recargoPiezaTaller) + ' + envío ' + fmt(envioNuevo) + ' + mano de obra ' + fmt(manoObraTaller),
+                        horas.toLocaleString('es-ES') + ' h × ' + fmt(tarifaHora) + '/h. Simulación editable; no es una oferta de un taller real.',
+                        'taller', '') +
+                '</div>' +
+                '<div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">' +
+                    '<div class="p-3 rounded-lg bg-white border"><div class="text-slate-500">Diferencia usado frente a nuevo DIY</div><div class="font-bold ' + (diferenciaUsadoNuevo <= 0 ? 'text-emerald-700' : 'text-amber-700') + '">' +
+                        (diferenciaUsadoNuevo <= 0 ? 'Usado cuesta ' + fmt(Math.abs(diferenciaUsadoNuevo)) + ' menos o igual' : 'Usado cuesta ' + fmt(diferenciaUsadoNuevo) + ' más') +
+                    '</div></div>' +
+                    '<div class="p-3 rounded-lg bg-white border"><div class="text-slate-500">Diferencia nuevo DIY frente a taller</div><div class="font-bold">' +
+                        (diferenciaNuevoTaller > 0 ? 'El taller cuesta ' + fmt(diferenciaNuevoTaller) + ' menos' : diferenciaNuevoTaller < 0 ? 'El taller cuesta ' + fmt(Math.abs(diferenciaNuevoTaller)) + ' más' : 'Mismo coste estimado') +
+                    '</div></div>' +
+                '</div>' +
+                '<p class="mt-4 text-[11px] leading-relaxed text-slate-500">Estimación con tus datos. Los precios del catálogo son ejemplos y pueden no coincidir con el mercado. No incluye automáticamente IVA adicional, diagnosis, consumibles, devolución de casco, transporte imprevisto, herramienta, alineación, programación/codificación ni otras operaciones, salvo que las añadas a los importes. El coste final y la garantía dependen del vendedor y del taller.</p>';
         }
 
         function diametroNeumatico(ancho, perfil, llanta) {
