@@ -59,6 +59,15 @@ jobs:
                       print(f"Falta {marker!r} en {page}")
                       sys.exit(1)
 
+              head = html.split("</head>", 1)[0]
+              if "googletagmanager.com/gtag/js" in head:
+                  print(f"Analytics se carga en el head antes de gestionar el consentimiento: {page}")
+                  sys.exit(1)
+              for marker in ("autocalc_privacidad_v2", "Rechazar analítica", "Aceptar analítica", "Configurar cookies"):
+                  if marker not in html:
+                      print(f"Falta el control de privacidad {marker!r} en {page}")
+                      sys.exit(1)
+
           sitemap = (output / "sitemap.xml").read_text(encoding="utf-8")
           robots = (output / "robots.txt").read_text(encoding="utf-8")
           if "<loc>" not in sitemap or "Sitemap:" not in robots:
