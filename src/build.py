@@ -1516,11 +1516,32 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             `;
         }
 
+        function leerPreferenciaPrivacidad() {
+            try {
+                const guardada = localStorage.getItem(AUTOCALC_CONSENT_KEY);
+                if (!guardada) return null;
+                const datos = JSON.parse(guardada);
+                const maxEdadMs = 180 * 24 * 60 * 60 * 1000;
+                if (!datos || !['analytics', 'essential'].includes(datos.choice) ||
+                    !Number.isFinite(datos.timestamp) || Date.now() - datos.timestamp > maxEdadMs ||
+                    datos.timestamp > Date.now()) {
+                    localStorage.removeItem(AUTOCALC_CONSENT_KEY);
+                    return null;
+                }
+                return datos.choice;
+            } catch (error) {
+                return null;
+            }
+        }
+
         function guardarPreferenciaPrivacidad(valor) {
             try {
-                localStorage.setItem(AUTOCALC_CONSENT_KEY, valor);
+                localStorage.setItem(AUTOCALC_CONSENT_KEY, JSON.stringify({
+                    choice: valor,
+                    timestamp: Date.now()
+                }));
             } catch (error) {
-                // Si el navegador bloquea el almacenamiento local, mantenemos la elección solo en esta página.
+                // Si el navegador bloquea el almacenamiento local, la elección solo se aplica en esta página.
             }
         }
 
@@ -1625,16 +1646,15 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             mostrarFalloOBD();
             evaluarChecklist();
             calcularDesguace();
-            let preferenciaPrivacidad = null;
-            try {
-                preferenciaPrivacidad = localStorage.getItem(AUTOCALC_CONSENT_KEY);
-            } catch (error) {
-                preferenciaPrivacidad = null;
-            }
-
+            const preferenciaPrivacidad = leerPreferenciaPrivacidad();
             if (preferenciaPrivacidad === 'analytics') {
                 actualizarAnalitica(true);
-            } else if (preferenciaPrivacidad !== 'essential') {
+            } else if (preferenciaPrivacidad === 'essential') {
+                // Analytics no se ha cargado; borrar posibles cookies heredadas de la versión anterior.
+                eliminarCookiesAnalitica();
+            } else {
+                // Los consentimientos antiguos no se consideran válidos y sus cookies se limpian antes de volver a preguntar.
+                eliminarCookiesAnalitica();
                 document.getElementById('cookie-banner').classList.remove('hidden');
             }
         });
