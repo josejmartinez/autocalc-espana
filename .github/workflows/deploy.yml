@@ -86,6 +86,17 @@ jobs:
               print("El sitemap o robots.txt no coincide con el dominio activo.")
               sys.exit(1)
 
+          for marker in ("Tramo fiscal IVTM (sin cuota local)", "Consulta el distintivo por matrícula", "no una cuota municipal"):
+              if marker not in index_html:
+                  print(f"Falta aclaración fiscal o DGT: {marker}")
+                  sys.exit(1)
+
+          stale_claims = ("~143 €/año", "~25 €/año", "85 % de los rechazos", "supone resultado desfavorable", "APTO PARA ITV (medida equivalente legal)")
+          for claim in stale_claims:
+              if any(claim in page.read_text(encoding="utf-8") for page in html_pages):
+                  print(f"Se ha encontrado una afirmación obsoleta o demasiado categórica: {claim}")
+                  sys.exit(1)
+
           cname_file = output / "CNAME"
           if use_custom_domain:
               if not cname_file.is_file() or cname_file.read_text(encoding="utf-8").strip() != custom_domain:
