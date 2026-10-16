@@ -20,7 +20,7 @@ MEDIDAS_ESPANA = [
     (195, 65, 15, 205, 55, 16, "Seat León I/II, VW Golf IV/V, Skoda Octavia, Audi A3 8L"),
     (185, 65, 15, 195, 60, 15, "Dacia Sandero, Renault Clio, Dacia Logan, Nissan Primera, Hyundai i20"),
     (185, 60, 15, 195, 55, 15, "Seat Ibiza, VW Polo, Skoda Fabia, Toyota Yaris"),
-    (195, 50, 15, 195, 55, 15, "Ford Fiesta, Seat Ibiza, Peugeot 206, Mazda MX-5"),
+    (195, 50, 15, 195, 45, 16, "Ford Fiesta, Seat Ibiza, Peugeot 206, Mazda MX-5"),
     (195, 55, 15, 205, 50, 15, "Citroën Xsara, Peugeot 206 GTI, Seat Córdoba, Fiat Bravo"),
     (195, 60, 15, 205, 55, 15, "Ford Focus MK1, Opel Astra G, Nissan Almera, Toyota Avensis"),
     (175, 65, 15, 185, 60, 15, "Mini One, Suzuki Swift, Fiat Punto, Toyota Yaris"),
@@ -57,7 +57,7 @@ MEDIDAS_ESPANA = [
 
 MODELOS_COCHES = [
     ("seat-leon", "Seat León", 205, 55, 16, 225, 45, 17, 5.4),
-    ("seat-ibiza", "Seat Ibiza", 185, 60, 15, 215, 45, 17, 5.2),
+    ("seat-ibiza", "Seat Ibiza", 185, 60, 15, 205, 40, 17, 5.2),
     ("seat-ateca", "Seat Ateca", 215, 60, 16, 215, 55, 17, 5.8),
     ("seat-arona", "Seat Arona", 205, 60, 16, 205, 55, 17, 5.3),
     ("cupra-formentor", "Cupra Formentor", 245, 45, 18, 245, 40, 19, 6.4),
@@ -75,9 +75,9 @@ MODELOS_COCHES = [
     ("peugeot-2008", "Peugeot 2008", 215, 60, 17, 215, 55, 18, 5.6),
     ("peugeot-3008", "Peugeot 3008", 225, 55, 18, 235, 50, 18, 5.8),
     ("citroen-c3", "Citroën C3", 195, 55, 16, 205, 50, 16, 5.2),
-    ("citroen-c4", "Citroën C4", 205, 55, 16, 195, 60, 18, 5.4),
+    ("citroen-c4", "Citroën C4", 205, 55, 16, 225, 45, 17, 5.4),
     ("citroen-berlingo", "Citroën Berlingo", 205, 60, 16, 215, 55, 16, 5.9),
-    ("opel-corsa", "Opel Corsa", 175, 65, 14, 195, 55, 16, 5.1),
+    ("opel-corsa", "Opel Corsa", 175, 65, 14, 195, 45, 16, 5.1),
     ("opel-astra", "Opel Astra", 205, 55, 16, 225, 45, 17, 5.4),
     ("ford-focus", "Ford Focus", 205, 55, 16, 215, 50, 17, 5.5),
     ("ford-fiesta", "Ford Fiesta", 195, 55, 15, 195, 50, 16, 5.2),
@@ -174,7 +174,7 @@ MEDIDAS_ESPANA.extend([
 
 MODELOS_COCHES.extend([
     ("bmw-serie-3", "BMW Serie 3", 205, 55, 16, 225, 45, 17, 5.7),
-    ("audi-a4", "Audi A4", 205, 55, 16, 225, 50, 17, 5.6),
+    ("audi-a4", "Audi A4", 205, 55, 16, 225, 45, 17, 5.6),
     ("mercedes-clase-c", "Mercedes Clase C", 205, 55, 16, 225, 45, 17, 5.6),
     ("renault-kangoo", "Renault Kangoo", 185, 65, 15, 195, 65, 15, 5.8),
     ("peugeot-partner", "Peugeot Partner", 195, 65, 15, 205, 60, 16, 5.8),
