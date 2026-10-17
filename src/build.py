@@ -238,11 +238,9 @@ for ad_slot_name in DIRECT_AD_SLOT_NAMES:
             raise ValueError(f"El enlace del espacio publicitario {ad_slot_name} debe ser una URL HTTPS válida.")
         image_url = ad_slot_config.get("image_url", "").strip()
         if image_url:
-            parsed_image = urlsplit(image_url)
             safe_local_image = image_url.startswith("/") and not image_url.startswith("//") and ".." not in image_url.split("/")
-            safe_remote_image = parsed_image.scheme == "https" and bool(parsed_image.hostname)
-            if not (safe_local_image or safe_remote_image):
-                raise ValueError(f"La imagen del espacio publicitario {ad_slot_name} debe ser HTTPS o una ruta local segura.")
+            if not safe_local_image:
+                raise ValueError(f"La imagen del espacio publicitario {ad_slot_name} debe ser una ruta local segura del propio sitio.")
     adsense_slot_id = ADSENSE_SLOT_IDS.get(ad_slot_name, "")
     if not isinstance(adsense_slot_id, str):
         raise TypeError(f"El identificador AdSense de {ad_slot_name} debe ser texto.")
