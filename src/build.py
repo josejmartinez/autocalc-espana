@@ -1541,10 +1541,12 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                 <p class="text-xs text-rose-700 font-semibold mt-1"><strong>Impacto en la estación ITV:</strong> ${info.itv}</p>
                 <p class="text-xs text-emerald-800 font-medium mt-1"><strong>Solución recomendada:</strong> ${info.solucion}</p>
                 <div class="flex flex-wrap gap-2 mt-3">
-                    <a href="${buildPartnerUrl('autodoc', 'https://www.autodoc.es/search?keyword=' + encodeURIComponent(info.query.replace(/\+/g, ' ')))}" target="_blank" rel="nofollow sponsored" class="text-xs bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg transition">Buscar recambio en Autodoc →</a>
+                    <a id="link-obd-autodoc" href="https://www.autodoc.es/" target="_blank" rel="nofollow" class="text-xs bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg transition">Buscar recambio en Autodoc →</a>
                     <a href="https://www.amazon.es/s?k=${info.query}&tag=${AMAZON_TAG}" target="_blank" rel="nofollow sponsored" class="text-xs bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg transition">Ver aditivos / recambio en Amazon →</a>
                 </div>
             `;
+            const obdAutodocLink = document.getElementById('link-obd-autodoc');
+            setPartnerLink(obdAutodocLink, 'autodoc', 'https://www.autodoc.es/search?keyword=' + encodeURIComponent(info.query.replace(/\+/g, ' ')));
         }
 
         function evaluarChecklist() {
@@ -1590,7 +1592,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const consulta = p[4].split('+').join(' ');
             const linkAutodoc = document.getElementById('link-pieza-autodoc');
             if (linkAutodoc) {
-                linkAutodoc.href = buildPartnerUrl('autodoc', 'https://www.autodoc.es/search?keyword=' + encodeURIComponent(consulta));
+                setPartnerLink(linkAutodoc, 'autodoc', 'https://www.autodoc.es/search?keyword=' + encodeURIComponent(consulta));
             }
 
             calcularDesguace();
@@ -1835,10 +1837,10 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
 
             dibujarComparadorSVG(a1, p1, l1, d1, a2, p2, l2, d2);
 
-            document.getElementById('cta-muchoneumatico').href = buildPartnerUrl('muchoneumatico', `https://www.muchoneumatico.com/buscar?controller=search&s=${a1}+${p1}+${l1}`);
+            setPartnerLink('cta-muchoneumatico', 'muchoneumatico', `https://www.muchoneumatico.com/buscar?controller=search&s=${a1}+${p1}+${l1}`);
             document.getElementById('txt-cta-mucho').innerText = `Muchoneumático ${a1}/${p1} R${l1}`;
-            document.getElementById('cta-norauto').href = buildPartnerUrl('norauto', `https://www.norauto.es/c/47595-neumaticos.html?q=${a2}%2F${p2}R${l2}`);
-            document.getElementById('cta-feuvert').href = buildPartnerUrl('feuvert', `https://www.feuvert.es/neumaticos?q=${a2}+${p2}+${l2}`);
+            setPartnerLink('cta-norauto', 'norauto', `https://www.norauto.es/c/47595-neumaticos.html?q=${a2}%2F${p2}R${l2}`);
+            setPartnerLink('cta-feuvert', 'feuvert', `https://www.feuvert.es/neumaticos?q=${a2}+${p2}+${l2}`);
             document.getElementById('txt-cta-norauto').innerText = `Montaje ${a2}/${p2} R${l2}`;
             document.getElementById('cta-neumatico-orig').href = `https://www.amazon.es/s?k=neumaticos+${a1}+${p1}+R${l1}&tag=${AMAZON_TAG}`;
             document.getElementById('txt-cta-orig').innerText = `Amazon: ${a1}/${p1} R${l1} y V16`;
