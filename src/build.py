@@ -302,6 +302,39 @@ def render_ad_slot(slot_name, direct_slots=None, adsense_slots=None):
     return ""
 
 
+def render_affiliate_sidebar(slot_name, partner, headline, body, destination, templates=None):
+    """Render a sidebar affiliate promo only when the partner has an approved tracking template."""
+    if slot_name not in {"sidebar_left", "sidebar_right"}:
+        raise ValueError("Las promociones de afiliación solo pueden usar las posiciones laterales.")
+    selected_templates = AFFILIATE_LINK_TEMPLATES if templates is None else templates
+    if not str(selected_templates.get(partner, "") or "").strip():
+        return ""
+    href = escape(build_affiliate_url(partner, destination, selected_templates), quote=True)
+    safe_headline = escape(headline)
+    safe_body = escape(body)
+    side = "left" if slot_name == "sidebar_left" else "right"
+    wrapper_class = f"autocalc-ad-slot autocalc-ad-sidebar autocalc-ad-sidebar-{side} no-print"
+    return (
+        f'<aside class="{wrapper_class}" aria-label="Enlace afiliado de {safe_headline}">'
+        '<p class="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-2">Recomendación comercial</p>'
+        f'<a href="{href}" target="_blank" rel="sponsored nofollow noopener noreferrer" '
+        'class="block bg-white border border-slate-200 rounded-xl p-3 shadow-sm hover:shadow-md transition">'
+        f'<span class="block text-sm font-extrabold text-slate-900">{safe_headline}</span>'
+        f'<p class="mt-2 text-xs text-slate-600 leading-relaxed">{safe_body}</p>'
+        '<span class="block mt-3 text-xs font-bold text-amber-700">Consultar oferta →</span>'
+        '<span class="autocalc-affiliate-label block mt-1 text-[9px] font-semibold text-slate-500">Enlace de afiliado · puede generar comisión</span>'
+        '</a></aside>'
+    )
+
+
+def render_sidebar_ad(slot_name, partner, headline, body, destination):
+    """Prefer a contracted sponsor or configured AdSense unit, then a tracked affiliate promo."""
+    configured_ad = render_ad_slot(slot_name)
+    if configured_ad:
+        return configured_ad
+    return render_affiliate_sidebar(slot_name, partner, headline, body, destination)
+
+
 if ADSENSE_CLIENT:
     if not GOOGLE_CERTIFIED_CMP_CONFIGURED:
         raise RuntimeError(
@@ -2310,8 +2343,8 @@ def render_page(
         "__AFFILIATE_LINK_TEMPLATES_JSON__": json.dumps(AFFILIATE_LINK_TEMPLATES, ensure_ascii=False),
         "__AMAZON_DISCLOSURE__": AMAZON_DISCLOSURE,
         "__OTHER_AFFILIATE_DISCLOSURE__": affiliate_disclosure_for_other_merchants(),
-        "__SIDEBAR_LEFT_AD_HTML__": render_ad_slot("sidebar_left"),
-        "__SIDEBAR_RIGHT_AD_HTML__": render_ad_slot("sidebar_right"),
+        "__SIDEBAR_LEFT_AD_HTML__": render_sidebar_ad("sidebar_left", "autodoc", "AUTODOC · recambios para tu vehículo", "Consulta piezas nuevas por modelo o referencia y comprueba compatibilidad antes de comprar.", f"https://www.autodoc.es/search?keyword={quote(car_autodoc_query.replace(chr(43), chr(32)), safe='')}"),
+        "__SIDEBAR_RIGHT_AD_HTML__": render_sidebar_ad("sidebar_right", "norauto", "Norauto · neumáticos y montaje", "Consulta disponibilidad y precio de montaje; confirma las condiciones en el centro.", f"https://www.norauto.es/c/47595-neumaticos.html?q={a2}%2F{p2}R{l2}"),
         "__INLINE_AD_HTML__": render_ad_slot("inline"),
         "__GOOGLE_ANALYTICS_ID__": GOOGLE_ANALYTICS_ID,
         "__GOOGLE_SITE_VERIFICATION_TAG__": GOOGLE_SITE_VERIFICATION_TAG,

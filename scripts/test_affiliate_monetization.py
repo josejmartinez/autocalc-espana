@@ -12,7 +12,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from build import (  # noqa: E402
     AMAZON_DISCLOSURE, AFFILIATE_PARTNER_DOMAINS, apply_affiliate_links,
-    build_affiliate_url, render_ad_slot,
+    build_affiliate_url, render_ad_slot, render_affiliate_sidebar,
 )
 
 PUBLIC = ROOT / "public"
@@ -97,6 +97,27 @@ def main() -> int:
         raise AssertionError("El bloque de publicidad directa no tiene disclosure/rel correctos.")
     if "&lt;Oferta&gt; especial" not in safe_slot or "<Oferta>" in safe_slot:
         raise AssertionError("Los textos del patrocinador deben escaparse como texto plano.")
+
+    # Side promos are invisible until an approved tracking template exists.
+    sidebar_direct = render_affiliate_sidebar(
+        "sidebar_left", "autodoc", "AUTODOC", "Buscar recambios",
+        "https://www.autodoc.es/search?keyword=alternador", templates={}
+    )
+    if sidebar_direct:
+        raise AssertionError("No debe aparecer un anuncio afiliado lateral sin tracking aprobado.")
+
+    sidebar_tracked = render_affiliate_sidebar(
+        "sidebar_left", "autodoc", "AUTODOC", "Buscar recambios",
+        "https://www.autodoc.es/search?keyword=alternador",
+        templates={"autodoc": "https://tracking.example/click?destination={destination}"}
+    )
+    sidebar_rel = re.search(r'rel="([^"]+)"', sidebar_tracked)
+    if not sidebar_tracked or not sidebar_rel or "sponsored" not in sidebar_rel.group(1):
+        raise AssertionError("La promoción lateral afiliada no tiene rel=sponsored.")
+    if "Enlace de afiliado" not in sidebar_tracked or "AUTODOC" not in sidebar_tracked:
+        raise AssertionError("La promoción lateral debe identificarse como afiliada y mostrar el comercio.")
+    if quote("https://www.autodoc.es/search?keyword=alternador", safe="") not in sidebar_tracked:
+        raise AssertionError("La promoción lateral no conserva su destino mediante el deeplink.")
 
     local_link = apply_affiliate_links('<a href="/privacidad-cookies.html">Privacidad</a>', {})
     if 'rel="nofollow"' in local_link:
