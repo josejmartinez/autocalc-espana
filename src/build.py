@@ -59,6 +59,7 @@ AFFILIATE_LINK_TEMPLATES = CFG.get("affiliate_link_templates", {})
 AFFILIATE_PARTNER_DOMAINS = {
     "autodoc": ("autodoc.es",),
     "norauto": ("norauto.es",),
+    "ebay": ("ebay.es",),
     "oscaro": ("oscaro.es",),
     "aurgi": ("aurgi.com",),
     "feuvert": ("feuvert.es",),
@@ -71,6 +72,7 @@ AFFILIATE_PARTNER_DOMAINS = {
 AFFILIATE_PARTNER_LABELS = {
     "autodoc": "AUTODOC",
     "norauto": "Norauto",
+    "ebay": "eBay Partner Network",
     "oscaro": "Oscaro",
     "aurgi": "Aurgi",
     "feuvert": "Feu Vert",
@@ -1094,6 +1096,15 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                     <span class="mt-4 inline-block text-center bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs py-2 rounded-lg">Ver Aurgi →</span>
                 </a>
 
+
+                <a id="cta-ebay" href="https://www.ebay.es/sch/i.html?_nkw=neumaticos+__VAL_A1__+__VAL_P1__+R__VAL_L1__" target="_blank" rel="nofollow" class="order-6 bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs text-violet-400 font-semibold">Nuevo y usado · catálogo amplio</span>
+                        <h3 id="txt-cta-ebay" class="font-bold text-sm mt-1">eBay: neumáticos __VAL_A1__/__VAL_P1__ R__VAL_L1__ y recambio usado</h3>
+                        <p class="text-xs text-slate-300 mt-1">Útil para comparar piezas OEM usadas y nuevas. Revisa estado, vendedor, devolución, compatibilidad y coste total.</p>
+                    </div>
+                    <span class="mt-4 inline-block text-center bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs py-2 rounded-lg">Buscar en eBay →</span>
+                </a>
                 <a id="cta-costco" href="https://www.costco.es/" target="_blank" rel="nofollow" class="order-8 bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
                     <div>
                         <span class="text-xs text-slate-300 font-semibold">Proveedor complementario</span>
@@ -1843,6 +1854,8 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             document.getElementById('txt-cta-mucho').innerText = `Muchoneumático ${a1}/${p1} R${l1}`;
             setPartnerLink('cta-norauto', 'norauto', `https://www.norauto.es/c/47595-neumaticos.html?q=${a2}%2F${p2}R${l2}`);
             setPartnerLink('cta-feuvert', 'feuvert', `https://www.feuvert.es/neumaticos?q=${a2}+${p2}+${l2}`);
+            setPartnerLink('cta-ebay', 'ebay', `https://www.ebay.es/sch/i.html?_nkw=neumaticos+${a1}+${p1}+R${l1}`);
+            document.getElementById('txt-cta-ebay').innerText = `eBay: ${a1}/${p1} R${l1} y recambio usado`;
             document.getElementById('txt-cta-norauto').innerText = `Montaje ${a2}/${p2} R${l2}`;
             document.getElementById('cta-neumatico-orig').href = `https://www.amazon.es/s?k=neumaticos+${a1}+${p1}+R${l1}&tag=${AMAZON_TAG}`;
             document.getElementById('txt-cta-orig').innerText = `Amazon: ${a1}/${p1} R${l1} y V16`;
