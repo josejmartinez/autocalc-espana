@@ -230,10 +230,17 @@ def validate_commercial_contact(contact_email, adsense_client="", direct_slots=N
         isinstance(slot, dict) and slot.get("enabled") is True
         for slot in configured_slots.values()
     )
-    if display_ads_enabled and not str(contact_email or "").strip():
+    email = str(contact_email or "").strip()
+    email_lower = email.lower()
+    email_looks_real = (
+        "@" in email
+        and "." in email.rsplit("@", 1)[-1]
+        and not any(marker in email_lower for marker in ("tudominio", "example", "changeme"))
+    )
+    if display_ads_enabled and not email_looks_real:
         raise RuntimeError(
-            "Publicidad display bloqueada: completa config.json contact_email antes de activar "
-            "patrocinadores directos o AdSense."
+            "Publicidad display bloqueada: completa config.json contact_email con un correo real "
+            "del responsable antes de activar patrocinadores directos o AdSense."
         )
     return True
 
