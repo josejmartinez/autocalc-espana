@@ -16,7 +16,41 @@
     "muchoneumatico": "",
     "recambioverde": "",
     "desguaceslatorre": "",
-    "elchoque": ""
+    "elchoque": "",
+    "oscaro": "",
+    "aurgi": "",
+    "costco": ""
   },
-  "indexnow_key": "2adad980798dd765f6a21f84be067896"
+  "indexnow_key": "2adad980798dd765f6a21f84be067896",
+  "direct_ad_slots": {
+    "sidebar_left": {
+      "enabled": false,
+      "advertiser": "",
+      "headline": "",
+      "body": "",
+      "image_url": "",
+      "target_url": ""
+    },
+    "sidebar_right": {
+      "enabled": false,
+      "advertiser": "",
+      "headline": "",
+      "body": "",
+      "image_url": "",
+      "target_url": ""
+    },
+    "inline": {
+      "enabled": false,
+      "advertiser": "",
+      "headline": "",
+      "body": "",
+      "image_url": "",
+      "target_url": ""
+    }
+  },
+  "adsense_slots": {
+    "sidebar_left": "",
+    "sidebar_right": "",
+    "inline": ""
+  }
 }
