@@ -42,7 +42,7 @@ jobs:
 
       - name: Validate generated JavaScript syntax
         run: python scripts/test_inline_js.py
-
+\n      - name: Validate affiliate disclosures and tracking links\n        run: python scripts/test_affiliate_monetization.py\n
       - name: Test domain migration in both modes
         run: python scripts/test_domain_switch.py
 
