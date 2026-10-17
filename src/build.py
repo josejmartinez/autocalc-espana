@@ -1035,7 +1035,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                 <span class="text-xs bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full w-fit">Selección mecánica experta</span>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <a id="cta-muchoneumatico" href="https://www.muchoneumatico.com/buscar?controller=search&s=__VAL_A1__+__VAL_P1__+__VAL_L1__" target="_blank" rel="nofollow sponsored" class="bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
+                <a id="cta-muchoneumatico" href="https://www.muchoneumatico.com/buscar?controller=search&s=__VAL_A1__+__VAL_P1__+__VAL_L1__" target="_blank" rel="nofollow sponsored" class="order-5 bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
                     <div>
                         <span class="text-xs text-sky-400 font-semibold">Especialista en ruedas</span>
                         <h3 id="txt-cta-mucho" class="font-bold text-sm mt-1">Muchoneumático __VAL_A1__/__VAL_P1__ R__VAL_L1__</h3>
@@ -1044,18 +1044,18 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                     <span class="mt-4 inline-block text-center bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold text-xs py-2 rounded-lg">Ver en Muchoneumático →</span>
                 </a>
 
-                <a id="cta-autodoc" href="https://www.autodoc.es/search?keyword=__CAR_AUTODOC_QUERY__" target="_blank" rel="nofollow sponsored" class="bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
+                <a id="cta-autodoc" href="https://www.autodoc.es/search?keyword=__CAR_AUTODOC_QUERY__" target="_blank" rel="nofollow sponsored" class="order-1 border-orange-400 ring-2 ring-orange-400/60 bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border transition flex flex-col justify-between">
                     <div>
-                        <span class="text-xs text-orange-400 font-semibold">Recambios en general</span>
+                        <span class="text-xs text-orange-400 font-semibold">Prioridad 1 · recambio nuevo</span>
                         <h3 class="font-bold text-sm mt-1">Catálogo Autodoc (__CAR_SHORT_NAME__)</h3>
                         <p class="text-xs text-slate-300 mt-1">El mayor catálogo europeo de filtros, frenos, suspensión, aceites y correas.</p>
                     </div>
                     <span class="mt-4 inline-block text-center bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold text-xs py-2 rounded-lg">Buscar en Autodoc →</span>
                 </a>
 
-                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col justify-between">
+                <div class="order-2 border-blue-400 ring-2 ring-blue-500/50 bg-slate-800 p-4 rounded-xl border flex flex-col justify-between">
                     <div>
-                        <span class="text-xs text-emerald-400 font-semibold">Talleres por cercanía y ofertas</span>
+                        <span class="text-xs text-emerald-400 font-semibold">Prioridad 2 · montaje y taller</span>
                         <h3 id="txt-cta-norauto" class="font-bold text-sm mt-1">Montaje __VAL_A2__/__VAL_P2__ R__VAL_L2__</h3>
                         <p class="text-xs text-slate-300 mt-1">Compra online tus neumáticos o batería con cita de montaje en tu centro más cercano.</p>
                     </div>
@@ -1065,13 +1065,40 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                     </div>
                 </div>
 
-                <a id="cta-neumatico-orig" href="https://www.amazon.es/s?k=neumaticos+__VAL_A1__+__VAL_P1__+R__VAL_L1__&tag=__AMAZON_TAG__" target="_blank" rel="nofollow sponsored" class="bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
+                <a id="cta-neumatico-orig" href="https://www.amazon.es/s?k=neumaticos+__VAL_A1__+__VAL_P1__+R__VAL_L1__&tag=__AMAZON_TAG__" target="_blank" rel="nofollow sponsored" class="order-7 bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
                     <div>
                         <span class="text-xs text-amber-400 font-semibold">Envío 24 h y pre-ITV</span>
                         <h3 id="txt-cta-orig" class="font-bold text-sm mt-1">Amazon: __VAL_A1__/__VAL_P1__ R__VAL_L1__ y V16</h3>
                         <p class="text-xs text-slate-300 mt-1">Neumáticos, baliza V16 conectada DGT, escobillas y diagnosis OBD2.</p>
                     </div>
                     <span class="mt-4 inline-block text-center bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs py-2 rounded-lg">Ver en Amazon →</span>
+                </a>
+                
+                <a id="cta-oscaro" href="https://www.oscaro.es/" target="_blank" rel="nofollow" class="order-3 bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs text-emerald-400 font-semibold">Recambio nuevo · candidato prioritario</span>
+                        <h3 class="font-bold text-sm mt-1">Oscaro · piezas para tu coche</h3>
+                        <p class="text-xs text-slate-300 mt-1">Compara referencias y disponibilidad en su catálogo. Confirma compatibilidad por matrícula, versión o referencia OEM.</p>
+                    </div>
+                    <span class="mt-4 inline-block text-center bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2 rounded-lg">Buscar en Oscaro →</span>
+                </a>
+
+                <a id="cta-aurgi" href="https://www.aurgi.com/" target="_blank" rel="nofollow" class="order-4 bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs text-cyan-400 font-semibold">Neumáticos, baterías y taller</span>
+                        <h3 class="font-bold text-sm mt-1">Aurgi · productos y montaje</h3>
+                        <p class="text-xs text-slate-300 mt-1">Consulta el precio del producto y el montaje por separado y pide cita en tu centro.</p>
+                    </div>
+                    <span class="mt-4 inline-block text-center bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs py-2 rounded-lg">Ver Aurgi →</span>
+                </a>
+
+                <a id="cta-costco" href="https://www.costco.es/" target="_blank" rel="nofollow" class="order-8 bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs text-slate-300 font-semibold">Proveedor complementario</span>
+                        <h3 class="font-bold text-sm mt-1">Costco · catálogo y accesorios</h3>
+                        <p class="text-xs text-slate-300 mt-1">Enlace directo mientras se confirma si existe un programa de afiliación aplicable a España y automoción.</p>
+                    </div>
+                    <span class="mt-4 inline-block text-center bg-slate-600 hover:bg-slate-500 text-white font-bold text-xs py-2 rounded-lg">Consultar Costco →</span>
                 </a>
             </div>
         </section>
