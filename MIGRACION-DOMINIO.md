@@ -1,50 +1,78 @@
 # Migración de AutoCalc España a autocalc.es
 
-El sitio seguirá publicado en GitHub Pages mientras el dominio se activa. **No cambies** `use_custom_domain` a `true` hasta que el dominio esté dado de alta y GitHub Pages tenga validado el dominio y las DNS.
+**Estado (17 de octubre de 2026):** el dominio `autocalc.es` ya está registrado en Piensa Solutions. La rama `chore/activate-autocalc-domain` prepara el cambio de URL canónica, Open Graph, sitemap, `robots.txt` y `CNAME`; el dominio de producción no cambia hasta fusionar esta rama.
 
-## Cómo está preparado el código
+## Orden seguro para publicar el dominio
 
-En `config.json`:
+Haz estos pasos seguidos. **No fusiones la rama ni actives el modo de dominio propio en producción hasta que las DNS resuelvan correctamente.**
 
-- `domain`: URL actual de GitHub Pages y destino de vuelta si hay que revertir.
-- `custom_domain`: dominio reservado para el sitio, ahora `autocalc.es`.
-- `use_custom_domain`: interruptor de la migración. Sigue en `false`.
+### 1. Añade el dominio en GitHub Pages
 
-Al activar el interruptor, el generador actualiza automáticamente las URL canónicas, Open Graph, el sitemap, `robots.txt` y el archivo `CNAME`. El flujo de GitHub Actions prueba ambos modos y restaura la configuración activa antes de validar el artefacto. Como la web se publica mediante GitHub Actions, **el archivo CNAME por sí solo no configura el dominio en GitHub**: también hay que guardarlo en Settings → Pages.
+1. Abre el repositorio [josejmartinez/autocalc-espana](https://github.com/josejmartinez/autocalc-espana).
+2. Ve a **Settings → Pages**.
+3. En **Custom domain**, escribe `autocalc.es` y pulsa **Save**. Si ya aparece, no lo dupliques.
+4. No cambies la rama ni el método de publicación: el sitio se publica mediante GitHub Actions.
 
-## Pasos cuando Piensa Solutions confirme el alta
+GitHub recomienda registrar el dominio en Pages antes de apuntar las DNS para reducir el riesgo de que otra persona lo asocie a su sitio.
 
-1. **No toques la configuración actual todavía.** Comprueba que el dominio aparece activo en el área de cliente de Piensa Solutions.
-2. En GitHub, abre el repositorio `josejmartinez/autocalc-espana` → **Settings → Pages**. En «Custom domain», añade `autocalc.es` y guarda. GitHub recomienda añadir el dominio al sitio antes de configurarlo en el proveedor DNS, para reducir el riesgo de que otra persona pueda alojarlo.
-3. En la gestión DNS de Piensa Solutions, configura para el dominio raíz (`@`) estos cuatro registros **A**:
+### 2. Configura las DNS en Piensa Solutions
 
-   - `185.199.108.153`
-   - `185.199.109.153`
-   - `185.199.110.153`
-   - `185.199.111.153`
+En el Área de Cliente, abre el producto del dominio **autocalc.es** y entra en el panel de control o gestor de DNS. En los registros de la zona DNS, configura:
 
-   Añade `www` como **CNAME** a `josejmartinez.github.io` (sin el nombre del repositorio). Quita únicamente los registros de parking o A/AAAA que entren en conflicto con estos registros; **no borres MX ni TXT de correo u otros servicios**. No configures un CNAME en el dominio raíz.
-4. Espera a que GitHub Pages muestre que la comprobación DNS es correcta. Activa **Enforce HTTPS** cuando esté disponible. Los cambios DNS pueden tardar hasta 24 horas en propagarse.
-5. Actualiza tu copia local en IntelliJ y cambia únicamente `"use_custom_domain": false` a `"use_custom_domain": true` en `config.json`. Después:
+| Tipo | Nombre / host | Valor / destino |
+|---|---|---|
+| A | `@` (o el campo de nombre vacío para el dominio raíz, según el formulario) | `185.199.108.153` |
+| A | `@` | `185.199.109.153` |
+| A | `@` | `185.199.110.153` |
+| A | `@` | `185.199.111.153` |
+| CNAME | `www` | `josejmartinez.github.io` |
 
-   ```powershell
-   git switch main
-   git pull origin main
-   git add config.json
-   git commit -m "chore: activar el dominio autocalc.es"
-   git push origin main
-   ```
+Deja el TTL por defecto si no sabes qué valor usar. El CNAME de `www` apunta al dominio de usuario de GitHub, **sin** añadir `/autocalc-espana`.
 
-   Si editas el archivo por GitHub web en vez de IntelliJ, asegúrate de sincronizar luego la copia local con `git pull origin main`.
-6. Espera a que GitHub Actions termine en verde y comprueba `https://autocalc.es/`, `https://autocalc.es/robots.txt` y `https://autocalc.es/sitemap.xml`. En el sitemap y en las etiquetas canónicas ya deberán aparecer las URL de `autocalc.es`.
-7. En Google Search Console, añade la propiedad del nuevo dominio. Una propiedad de dominio se suele verificar con un registro TXT en DNS; el meta-token configurado en el HTML corresponde a la verificación de tipo prefijo de URL. Envía el nuevo sitemap cuando la web sea accesible por HTTPS.
+Antes de guardar, revisa si hay registros A/AAAA del dominio raíz que apunten al aparcamiento de Piensa Solutions o a otra IP. Retira únicamente los que entren en conflicto. **No borres registros MX ni TXT** ni cambies servidores NS: podrían ser necesarios para correo o verificaciones de otros servicios. No añadas un CNAME en el dominio raíz.
 
-## Si hay problemas y necesitas volver a GitHub Pages
+No es necesario activar el hosting WordPress de Piensa Solutions: el alojamiento de la web seguirá siendo GitHub Pages.
 
-1. En Settings → Pages, retira temporalmente `autocalc.es` como dominio personalizado si está causando una redirección a una web que todavía no responde.
-2. Cambia `use_custom_domain` a `false` en `config.json`, confirma el cambio y haz `git push origin main`.
-3. Comprueba que el último despliegue de Actions termina correctamente y que vuelven a publicarse las URL de `https://josejmartinez.github.io/autocalc-espana`.
+### 3. Comprueba que las DNS ya llegan a GitHub
 
-## Referencia oficial
+En Windows, abre PowerShell y ejecuta:
 
-Consulta [la guía oficial de GitHub para configurar dominios personalizados en GitHub Pages](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site) antes de cambiar DNS o activar HTTPS.
+```powershell
+Resolve-DnsName autocalc.es -Type A
+Resolve-DnsName www.autocalc.es -Type CNAME
+```
+
+Para el dominio raíz deben aparecer las cuatro IP de GitHub Pages indicadas arriba; `www.autocalc.es` debe apuntar a `josejmartinez.github.io`. La propagación puede tardar hasta 24 horas.
+
+### 4. Activa la versión preparada en el repositorio
+
+Cuando los registros ya resuelvan bien:
+
+1. Abre la [rama preparada](https://github.com/josejmartinez/autocalc-espana/tree/chore/activate-autocalc-domain) y su pull request si ya está creado.
+2. Comprueba que las verificaciones de GitHub Actions terminan en verde y fusiona la PR.
+3. En **Settings → Pages**, confirma que el dominio personalizado sigue siendo `autocalc.es`.
+4. Cuando GitHub Pages permita marcar **Enforce HTTPS**, actívalo. No habilites HTTPS en una web de terceros ni configures una redirección desde Piensa Solutions; HTTPS lo emitirá GitHub Pages.
+
+La activación del código cambia automáticamente las URL canónicas, Open Graph, el sitemap, `robots.txt` y el archivo `CNAME`. No hace falta editar esos archivos generados manualmente.
+
+### 5. Verifica la publicación y el SEO
+
+Cuando termine el despliegue, abre estas direcciones:
+
+- [https://autocalc.es/](https://autocalc.es/)
+- [https://autocalc.es/robots.txt](https://autocalc.es/robots.txt)
+- [https://autocalc.es/sitemap.xml](https://autocalc.es/sitemap.xml)
+- [https://www.autocalc.es/](https://www.autocalc.es/) (debe llegar al dominio principal)
+
+Comprueba que la portada carga con HTTPS y que el sitemap utiliza `https://autocalc.es/`, no la dirección antigua de GitHub Pages.
+
+En Google Search Console, añade `autocalc.es` como propiedad de dominio y usa el TXT de verificación que te proporcione Google. No elimines el actual `google-site-verification` del HTML: puede seguir siendo útil para una propiedad de prefijo de URL. Envía `https://autocalc.es/sitemap.xml` cuando la nueva web responda correctamente.
+
+## Reversión si surge un problema
+
+La URL de GitHub Pages se conserva en `config.json` como referencia de respaldo. Si el dominio propio no funciona, retira temporalmente `autocalc.es` de **Settings → Pages**, cambia `use_custom_domain` a `false`, publica ese cambio y comprueba el último despliegue de Actions. No borres registros DNS o de correo a ciegas.
+
+## Referencias oficiales
+
+- [GitHub Pages: gestionar un dominio personalizado](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site)
+- [Piensa Solutions: dominios y gestor DNS](https://www.piensasolutions.com/dominios)

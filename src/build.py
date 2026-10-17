@@ -8,7 +8,7 @@ Incluye:
 3. Comparador TCO (Gasolina vs. Diésel vs. Híbrido vs. GLP) con impuestos y mantenimiento.
 4. Datador de matrículas españolas (mes/año y edad) + Calculadora oficial BOE de caballos fiscales (CVF), IVTM, ITP y CO2.
 5. Checklist pre-ITV de 12 puntos + Buscador interactivo de códigos de avería OBD2 + Plan de mantenimiento.
-6. Calculadora ¿Desguace, Autodoc o taller? con 20 piezas reales preconfiguradas y directorio de desguaces.
+6. Comparador ¿Desguace, recambio nuevo o taller? con 16 referencias orientativas editables, costes configurables y avisos para piezas de seguridad.
 """
 
 import os
