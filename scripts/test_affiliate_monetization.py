@@ -13,6 +13,7 @@ sys.path.insert(0, str(ROOT / "src"))
 from build import (  # noqa: E402
     AMAZON_DISCLOSURE, AFFILIATE_PARTNER_DOMAINS, apply_affiliate_links,
     build_affiliate_url, render_ad_slot, render_affiliate_sidebar,
+    validate_commercial_contact,
 )
 
 PUBLIC = ROOT / "public"
@@ -31,6 +32,8 @@ def main() -> int:
             raise AssertionError(f"Falta el aviso comercial en {page.name}.")
         if "__AFFILIATE_LINK_TEMPLATES_JSON__" in html or "__AMAZON_DISCLOSURE__" in html:
             raise AssertionError(f"Quedó un marcador de plantilla en {page.name}.")
+        if page.name == "aviso-legal.html" and "Pendiente de completar por el titular antes de la explotación comercial" not in html:
+            raise AssertionError("El aviso legal no debe aparentar estar completo con el correo de contacto vacío.")
 
     sample = '<a href="https://www.autodoc.es/search?keyword=alternador" target="_blank" rel="nofollow sponsored">Buscar AUTODOC</a>'
     direct = apply_affiliate_links(sample, {})
@@ -80,6 +83,25 @@ def main() -> int:
         raise AssertionError("Un patrocinio directo ha perdido rel=sponsored.")
     if "Enlace de afiliado" in paid_ad_html:
         raise AssertionError("Un patrocinio directo no debe etiquetarse falsamente como afiliación.")
+
+    # Commercial display inventory must not be enabled before a public contact email is supplied.
+    if not validate_commercial_contact("", "", {}):
+        raise AssertionError("No debe bloquear el sitio cuando no hay anuncios configurados.")
+    try:
+        validate_commercial_contact("", "", {"inline": {"enabled": True}})
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError("Un anuncio directo no puede activarse sin correo de contacto.")
+    if not validate_commercial_contact("editor@autocalc.es", "", {"inline": {"enabled": True}}):
+        raise AssertionError("Un contacto configurado debe permitir validar el espacio publicitario.")
+
+    try:
+        validate_commercial_contact("contacto@tudominio.es", "", {"inline": {"enabled": True}})
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError("Un correo de ejemplo no puede habilitar publicidad display.")
 
     if render_ad_slot("sidebar_left") or render_ad_slot("sidebar_right") or render_ad_slot("inline"):
         raise AssertionError("Las posiciones de anuncios no configuradas deben permanecer invisibles.")
