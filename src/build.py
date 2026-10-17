@@ -133,6 +133,8 @@ def apply_affiliate_links(markup, templates=None):
             (host == "amazon.es" or host.endswith(".amazon.es"))
             and re.search(r"(?:[?&]|&amp;)tag=", href, re.IGNORECASE) is not None
         )
+        if partner is None and not is_amazon_affiliate:
+            return match.group(0)
         template = str(selected_templates.get(partner, "") or "").strip() if partner else ""
         is_affiliate = is_amazon_affiliate or bool(template)
 
