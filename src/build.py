@@ -412,8 +412,16 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
     <link rel="preconnect" href="https://www.amazon.es">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        .autocalc-ad-sidebar { display: none; }
+        .autocalc-ad-inline { width: 100%; max-width: 980px; margin: 1rem auto 1.5rem; padding: 0 1rem; }
+        .autocalc-ad-sidebar .adsbygoogle { min-width: 1px; }
+        @media (min-width: 1520px) {
+            .autocalc-ad-sidebar { display: block; position: fixed; top: 170px; width: 150px; max-height: calc(100vh - 190px); overflow: auto; z-index: 20; }
+            .autocalc-ad-sidebar-left { left: calc(50% - 512px - 160px); }
+            .autocalc-ad-sidebar-right { right: calc(50% - 512px - 160px); }
+        }
         @media print {
-            .no-print { display: none !important; }
+            .no-print, .autocalc-ad-slot { display: none !important; }
             body { background: #fff !important; }
         }
     </style>
@@ -440,6 +448,9 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             </div>
         </div>
     </header>
+
+    __SIDEBAR_LEFT_AD_HTML__
+    __SIDEBAR_RIGHT_AD_HTML__
 
     <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full">
 
@@ -469,6 +480,8 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                 6. ¿Desguace o nuevo?
             </button>
         </div>
+
+        __INLINE_AD_HTML__
 
         <!-- ==================== SECCIÓN 1: NEUMÁTICOS, EQUIVALENCIAS ITV Y OFFSET ET ==================== -->
         <section id="sec-itv" class="space-y-6">
@@ -2230,6 +2243,9 @@ def render_page(
         "__AFFILIATE_LINK_TEMPLATES_JSON__": json.dumps(AFFILIATE_LINK_TEMPLATES, ensure_ascii=False),
         "__AMAZON_DISCLOSURE__": AMAZON_DISCLOSURE,
         "__OTHER_AFFILIATE_DISCLOSURE__": affiliate_disclosure_for_other_merchants(),
+        "__SIDEBAR_LEFT_AD_HTML__": render_ad_slot("sidebar_left"),
+        "__SIDEBAR_RIGHT_AD_HTML__": render_ad_slot("sidebar_right"),
+        "__INLINE_AD_HTML__": render_ad_slot("inline"),
         "__GOOGLE_ANALYTICS_ID__": GOOGLE_ANALYTICS_ID,
         "__GOOGLE_SITE_VERIFICATION_TAG__": GOOGLE_SITE_VERIFICATION_TAG,
         "__CAR_CONTEXT_NAME__": car_context_name,
