@@ -96,6 +96,13 @@ def main() -> int:
     if not validate_commercial_contact("editor@autocalc.es", "", {"inline": {"enabled": True}}):
         raise AssertionError("Un contacto configurado debe permitir validar el espacio publicitario.")
 
+    try:
+        validate_commercial_contact("contacto@tudominio.es", "", {"inline": {"enabled": True}})
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError("Un correo de ejemplo no puede habilitar publicidad display.")
+
     if render_ad_slot("sidebar_left") or render_ad_slot("sidebar_right") or render_ad_slot("inline"):
         raise AssertionError("Las posiciones de anuncios no configuradas deben permanecer invisibles.")
     safe_slot = render_ad_slot("inline", direct_slots={
