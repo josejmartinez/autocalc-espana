@@ -14,7 +14,8 @@ Incluye:
 import os
 import json
 import re
-from html import escape
+from html import escape, unescape
+from urllib.parse import quote, urlsplit
 from datetime import date
 from catalogo import MEDIDAS_ESPANA, MODELOS_COCHES, RUTAS_ESPANA, ZONAS_DESGUACES_ITV, GARGANTA_POR_ANCHO
 
@@ -49,6 +50,151 @@ GOOGLE_SITE_VERIFICATION_TAG = (
     f'<meta name="google-site-verification" content="{escape(GOOGLE_SITE_VERIFICATION, quote=True)}" />'
     if GOOGLE_SITE_VERIFICATION else ""
 )
+
+
+AFFILIATE_LINK_TEMPLATES = CFG.get("affiliate_link_templates", {})
+AFFILIATE_PARTNER_DOMAINS = {
+    "autodoc": ("autodoc.es",),
+    "norauto": ("norauto.es",),
+    "feuvert": ("feuvert.es",),
+    "muchoneumatico": ("muchoneumatico.com",),
+    "recambioverde": ("recambioverde.es",),
+    "desguaceslatorre": ("desguaceslatorre.es",),
+    "elchoque": ("elchoque.com",),
+}
+AFFILIATE_PARTNER_LABELS = {
+    "autodoc": "AUTODOC",
+    "norauto": "Norauto",
+    "feuvert": "Feu Vert",
+    "muchoneumatico": "Muchoneumático",
+    "recambioverde": "RecambioVerde",
+    "desguaceslatorre": "Desguaces La Torre",
+    "elchoque": "El Choque",
+}
+AMAZON_DISCLOSURE = "En calidad de Afiliado de Amazon, obtengo ingresos por las compras adscritas que cumplen los requisitos aplicables."
+
+if not isinstance(AFFILIATE_LINK_TEMPLATES, dict):
+    raise TypeError("affiliate_link_templates debe ser un objeto JSON con plantillas por comercio.")
+
+unknown_affiliate_partners = set(AFFILIATE_LINK_TEMPLATES) - set(AFFILIATE_PARTNER_DOMAINS)
+if unknown_affiliate_partners:
+    raise ValueError("Comercios de afiliación desconocidos: " + ", ".join(sorted(unknown_affiliate_partners)))
+
+for affiliate_partner, affiliate_template in AFFILIATE_LINK_TEMPLATES.items():
+    if not isinstance(affiliate_template, str):
+        raise TypeError(f"La plantilla de afiliación de {affiliate_partner} debe ser texto.")
+    affiliate_template = affiliate_template.strip()
+    AFFILIATE_LINK_TEMPLATES[affiliate_partner] = affiliate_template
+    if affiliate_template and (
+        not affiliate_template.startswith("https://")
+        or "{destination}" not in affiliate_template
+    ):
+        raise ValueError(
+            f"La plantilla de {affiliate_partner} debe comenzar por https:// "
+            "e incluir el marcador literal {destination}, que se sustituye por la URL de destino codificada."
+        )
+
+
+def build_affiliate_url(partner, destination, templates=None):
+    """Apply a merchant-provided HTTPS tracking template to a destination URL."""
+    selected_templates = AFFILIATE_LINK_TEMPLATES if templates is None else templates
+    template = str(selected_templates.get(partner, "") or "").strip()
+    if not template:
+        return destination
+    if not template.startswith("https://") or "{destination}" not in template:
+        raise ValueError(f"Plantilla de afiliación no válida para {partner}.")
+    return template.replace("{destination}", quote(destination, safe=""))
+
+
+def apply_affiliate_links(markup, templates=None):
+    """Mark genuine affiliate links as sponsored and leave untracked merchant links direct."""
+    selected_templates = AFFILIATE_LINK_TEMPLATES if templates is None else templates
+
+    def rewrite_anchor(match):
+        attrs, body = match.group(1), match.group(2)
+        href_match = re.search(r"""\bhref\s*=\s*(["'])(.*?)\1""", attrs, re.IGNORECASE | re.DOTALL)
+        if not href_match:
+            return match.group(0)
+
+        href = unescape(href_match.group(2))
+        try:
+            host = (urlsplit(href).hostname or "").lower()
+        except ValueError:
+            return match.group(0)
+
+        partner = next(
+            (
+                name for name, domains in AFFILIATE_PARTNER_DOMAINS.items()
+                if any(host == domain or host.endswith("." + domain) for domain in domains)
+            ),
+            None,
+        )
+        is_amazon_affiliate = (
+            (host == "amazon.es" or host.endswith(".amazon.es"))
+            and re.search(r"(?:[?&]|&amp;)tag=", href, re.IGNORECASE) is not None
+        )
+        template = str(selected_templates.get(partner, "") or "").strip() if partner else ""
+        is_affiliate = is_amazon_affiliate or bool(template)
+
+        # Static URLs can be rewritten at build time. Dynamic JS template literals
+        # are handled by buildPartnerUrl() when the user changes calculator inputs.
+        if (
+            partner
+            and template
+            and "{destination}" in template
+            and (chr(36) + "{") not in href
+            and "__" not in href
+        ):
+            tracked_href = template.replace("{destination}", quote(href, safe=""))
+            attrs = (
+                attrs[:href_match.start(2)]
+                + escape(tracked_href, quote=True)
+                + attrs[href_match.end(2):]
+            )
+
+        rel_match = re.search(r"""\brel\s*=\s*(["'])(.*?)\1""", attrs, re.IGNORECASE | re.DOTALL)
+        existing_rel = rel_match.group(2).split() if rel_match else []
+        rel_tokens = [
+            token for token in existing_rel
+            if token.lower() not in {"sponsored", "noopener", "noreferrer", "nofollow"}
+        ]
+        rel_tokens.insert(0, "nofollow")
+        if is_affiliate:
+            rel_tokens.append("sponsored")
+        if re.search(r"""\btarget\s*=\s*["']_blank["']""", attrs, re.IGNORECASE):
+            rel_tokens.extend(["noopener", "noreferrer"])
+        rel_tokens = list(dict.fromkeys(rel_tokens))
+        new_rel = 'rel="' + " ".join(rel_tokens) + '"'
+        if rel_match:
+            attrs = attrs[:rel_match.start()] + new_rel + attrs[rel_match.end():]
+        else:
+            attrs += " " + new_rel
+
+        if is_affiliate and "Enlace de afiliado" not in body:
+            body += '<span class="block mt-1 text-[9px] font-semibold opacity-75">Enlace de afiliado · puede generar comisión</span>'
+
+        return "<a" + attrs + ">" + body + "</a>"
+
+    # Also processes anchors created later via inline JavaScript template literals.
+    return re.sub(r"<a\b([^>]*)>(.*?)</a\s*>", rewrite_anchor, markup, flags=re.IGNORECASE | re.DOTALL)
+
+
+def affiliate_disclosure_for_other_merchants():
+    active = [
+        label for key, label in AFFILIATE_PARTNER_LABELS.items()
+        if str(AFFILIATE_LINK_TEMPLATES.get(key, "") or "").strip()
+    ]
+    if active:
+        names = ", ".join(active)
+        return (
+            "Los enlaces de afiliación de otros comercios actualmente configurados corresponden a: "
+            + escape(names)
+            + ". La remuneración depende de las condiciones del programa y de la compra atribuida."
+        )
+    return (
+        "Los enlaces a AUTODOC, Norauto, Feu Vert, Muchoneumático y los desguaces son enlaces directos "
+        "mientras no se configure una URL de seguimiento de afiliación aprobada para cada comercio."
+    )
 
 if ADSENSE_CLIENT:
     if not GOOGLE_CERTIFIED_CMP_CONFIGURED:
