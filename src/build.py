@@ -59,7 +59,10 @@ AFFILIATE_LINK_TEMPLATES = CFG.get("affiliate_link_templates", {})
 AFFILIATE_PARTNER_DOMAINS = {
     "autodoc": ("autodoc.es",),
     "norauto": ("norauto.es",),
+    "oscaro": ("oscaro.es",),
+    "aurgi": ("aurgi.com",),
     "feuvert": ("feuvert.es",),
+    "costco": ("costco.es",),
     "muchoneumatico": ("muchoneumatico.com",),
     "recambioverde": ("recambioverde.es",),
     "desguaceslatorre": ("desguaceslatorre.es",),
@@ -68,7 +71,10 @@ AFFILIATE_PARTNER_DOMAINS = {
 AFFILIATE_PARTNER_LABELS = {
     "autodoc": "AUTODOC",
     "norauto": "Norauto",
+    "oscaro": "Oscaro",
+    "aurgi": "Aurgi",
     "feuvert": "Feu Vert",
+    "costco": "Costco",
     "muchoneumatico": "Muchoneumático",
     "recambioverde": "RecambioVerde",
     "desguaceslatorre": "Desguaces La Torre",
@@ -136,10 +142,12 @@ def apply_affiliate_links(markup, templates=None):
             (host == "amazon.es" or host.endswith(".amazon.es"))
             and re.search(r"(?:[?&]|&amp;)tag=", href, re.IGNORECASE) is not None
         )
-        if partner is None and not is_amazon_affiliate:
+        is_direct_paid_ad = re.search(r"""\bdata-autocalc-paid-ad(?:\s*=|\s|$)""", attrs, re.IGNORECASE) is not None
+        if partner is None and not is_amazon_affiliate and not is_direct_paid_ad:
             return match.group(0)
         template = str(selected_templates.get(partner, "") or "").strip() if partner else ""
         is_affiliate = is_amazon_affiliate or bool(template)
+        is_sponsored_link = is_affiliate or is_direct_paid_ad
 
         # Static URLs can be rewritten at build time. Dynamic JS template literals
         # are handled by buildPartnerUrl() when the user changes calculator inputs.
@@ -164,7 +172,7 @@ def apply_affiliate_links(markup, templates=None):
             if token.lower() not in {"sponsored", "noopener", "noreferrer", "nofollow"}
         ]
         rel_tokens.insert(0, "nofollow")
-        if is_affiliate:
+        if is_sponsored_link:
             rel_tokens.append("sponsored")
         if re.search(r"""\btarget\s*=\s*["']_blank["']""", attrs, re.IGNORECASE):
             rel_tokens.extend(["noopener", "noreferrer"])
@@ -176,7 +184,7 @@ def apply_affiliate_links(markup, templates=None):
             attrs += " " + new_rel
 
         if is_affiliate and "Enlace de afiliado" not in body:
-            body += '<span class="block mt-1 text-[9px] font-semibold opacity-75">Enlace de afiliado · puede generar comisión</span>'
+            body += '<span class="autocalc-affiliate-label block mt-1 text-[9px] font-semibold opacity-75">Enlace de afiliado · puede generar comisión</span>'
 
         return "<a" + attrs + ">" + body + "</a>"
 
@@ -200,6 +208,97 @@ def affiliate_disclosure_for_other_merchants():
         "Los enlaces a AUTODOC, Norauto, Feu Vert, Muchoneumático y los desguaces son enlaces directos "
         "mientras no se configure una URL de seguimiento de afiliación aprobada para cada comercio."
     )
+
+DIRECT_AD_SLOT_NAMES = ("sidebar_left", "sidebar_right", "inline")
+DIRECT_AD_SLOTS = CFG.get("direct_ad_slots", {})
+ADSENSE_SLOT_IDS = CFG.get("adsense_slots", {})
+if not isinstance(DIRECT_AD_SLOTS, dict):
+    raise TypeError("direct_ad_slots debe ser un objeto JSON.")
+if not isinstance(ADSENSE_SLOT_IDS, dict):
+    raise TypeError("adsense_slots debe ser un objeto JSON.")
+if set(DIRECT_AD_SLOTS) - set(DIRECT_AD_SLOT_NAMES):
+    raise ValueError("direct_ad_slots contiene posiciones desconocidas.")
+if set(ADSENSE_SLOT_IDS) - set(DIRECT_AD_SLOT_NAMES):
+    raise ValueError("adsense_slots contiene posiciones desconocidas.")
+
+for ad_slot_name in DIRECT_AD_SLOT_NAMES:
+    ad_slot_config = DIRECT_AD_SLOTS.get(ad_slot_name, {})
+    if not isinstance(ad_slot_config, dict):
+        raise TypeError(f"El espacio publicitario {ad_slot_name} debe ser un objeto.")
+    if ad_slot_config.get("enabled") is True:
+        for field in ("advertiser", "headline", "body", "image_url", "target_url"):
+            if not isinstance(ad_slot_config.get(field, ""), str):
+                raise TypeError(f"El campo {field} del espacio publicitario {ad_slot_name} debe ser texto.")
+        if not ad_slot_config.get("advertiser", "").strip() or not ad_slot_config.get("headline", "").strip():
+            raise ValueError(f"El espacio publicitario {ad_slot_name} necesita anunciante y titular.")
+        target_url = urlsplit(ad_slot_config.get("target_url", "").strip())
+        if target_url.scheme != "https" or not target_url.hostname or target_url.username or target_url.password:
+            raise ValueError(f"El enlace del espacio publicitario {ad_slot_name} debe ser una URL HTTPS válida.")
+        image_url = ad_slot_config.get("image_url", "").strip()
+        if image_url:
+            parsed_image = urlsplit(image_url)
+            safe_local_image = image_url.startswith("/") and not image_url.startswith("//") and ".." not in image_url.split("/")
+            safe_remote_image = parsed_image.scheme == "https" and bool(parsed_image.hostname)
+            if not (safe_local_image or safe_remote_image):
+                raise ValueError(f"La imagen del espacio publicitario {ad_slot_name} debe ser HTTPS o una ruta local segura.")
+    adsense_slot_id = ADSENSE_SLOT_IDS.get(ad_slot_name, "")
+    if not isinstance(adsense_slot_id, str):
+        raise TypeError(f"El identificador AdSense de {ad_slot_name} debe ser texto.")
+    if adsense_slot_id.strip() and not re.fullmatch(r"[0-9]{4,24}", adsense_slot_id.strip()):
+        raise ValueError(f"El identificador AdSense de {ad_slot_name} debe contener solo dígitos.")
+
+
+
+def render_ad_slot(slot_name):
+    """Render a direct sponsor or approved AdSense unit; keep unconfigured slots invisible."""
+    if slot_name not in DIRECT_AD_SLOT_NAMES:
+        raise ValueError(f"Posición publicitaria desconocida: {slot_name}")
+    if slot_name.startswith("sidebar_"):
+        side = "left" if slot_name.endswith("_left") else "right"
+        wrapper_class = f"autocalc-ad-slot autocalc-ad-sidebar autocalc-ad-sidebar-{side} no-print"
+    else:
+        wrapper_class = "autocalc-ad-slot autocalc-ad-inline no-print"
+
+    sponsor = DIRECT_AD_SLOTS.get(slot_name, {})
+    if sponsor.get("enabled") is True:
+        advertiser = escape(sponsor["advertiser"].strip())
+        headline = escape(sponsor["headline"].strip())
+        body = escape(sponsor.get("body", "").strip())
+        target_url = escape(sponsor["target_url"].strip(), quote=True)
+        image_url = sponsor.get("image_url", "").strip()
+        image_html = ""
+        if image_url:
+            image_html = (
+                f'<img src="{escape(image_url, quote=True)}" alt="{advertiser}" '
+                'loading="lazy" class="w-full max-h-36 object-contain rounded-lg mb-2">'
+            )
+        body_html = f'<p class="mt-2 text-xs text-slate-600 leading-relaxed">{body}</p>' if body else ""
+        return (
+            f'<aside class="{wrapper_class}" aria-label="Publicidad de {advertiser}">'
+            '<p class="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-2">Publicidad</p>'
+            f'<a data-autocalc-paid-ad="true" href="{target_url}" target="_blank" '
+            'rel="sponsored nofollow noopener noreferrer" '
+            'class="block bg-white border border-slate-200 rounded-xl p-3 shadow-sm hover:shadow-md transition">'
+            f'{image_html}<span class="block text-sm font-extrabold text-slate-900">{headline}</span>'
+            f'{body_html}<span class="block mt-3 text-xs font-bold text-amber-700">Ver oferta →</span>'
+            '</a></aside>'
+        )
+
+    slot_id = str(ADSENSE_SLOT_IDS.get(slot_name, "") or "").strip()
+    if ADSENSE_CLIENT and GOOGLE_CERTIFIED_CMP_CONFIGURED and slot_id:
+        ad_style = "display:block;min-height:100px;width:100%;"
+        if slot_name.startswith("sidebar_"):
+            ad_style = "display:block;min-height:280px;width:100%;"
+        return (
+            f'<aside class="{wrapper_class}" aria-label="Publicidad">'
+            '<p class="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-2">Publicidad</p>'
+            f'<ins class="adsbygoogle" style="{ad_style}" data-ad-client="{escape(ADSENSE_CLIENT, quote=True)}" '
+            f'data-ad-slot="{escape(slot_id, quote=True)}" data-ad-format="auto" data-full-width-responsive="true"></ins>'
+            '<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>'
+            '</aside>'
+        )
+    return ""
+
 
 if ADSENSE_CLIENT:
     if not GOOGLE_CERTIFIED_CMP_CONFIGURED:
