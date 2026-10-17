@@ -92,3 +92,56 @@ Referencia: [requisitos de CMP de Google AdSense para publishers](https://suppor
 5. **Optimización:** revisar mensual los clics y comisiones por proveedor, retirar campañas que no conviertan, no sesgar las recomendaciones al proveedor que más pague y mantener comparaciones transparentes de precio total, envío, montaje, compatibilidad y garantía.
 
 No existe un ingreso garantizado: las comisiones dependen de que el usuario compre, de las reglas de atribución, la aprobación de la venta y el tráfico real.
+
+## 7. Plan comercial actualizado: prioridad de campañas
+
+**Orden operativo propuesto (no significa que la campaña esté aprobada ni abierta en España):**
+
+1. **AUTODOC** — prioridad máxima para recambios nuevos. Solicitar programa desde Awin y/o el formulario de partners que AUTODOC facilite. Empezar con enlaces a categorías y búsquedas con contexto de vehículo.
+2. **Norauto** — prioridad máxima para neumáticos, baterías, montaje y servicios de taller. Buscar la campaña española en Awin y solicitar admisión.
+3. **Oscaro** — prioridad alta para recambios nuevos. Comprobar campañas disponibles y solicitar admisión. La ficha de tienda pública no confirma por sí sola la existencia de un programa de afiliación abierto.
+4. **Aurgi y Feu Vert** — candidatos para neumáticos, mantenimiento, baterías y montaje. Comprobar campaña, país, condiciones de tráfico y estructura de comisión en la red antes de configurar tracking.
+5. **eBay Partner Network** — canal adicional confirmado en la documentación oficial de eBay España; tiene una solicitud propia y herramientas para crear enlaces medibles a anuncios y búsquedas. Especialmente interesante para piezas OEM usadas y nuevas, aunque hay que usar los enlaces reales generados por EPN.
+6. **Muchoneumático y RecambioVerde** — solicitar o confirmar programa de publisher propio o a través de red, y guardar el deeplink solo tras una aprobación real.
+7. **Costco** — prioridad baja. No hemos podido confirmar un programa público de afiliados de Costco España relacionado con automoción. En su web, «afiliación» se refiere habitualmente a la tarjeta de socio, no a un programa de publisher. Mantener el enlace como directo hasta disponer de información oficial sobre una colaboración remunerada.
+
+### Alta en Awin
+
+- Registra AutoCalc en [Awin Afiliados](https://www.awin.com/es/afiliados) y completa el perfil con el dominio, audiencia, tipo de contenido y fuentes de tráfico reales.
+- Cuando se apruebe la cuenta de publisher, busca las marcas indicadas en el directorio y solicita cada campaña por separado. Unirse a la red no equivale a ser aceptado por un anunciante.
+- No he podido verificar desde páginas públicas que las campañas de AUTODOC, Norauto, Oscaro, Aurgi o Feu Vert estén abiertas ahora mismo para España. Esa disponibilidad y sus términos deben comprobarse dentro del directorio autenticado.
+- Solicita también [eBay Partner Network](https://www.ebay.es/centroparavendedores/vender-en-ebay/ebay-partner-network). El programa español explica oficialmente que el editor solicita el acceso y luego crea enlaces medibles con sus herramientas.
+
+### Plantillas y enlaces en el código
+
+El comparador destaca visualmente AUTODOC y Norauto al principio, y añade Oscaro, Aurgi, eBay y Costco como alternativas. Las claves de seguimiento están en `config.json`, dentro de `affiliate_link_templates`, pero permanecen vacías hasta tener el tracking oficial.
+
+**No rellenes esas claves con enlaces normales ni con IDs supuestos.** Para los partners cuya campaña entregue un enlace fijo que no pueda expresarse como plantilla, adapta el generador al formato oficial de la red antes de activar esa campaña. En el caso de eBay, usa las herramientas de EPN para generar el enlace real.
+
+Cuando una plantilla se activa, el sitio codifica el destino, aplica `rel="sponsored"` e identifica el enlace como afiliado. Para enlaces que aún son directos no se finge una relación remunerada.
+
+Fuentes oficiales: [Awin Afiliados](https://www.awin.com/es/afiliados/content-creator-influencer), [FAQ de Awin](https://www.awin.com/es/faq), [eBay Partner Network España](https://www.ebay.es/centroparavendedores/vender-en-ebay/ebay-partner-network), [información de socios de Costco España](https://www.costco.es/terminos-condiciones).
+
+## 8. Espacios publicitarios laterales y patrocinio directo
+
+El generador admite tres posiciones: `sidebar_left`, `sidebar_right` e `inline`. La configuración se encuentra en `config.json`:
+
+- `direct_ad_slots`: anuncios de patrocinadores directos. Para activar uno, define `enabled: true`, `advertiser`, `headline`, `target_url` HTTPS, y opcionalmente `body` e `image_url`. La imagen puede ser una URL HTTPS o una ruta local segura del propio sitio. El anuncio se marca explícitamente como **Publicidad** y el enlace lleva `rel="sponsored"`.
+- `adsense_slots`: IDs de bloque de AdSense para cada posición. Deben ser los IDs numéricos reales facilitados por AdSense. Los bloques no aparecen si falta el ID de bloque o si AdSense está desactivado.
+- Las barras laterales solo se muestran en pantallas amplias (1520 px o más), para no tapar el contenido. El espacio `inline` se adapta a móvil y escritorio.
+- Los tres espacios están desactivados y vacíos de forma deliberada. No muestran banners falsos.
+
+### Activación de AdSense
+
+El código exige un ID real `ca-pub-...`, IDs de bloque válidos y `google_certified_cmp_configured: true` antes de aceptar AdSense. Esa bandera solo debe activarse una vez que se haya elegido e integrado una CMP certificada por Google que satisfaga los requisitos aplicables. El banner actual de Analytics no sirve como sustituto de esa CMP.
+
+Antes de solicitar publicidad programática, completa los datos legales reales y de contacto: ahora mismo `contact_email` está vacío. Revisa también privacidad y aviso legal. Para comercializar directamente los espacios, prepara un dossier con impresiones, clics y audiencia reales cuando dispongamos de suficientes datos; no inventes métricas.
+
+## 9. Medición y criterios comerciales
+
+- Mantén AUTODOC y Norauto como prioridades, pero recomienda la tienda según el trabajo, precio total, compatibilidad, envío, montaje, garantía y disponibilidad, no solo según la comisión.
+- Usa enlaces de afiliado que lleven a una búsqueda o producto pertinente, no únicamente a la portada del comercio cuando el producto o medida ya se conoce.
+- Si más adelante se incorporan precios y disponibilidad de forma automática, usa feeds o APIs permitidos por cada comercio; no raspes catálogos si sus términos no lo permiten.
+- Revisa mensualmente clics de salida, conversiones aprobadas, comisiones, devoluciones y rendimiento de cada ubicación publicitaria.
+- No hay garantía de ingresos. Se necesitan tráfico, compras cualificadas y aceptación de las ventas para generar comisiones.
+
