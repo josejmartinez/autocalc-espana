@@ -4,9 +4,12 @@
 
 ## 1. Estado actual del proyecto
 
-- Dominio principal configurado: `https://autocalc.es`.
+- Dominio principal configurado en el generador: `https://autocalc.es`.
+- **HTTPS pendiente de certificado** en GitHub Pages: las DNS aparecen como correctas, pero el navegador llegó a mostrar `NET::ERR_CERT_COMMON_NAME_INVALID` y GitHub todavía indicaba que no había emitido el certificado. No dar la migración por cerrada ni completar el alta de Awin hasta que la URL HTTPS sea segura.
+- **Solicitud de publisher en Awin enviada el 17 de octubre de 2026; revisión pendiente.** Después de la aceptación de la red hay que solicitar AUTODOC y Norauto por separado; no hay todavía campañas aprobadas ni enlaces de seguimiento reales en `config.json`.
+- `contact_email` está vacío. El aviso legal se muestra expresamente pendiente de completar; antes de vender publicidad, completa el correo real del responsable y revisa la información identificativa/legal.
 - Identificador de Amazon configurado en enlaces: `autocalces-21`. La configuración del identificador no demuestra por sí sola que la cuenta esté aprobada o en buen estado; confirmar el estado en la consola de Amazon Afiliados.
-- Enlaces de AUTODOC, Norauto, Feu Vert y Muchoneumático: enlaces directos mientras no se añada una plantilla de seguimiento asignada por el programa.
+- Los enlaces a AUTODOC, Norauto, Oscaro, Aurgi, Feu Vert, eBay, Costco, Muchoneumático y desguaces permanecen directos mientras no se configure el seguimiento oficial de una campaña aprobada.
 - AdSense: desactivado (`adsense_client` vacío). La web tiene un control de consentimiento propio para Analytics, pero no es una CMP certificada de Google para anuncios.
 
 ## 2. Google Search Console tras la migración
@@ -146,3 +149,9 @@ Antes de solicitar publicidad programática, completa los datos legales reales y
 - Revisa mensualmente clics de salida, conversiones aprobadas, comisiones, devoluciones y rendimiento de cada ubicación publicitaria.
 - No hay garantía de ingresos. Se necesitan tráfico, compras cualificadas y aceptación de las ventas para generar comisiones.
 
+## 10. Cierre de la sesión del 17 de octubre de 2026
+
+- Cambios del comparador, plantillas de afiliación, promociones laterales y espacios de anuncio ya están integrados en `main`; las plantillas de seguimiento y los tres espacios de publicidad siguen vacíos/desactivados intencionadamente.
+- Solicitud de Awin recibida; no hay que repetir el registro. Esperar el correo y, cuando se habilite la cuenta, solicitar AUTODOC y Norauto antes que los demás.
+- En la última revisión, el contenido público se desplegó correctamente en GitHub Pages, pero el certificado HTTPS no estaba emitido. No cambies más DNS si GitHub marca DNS correcto; si sigue sin certificado después del periodo indicado por GitHub, contacta con soporte de GitHub Pages y adjunta la captura de `DNS check successful` junto con el error del certificado.
+- El build bloquea la activación accidental de espacios publicitarios display cuando `contact_email` está vacío. Ese correo no se inventa: debe completarlo el titular.
