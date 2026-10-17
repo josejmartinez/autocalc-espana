@@ -126,7 +126,7 @@ Fuentes oficiales: [Awin Afiliados](https://www.awin.com/es/afiliados/content-cr
 
 El generador admite tres posiciones: `sidebar_left`, `sidebar_right` e `inline`. La configuración se encuentra en `config.json`:
 
-- `direct_ad_slots`: anuncios de patrocinadores directos. Para activar uno, define `enabled: true`, `advertiser`, `headline`, `target_url` HTTPS, y opcionalmente `body` e `image_url`. La imagen puede ser una URL HTTPS o una ruta local segura del propio sitio. El anuncio se marca explícitamente como **Publicidad** y el enlace lleva `rel="sponsored"`.
+- `direct_ad_slots`: anuncios de patrocinadores directos. Para activar uno, define `enabled: true`, `advertiser`, `headline`, `target_url` HTTPS, y opcionalmente `body` e `image_url`. Si añades imagen, súbela al propio repositorio y usa una ruta local segura como `/assets/anunciante.webp`; no se aceptan imágenes remotas de terceros en el bloque directo. El anuncio se marca explícitamente como **Publicidad** y el enlace lleva `rel="sponsored"`.
 - `adsense_slots`: IDs de bloque de AdSense para cada posición. Deben ser los IDs numéricos reales facilitados por AdSense. Los bloques no aparecen si falta el ID de bloque o si AdSense está desactivado.
 - Las barras laterales solo se muestran en pantallas amplias (1520 px o más), para no tapar el contenido. El espacio `inline` se adapta a móvil y escritorio.
 - Los tres espacios están desactivados y vacíos de forma deliberada. No muestran banners falsos.
