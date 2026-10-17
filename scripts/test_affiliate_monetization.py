@@ -10,7 +10,10 @@ from urllib.parse import quote
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from build import AMAZON_DISCLOSURE, apply_affiliate_links, build_affiliate_url  # noqa: E402
+from build import (  # noqa: E402
+    AMAZON_DISCLOSURE, AFFILIATE_PARTNER_DOMAINS, apply_affiliate_links,
+    build_affiliate_url, render_ad_slot,
+)
 
 PUBLIC = ROOT / "public"
 
@@ -47,6 +50,53 @@ def main() -> int:
         raise AssertionError("build_affiliate_url no codifica el destino.")
     if build_affiliate_url("autodoc", "https://www.autodoc.es/search?keyword=alternador", {}) != "https://www.autodoc.es/search?keyword=alternador":
         raise AssertionError("Sin plantilla, el destino debe permanecer directo.")
+
+    # Priority merchants must be supported by the tracking configuration, even when their
+    # templates stay empty until the user has a real approved campaign link.
+    for partner in ("autodoc", "norauto", "ebay", "oscaro", "aurgi", "feuvert", "costco"):
+        if partner not in AFFILIATE_PARTNER_DOMAINS:
+            raise AssertionError(f"Falta el comercio prioritario {partner} en el sistema de afiliación.")
+
+    oscaro_html = '<a href="https://www.oscaro.es/" target="_blank" rel="nofollow">Oscaro</a>'
+    oscaro_tracked = apply_affiliate_links(oscaro_html, {
+        "oscaro": "https://tracking.example/click?destination={destination}"
+    })
+    oscaro_rel = re.search(r'rel="([^"]+)"', oscaro_tracked)
+    if "Enlace de afiliado" not in oscaro_tracked or not oscaro_rel or "sponsored" not in oscaro_rel.group(1):
+        raise AssertionError("Oscaro no acepta plantilla de seguimiento configurable como afiliado.")
+
+    ebay_html = '<a href="https://www.ebay.es/sch/i.html?_nkw=alternador" target="_blank" rel="nofollow">Buscar en eBay</a>'
+    ebay_tracked = apply_affiliate_links(ebay_html, {
+        "ebay": "https://tracking.example/click?destination={destination}"
+    })
+    if "Enlace de afiliado" not in ebay_tracked:
+        raise AssertionError("eBay no acepta plantilla de seguimiento configurable como afiliado.")
+
+    # A paid direct-sponsor placement remains sponsored even when it is not an affiliate link.
+    paid_ad = '<a data-autocalc-paid-ad="true" href="https://sponsor.example/oferta" target="_blank" rel="sponsored nofollow">Publicidad</a>'
+    paid_ad_html = apply_affiliate_links(paid_ad, {})
+    paid_ad_rel = re.search(r'rel="([^"]+)"', paid_ad_html)
+    if not paid_ad_rel or "sponsored" not in paid_ad_rel.group(1):
+        raise AssertionError("Un patrocinio directo ha perdido rel=sponsored.")
+    if "Enlace de afiliado" in paid_ad_html:
+        raise AssertionError("Un patrocinio directo no debe etiquetarse falsamente como afiliación.")
+
+    if render_ad_slot("sidebar_left") or render_ad_slot("sidebar_right") or render_ad_slot("inline"):
+        raise AssertionError("Las posiciones de anuncios no configuradas deben permanecer invisibles.")
+    safe_slot = render_ad_slot("inline", direct_slots={
+        "inline": {
+            "enabled": True,
+            "advertiser": "Taller Ejemplo",
+            "headline": "<Oferta> especial",
+            "body": "Texto comercial",
+            "image_url": "",
+            "target_url": "https://sponsor.example/oferta",
+        }
+    }, adsense_slots={})
+    if 'aria-label="Publicidad de Taller Ejemplo"' not in safe_slot or 'rel="sponsored nofollow noopener noreferrer"' not in safe_slot:
+        raise AssertionError("El bloque de publicidad directa no tiene disclosure/rel correctos.")
+    if "&lt;Oferta&gt; especial" not in safe_slot or "<Oferta>" in safe_slot:
+        raise AssertionError("Los textos del patrocinador deben escaparse como texto plano.")
 
     local_link = apply_affiliate_links('<a href="/privacidad-cookies.html">Privacidad</a>', {})
     if 'rel="nofollow"' in local_link:

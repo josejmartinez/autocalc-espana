@@ -59,7 +59,11 @@ AFFILIATE_LINK_TEMPLATES = CFG.get("affiliate_link_templates", {})
 AFFILIATE_PARTNER_DOMAINS = {
     "autodoc": ("autodoc.es",),
     "norauto": ("norauto.es",),
+    "ebay": ("ebay.es",),
+    "oscaro": ("oscaro.es",),
+    "aurgi": ("aurgi.com",),
     "feuvert": ("feuvert.es",),
+    "costco": ("costco.es",),
     "muchoneumatico": ("muchoneumatico.com",),
     "recambioverde": ("recambioverde.es",),
     "desguaceslatorre": ("desguaceslatorre.es",),
@@ -68,7 +72,11 @@ AFFILIATE_PARTNER_DOMAINS = {
 AFFILIATE_PARTNER_LABELS = {
     "autodoc": "AUTODOC",
     "norauto": "Norauto",
+    "ebay": "eBay Partner Network",
+    "oscaro": "Oscaro",
+    "aurgi": "Aurgi",
     "feuvert": "Feu Vert",
+    "costco": "Costco",
     "muchoneumatico": "Muchoneumático",
     "recambioverde": "RecambioVerde",
     "desguaceslatorre": "Desguaces La Torre",
@@ -136,10 +144,12 @@ def apply_affiliate_links(markup, templates=None):
             (host == "amazon.es" or host.endswith(".amazon.es"))
             and re.search(r"(?:[?&]|&amp;)tag=", href, re.IGNORECASE) is not None
         )
-        if partner is None and not is_amazon_affiliate:
+        is_direct_paid_ad = re.search(r"""\bdata-autocalc-paid-ad(?:\s*=|\s|$)""", attrs, re.IGNORECASE) is not None
+        if partner is None and not is_amazon_affiliate and not is_direct_paid_ad:
             return match.group(0)
         template = str(selected_templates.get(partner, "") or "").strip() if partner else ""
         is_affiliate = is_amazon_affiliate or bool(template)
+        is_sponsored_link = is_affiliate or is_direct_paid_ad
 
         # Static URLs can be rewritten at build time. Dynamic JS template literals
         # are handled by buildPartnerUrl() when the user changes calculator inputs.
@@ -164,7 +174,7 @@ def apply_affiliate_links(markup, templates=None):
             if token.lower() not in {"sponsored", "noopener", "noreferrer", "nofollow"}
         ]
         rel_tokens.insert(0, "nofollow")
-        if is_affiliate:
+        if is_sponsored_link:
             rel_tokens.append("sponsored")
         if re.search(r"""\btarget\s*=\s*["']_blank["']""", attrs, re.IGNORECASE):
             rel_tokens.extend(["noopener", "noreferrer"])
@@ -176,7 +186,7 @@ def apply_affiliate_links(markup, templates=None):
             attrs += " " + new_rel
 
         if is_affiliate and "Enlace de afiliado" not in body:
-            body += '<span class="block mt-1 text-[9px] font-semibold opacity-75">Enlace de afiliado · puede generar comisión</span>'
+            body += '<span class="autocalc-affiliate-label block mt-1 text-[9px] font-semibold opacity-75">Enlace de afiliado · puede generar comisión</span>'
 
         return "<a" + attrs + ">" + body + "</a>"
 
@@ -197,9 +207,100 @@ def affiliate_disclosure_for_other_merchants():
             + ". La remuneración depende de las condiciones del programa y de la compra atribuida."
         )
     return (
-        "Los enlaces a AUTODOC, Norauto, Feu Vert, Muchoneumático y los desguaces son enlaces directos "
+        "Los enlaces a AUTODOC, Norauto, Oscaro, Aurgi, Feu Vert, eBay, Costco, Muchoneumático y los desguaces son enlaces directos "
         "mientras no se configure una URL de seguimiento de afiliación aprobada para cada comercio."
     )
+
+DIRECT_AD_SLOT_NAMES = ("sidebar_left", "sidebar_right", "inline")
+DIRECT_AD_SLOTS = CFG.get("direct_ad_slots", {})
+ADSENSE_SLOT_IDS = CFG.get("adsense_slots", {})
+if not isinstance(DIRECT_AD_SLOTS, dict):
+    raise TypeError("direct_ad_slots debe ser un objeto JSON.")
+if not isinstance(ADSENSE_SLOT_IDS, dict):
+    raise TypeError("adsense_slots debe ser un objeto JSON.")
+if set(DIRECT_AD_SLOTS) - set(DIRECT_AD_SLOT_NAMES):
+    raise ValueError("direct_ad_slots contiene posiciones desconocidas.")
+if set(ADSENSE_SLOT_IDS) - set(DIRECT_AD_SLOT_NAMES):
+    raise ValueError("adsense_slots contiene posiciones desconocidas.")
+
+for ad_slot_name in DIRECT_AD_SLOT_NAMES:
+    ad_slot_config = DIRECT_AD_SLOTS.get(ad_slot_name, {})
+    if not isinstance(ad_slot_config, dict):
+        raise TypeError(f"El espacio publicitario {ad_slot_name} debe ser un objeto.")
+    if ad_slot_config.get("enabled") is True:
+        for field in ("advertiser", "headline", "body", "image_url", "target_url"):
+            if not isinstance(ad_slot_config.get(field, ""), str):
+                raise TypeError(f"El campo {field} del espacio publicitario {ad_slot_name} debe ser texto.")
+        if not ad_slot_config.get("advertiser", "").strip() or not ad_slot_config.get("headline", "").strip():
+            raise ValueError(f"El espacio publicitario {ad_slot_name} necesita anunciante y titular.")
+        target_url = urlsplit(ad_slot_config.get("target_url", "").strip())
+        if target_url.scheme != "https" or not target_url.hostname or target_url.username or target_url.password:
+            raise ValueError(f"El enlace del espacio publicitario {ad_slot_name} debe ser una URL HTTPS válida.")
+        image_url = ad_slot_config.get("image_url", "").strip()
+        if image_url:
+            safe_local_image = image_url.startswith("/") and not image_url.startswith("//") and ".." not in image_url.split("/")
+            if not safe_local_image:
+                raise ValueError(f"La imagen del espacio publicitario {ad_slot_name} debe ser una ruta local segura del propio sitio.")
+    adsense_slot_id = ADSENSE_SLOT_IDS.get(ad_slot_name, "")
+    if not isinstance(adsense_slot_id, str):
+        raise TypeError(f"El identificador AdSense de {ad_slot_name} debe ser texto.")
+    if adsense_slot_id.strip() and not re.fullmatch(r"[0-9]{4,24}", adsense_slot_id.strip()):
+        raise ValueError(f"El identificador AdSense de {ad_slot_name} debe contener solo dígitos.")
+
+
+
+def render_ad_slot(slot_name, direct_slots=None, adsense_slots=None):
+    """Render a direct sponsor or approved AdSense unit; keep unconfigured slots invisible."""
+    if slot_name not in DIRECT_AD_SLOT_NAMES:
+        raise ValueError(f"Posición publicitaria desconocida: {slot_name}")
+    selected_direct_slots = DIRECT_AD_SLOTS if direct_slots is None else direct_slots
+    selected_adsense_slots = ADSENSE_SLOT_IDS if adsense_slots is None else adsense_slots
+    if slot_name.startswith("sidebar_"):
+        side = "left" if slot_name.endswith("_left") else "right"
+        wrapper_class = f"autocalc-ad-slot autocalc-ad-sidebar autocalc-ad-sidebar-{side} no-print"
+    else:
+        wrapper_class = "autocalc-ad-slot autocalc-ad-inline no-print"
+
+    sponsor = selected_direct_slots.get(slot_name, {})
+    if sponsor.get("enabled") is True:
+        advertiser = escape(sponsor["advertiser"].strip())
+        headline = escape(sponsor["headline"].strip())
+        body = escape(sponsor.get("body", "").strip())
+        target_url = escape(sponsor["target_url"].strip(), quote=True)
+        image_url = sponsor.get("image_url", "").strip()
+        image_html = ""
+        if image_url:
+            image_html = (
+                f'<img src="{escape(image_url, quote=True)}" alt="{advertiser}" '
+                'loading="lazy" class="w-full max-h-36 object-contain rounded-lg mb-2">'
+            )
+        body_html = f'<p class="mt-2 text-xs text-slate-600 leading-relaxed">{body}</p>' if body else ""
+        return (
+            f'<aside class="{wrapper_class}" aria-label="Publicidad de {advertiser}">'
+            '<p class="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-2">Publicidad</p>'
+            f'<a data-autocalc-paid-ad="true" href="{target_url}" target="_blank" '
+            'rel="sponsored nofollow noopener noreferrer" '
+            'class="block bg-white border border-slate-200 rounded-xl p-3 shadow-sm hover:shadow-md transition">'
+            f'{image_html}<span class="block text-sm font-extrabold text-slate-900">{headline}</span>'
+            f'{body_html}<span class="block mt-3 text-xs font-bold text-amber-700">Ver oferta →</span>'
+            '</a></aside>'
+        )
+
+    slot_id = str(selected_adsense_slots.get(slot_name, "") or "").strip()
+    if ADSENSE_CLIENT and GOOGLE_CERTIFIED_CMP_CONFIGURED and slot_id:
+        ad_style = "display:block;min-height:100px;width:100%;"
+        if slot_name.startswith("sidebar_"):
+            ad_style = "display:block;min-height:280px;width:100%;"
+        return (
+            f'<aside class="{wrapper_class}" aria-label="Publicidad">'
+            '<p class="text-[10px] uppercase tracking-wider text-slate-500 font-bold mb-2">Publicidad</p>'
+            f'<ins class="adsbygoogle" style="{ad_style}" data-ad-client="{escape(ADSENSE_CLIENT, quote=True)}" '
+            f'data-ad-slot="{escape(slot_id, quote=True)}" data-ad-format="auto" data-full-width-responsive="true"></ins>'
+            '<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>'
+            '</aside>'
+        )
+    return ""
+
 
 if ADSENSE_CLIENT:
     if not GOOGLE_CERTIFIED_CMP_CONFIGURED:
@@ -313,8 +414,16 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
     <link rel="preconnect" href="https://www.amazon.es">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        .autocalc-ad-sidebar { display: none; }
+        .autocalc-ad-inline { width: 100%; max-width: 980px; margin: 1rem auto 1.5rem; padding: 0 1rem; }
+        .autocalc-ad-sidebar .adsbygoogle { min-width: 1px; }
+        @media (min-width: 1520px) {
+            .autocalc-ad-sidebar { display: block; position: fixed; top: 170px; width: 150px; max-height: calc(100vh - 190px); overflow: auto; z-index: 20; }
+            .autocalc-ad-sidebar-left { left: calc(50% - 512px - 160px); }
+            .autocalc-ad-sidebar-right { right: calc(50% - 512px - 160px); }
+        }
         @media print {
-            .no-print { display: none !important; }
+            .no-print, .autocalc-ad-slot { display: none !important; }
             body { background: #fff !important; }
         }
     </style>
@@ -341,6 +450,9 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             </div>
         </div>
     </header>
+
+    __SIDEBAR_LEFT_AD_HTML__
+    __SIDEBAR_RIGHT_AD_HTML__
 
     <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full">
 
@@ -370,6 +482,8 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                 6. ¿Desguace o nuevo?
             </button>
         </div>
+
+        __INLINE_AD_HTML__
 
         <!-- ==================== SECCIÓN 1: NEUMÁTICOS, EQUIVALENCIAS ITV Y OFFSET ET ==================== -->
         <section id="sec-itv" class="space-y-6">
@@ -923,7 +1037,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                 <span class="text-xs bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full w-fit">Selección mecánica experta</span>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <a id="cta-muchoneumatico" href="https://www.muchoneumatico.com/buscar?controller=search&s=__VAL_A1__+__VAL_P1__+__VAL_L1__" target="_blank" rel="nofollow sponsored" class="bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
+                <a id="cta-muchoneumatico" href="https://www.muchoneumatico.com/buscar?controller=search&s=__VAL_A1__+__VAL_P1__+__VAL_L1__" target="_blank" rel="nofollow sponsored" class="order-5 bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
                     <div>
                         <span class="text-xs text-sky-400 font-semibold">Especialista en ruedas</span>
                         <h3 id="txt-cta-mucho" class="font-bold text-sm mt-1">Muchoneumático __VAL_A1__/__VAL_P1__ R__VAL_L1__</h3>
@@ -932,18 +1046,18 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                     <span class="mt-4 inline-block text-center bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold text-xs py-2 rounded-lg">Ver en Muchoneumático →</span>
                 </a>
 
-                <a id="cta-autodoc" href="https://www.autodoc.es/search?keyword=__CAR_AUTODOC_QUERY__" target="_blank" rel="nofollow sponsored" class="bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
+                <a id="cta-autodoc" href="https://www.autodoc.es/search?keyword=__CAR_AUTODOC_QUERY__" target="_blank" rel="nofollow sponsored" class="order-1 border-orange-400 ring-2 ring-orange-400/60 bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border transition flex flex-col justify-between">
                     <div>
-                        <span class="text-xs text-orange-400 font-semibold">Recambios en general</span>
+                        <span class="text-xs text-orange-400 font-semibold">Prioridad 1 · recambio nuevo</span>
                         <h3 class="font-bold text-sm mt-1">Catálogo Autodoc (__CAR_SHORT_NAME__)</h3>
                         <p class="text-xs text-slate-300 mt-1">El mayor catálogo europeo de filtros, frenos, suspensión, aceites y correas.</p>
                     </div>
                     <span class="mt-4 inline-block text-center bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold text-xs py-2 rounded-lg">Buscar en Autodoc →</span>
                 </a>
 
-                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col justify-between">
+                <div class="order-2 border-blue-400 ring-2 ring-blue-500/50 bg-slate-800 p-4 rounded-xl border flex flex-col justify-between">
                     <div>
-                        <span class="text-xs text-emerald-400 font-semibold">Talleres por cercanía y ofertas</span>
+                        <span class="text-xs text-emerald-400 font-semibold">Prioridad 2 · montaje y taller</span>
                         <h3 id="txt-cta-norauto" class="font-bold text-sm mt-1">Montaje __VAL_A2__/__VAL_P2__ R__VAL_L2__</h3>
                         <p class="text-xs text-slate-300 mt-1">Compra online tus neumáticos o batería con cita de montaje en tu centro más cercano.</p>
                     </div>
@@ -953,13 +1067,49 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                     </div>
                 </div>
 
-                <a id="cta-neumatico-orig" href="https://www.amazon.es/s?k=neumaticos+__VAL_A1__+__VAL_P1__+R__VAL_L1__&tag=__AMAZON_TAG__" target="_blank" rel="nofollow sponsored" class="bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
+                <a id="cta-neumatico-orig" href="https://www.amazon.es/s?k=neumaticos+__VAL_A1__+__VAL_P1__+R__VAL_L1__&tag=__AMAZON_TAG__" target="_blank" rel="nofollow sponsored" class="order-7 bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
                     <div>
                         <span class="text-xs text-amber-400 font-semibold">Envío 24 h y pre-ITV</span>
                         <h3 id="txt-cta-orig" class="font-bold text-sm mt-1">Amazon: __VAL_A1__/__VAL_P1__ R__VAL_L1__ y V16</h3>
                         <p class="text-xs text-slate-300 mt-1">Neumáticos, baliza V16 conectada DGT, escobillas y diagnosis OBD2.</p>
                     </div>
                     <span class="mt-4 inline-block text-center bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs py-2 rounded-lg">Ver en Amazon →</span>
+                </a>
+                
+                <a id="cta-oscaro" href="https://www.oscaro.es/" target="_blank" rel="nofollow" class="order-3 bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs text-emerald-400 font-semibold">Recambio nuevo · candidato prioritario</span>
+                        <h3 class="font-bold text-sm mt-1">Oscaro · piezas para tu coche</h3>
+                        <p class="text-xs text-slate-300 mt-1">Compara referencias y disponibilidad en su catálogo. Confirma compatibilidad por matrícula, versión o referencia OEM.</p>
+                    </div>
+                    <span class="mt-4 inline-block text-center bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2 rounded-lg">Buscar en Oscaro →</span>
+                </a>
+
+                <a id="cta-aurgi" href="https://www.aurgi.com/" target="_blank" rel="nofollow" class="order-4 bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs text-cyan-400 font-semibold">Neumáticos, baterías y taller</span>
+                        <h3 class="font-bold text-sm mt-1">Aurgi · productos y montaje</h3>
+                        <p class="text-xs text-slate-300 mt-1">Consulta el precio del producto y el montaje por separado y pide cita en tu centro.</p>
+                    </div>
+                    <span class="mt-4 inline-block text-center bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs py-2 rounded-lg">Ver Aurgi →</span>
+                </a>
+
+
+                <a id="cta-ebay" href="https://www.ebay.es/sch/i.html?_nkw=neumaticos+__VAL_A1__+__VAL_P1__+R__VAL_L1__" target="_blank" rel="nofollow" class="order-6 bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs text-violet-400 font-semibold">Nuevo y usado · catálogo amplio</span>
+                        <h3 id="txt-cta-ebay" class="font-bold text-sm mt-1">eBay: neumáticos __VAL_A1__/__VAL_P1__ R__VAL_L1__ y recambio usado</h3>
+                        <p class="text-xs text-slate-300 mt-1">Útil para comparar piezas OEM usadas y nuevas. Revisa estado, vendedor, devolución, compatibilidad y coste total.</p>
+                    </div>
+                    <span class="mt-4 inline-block text-center bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs py-2 rounded-lg">Buscar en eBay →</span>
+                </a>
+                <a id="cta-costco" href="https://www.costco.es/" target="_blank" rel="nofollow" class="order-8 bg-slate-800 hover:bg-slate-700 p-4 rounded-xl border border-slate-700 transition flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs text-slate-300 font-semibold">Proveedor complementario</span>
+                        <h3 class="font-bold text-sm mt-1">Costco · catálogo y accesorios</h3>
+                        <p class="text-xs text-slate-300 mt-1">Enlace directo mientras se confirma si existe un programa de afiliación aplicable a España y automoción.</p>
+                    </div>
+                    <span class="mt-4 inline-block text-center bg-slate-600 hover:bg-slate-500 text-white font-bold text-xs py-2 rounded-lg">Consultar Costco →</span>
                 </a>
             </div>
         </section>
@@ -1016,6 +1166,31 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             if (!template || typeof destination !== 'string') return destination;
             if (!template.startsWith('https://') || !template.includes('{destination}')) return destination;
             return template.replaceAll('{destination}', encodeURIComponent(destination));
+        }
+
+        function setPartnerLink(elementOrId, partner, destination) {
+            const el = typeof elementOrId === 'string' ? document.getElementById(elementOrId) : elementOrId;
+            if (!el || typeof destination !== 'string') return;
+            const template = AFFILIATE_LINK_TEMPLATES[partner] || '';
+            const tracked = Boolean(template && template.startsWith('https://') && template.includes('{destination}'));
+            el.href = tracked ? buildPartnerUrl(partner, destination) : destination;
+
+            const relTokens = (el.getAttribute('rel') || '').split(/\s+/).filter(Boolean)
+                .filter(token => !['nofollow', 'sponsored', 'noopener', 'noreferrer'].includes(token.toLowerCase()));
+            relTokens.push('nofollow');
+            if (tracked) relTokens.push('sponsored');
+            if (el.target === '_blank') relTokens.push('noopener', 'noreferrer');
+            el.setAttribute('rel', [...new Set(relTokens)].join(' '));
+
+            let label = el.querySelector('.autocalc-affiliate-label');
+            if (tracked && !label) {
+                label = document.createElement('span');
+                label.className = 'autocalc-affiliate-label block mt-1 text-[9px] font-semibold opacity-75';
+                label.textContent = 'Enlace de afiliado · puede generar comisión';
+                el.appendChild(label);
+            } else if (!tracked && label) {
+                label.remove();
+            }
         }
         const AUTOCALC_CONSENT_KEY = "autocalc_privacidad_v2";
         const TAB_INICIAL = "__INITIAL_TAB__";
@@ -1377,10 +1552,12 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                 <p class="text-xs text-rose-700 font-semibold mt-1"><strong>Impacto en la estación ITV:</strong> ${info.itv}</p>
                 <p class="text-xs text-emerald-800 font-medium mt-1"><strong>Solución recomendada:</strong> ${info.solucion}</p>
                 <div class="flex flex-wrap gap-2 mt-3">
-                    <a href="${buildPartnerUrl('autodoc', 'https://www.autodoc.es/search?keyword=' + encodeURIComponent(info.query.replace(/\+/g, ' ')))}" target="_blank" rel="nofollow sponsored" class="text-xs bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg transition">Buscar recambio en Autodoc →</a>
+                    <a id="link-obd-autodoc" href="https://www.autodoc.es/" target="_blank" rel="nofollow" class="text-xs bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg transition">Buscar recambio en Autodoc →</a>
                     <a href="https://www.amazon.es/s?k=${info.query}&tag=${AMAZON_TAG}" target="_blank" rel="nofollow sponsored" class="text-xs bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg transition">Ver aditivos / recambio en Amazon →</a>
                 </div>
             `;
+            const obdAutodocLink = document.getElementById('link-obd-autodoc');
+            setPartnerLink(obdAutodocLink, 'autodoc', 'https://www.autodoc.es/search?keyword=' + encodeURIComponent(info.query.replace(/\+/g, ' ')));
         }
 
         function evaluarChecklist() {
@@ -1426,7 +1603,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const consulta = p[4].split('+').join(' ');
             const linkAutodoc = document.getElementById('link-pieza-autodoc');
             if (linkAutodoc) {
-                linkAutodoc.href = buildPartnerUrl('autodoc', 'https://www.autodoc.es/search?keyword=' + encodeURIComponent(consulta));
+                setPartnerLink(linkAutodoc, 'autodoc', 'https://www.autodoc.es/search?keyword=' + encodeURIComponent(consulta));
             }
 
             calcularDesguace();
@@ -1671,10 +1848,12 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
 
             dibujarComparadorSVG(a1, p1, l1, d1, a2, p2, l2, d2);
 
-            document.getElementById('cta-muchoneumatico').href = buildPartnerUrl('muchoneumatico', `https://www.muchoneumatico.com/buscar?controller=search&s=${a1}+${p1}+${l1}`);
+            setPartnerLink('cta-muchoneumatico', 'muchoneumatico', `https://www.muchoneumatico.com/buscar?controller=search&s=${a1}+${p1}+${l1}`);
             document.getElementById('txt-cta-mucho').innerText = `Muchoneumático ${a1}/${p1} R${l1}`;
-            document.getElementById('cta-norauto').href = buildPartnerUrl('norauto', `https://www.norauto.es/c/47595-neumaticos.html?q=${a2}%2F${p2}R${l2}`);
-            document.getElementById('cta-feuvert').href = buildPartnerUrl('feuvert', `https://www.feuvert.es/neumaticos?q=${a2}+${p2}+${l2}`);
+            setPartnerLink('cta-norauto', 'norauto', `https://www.norauto.es/c/47595-neumaticos.html?q=${a2}%2F${p2}R${l2}`);
+            setPartnerLink('cta-feuvert', 'feuvert', `https://www.feuvert.es/neumaticos?q=${a2}+${p2}+${l2}`);
+            setPartnerLink('cta-ebay', 'ebay', `https://www.ebay.es/sch/i.html?_nkw=neumaticos+${a1}+${p1}+R${l1}`);
+            document.getElementById('txt-cta-ebay').innerText = `eBay: ${a1}/${p1} R${l1} y recambio usado`;
             document.getElementById('txt-cta-norauto').innerText = `Montaje ${a2}/${p2} R${l2}`;
             document.getElementById('cta-neumatico-orig').href = `https://www.amazon.es/s?k=neumaticos+${a1}+${p1}+R${l1}&tag=${AMAZON_TAG}`;
             document.getElementById('txt-cta-orig').innerText = `Amazon: ${a1}/${p1} R${l1} y V16`;
@@ -2131,6 +2310,9 @@ def render_page(
         "__AFFILIATE_LINK_TEMPLATES_JSON__": json.dumps(AFFILIATE_LINK_TEMPLATES, ensure_ascii=False),
         "__AMAZON_DISCLOSURE__": AMAZON_DISCLOSURE,
         "__OTHER_AFFILIATE_DISCLOSURE__": affiliate_disclosure_for_other_merchants(),
+        "__SIDEBAR_LEFT_AD_HTML__": render_ad_slot("sidebar_left"),
+        "__SIDEBAR_RIGHT_AD_HTML__": render_ad_slot("sidebar_right"),
+        "__INLINE_AD_HTML__": render_ad_slot("inline"),
         "__GOOGLE_ANALYTICS_ID__": GOOGLE_ANALYTICS_ID,
         "__GOOGLE_SITE_VERIFICATION_TAG__": GOOGLE_SITE_VERIFICATION_TAG,
         "__CAR_CONTEXT_NAME__": car_context_name,
@@ -2365,7 +2547,7 @@ def main():
         <p><strong>1. Titular y contacto:</strong> {contacto_publico}. La identidad del responsable y los datos de contacto deben completarse y revisarse por el titular antes de la explotación comercial.</p>
         <p><strong>2. Analítica:</strong> Google Analytics 4 (si está configurado) solo se carga tras aceptar expresamente la opción «Aceptar analítica». Si se elige «Rechazar analítica», la etiqueta no se carga; si se revoca una aceptación durante la visita, se envía la señal de denegación cuando procede y se intenta eliminar las cookies de Analytics accesibles desde este dominio. La elección se recuerda en el almacenamiento local del navegador.</p>
         <p><strong>3. Cambiar la decisión:</strong> puede volver a abrir el aviso desde el enlace «Configurar cookies» del pie de página y cambiar su elección. Los enlaces a sitios de terceros se rigen también por las políticas de esos proveedores.</p>
-        <p><strong>4. Publicidad:</strong> Google AdSense no está activado en la configuración actual. No deberá habilitarse hasta integrar una plataforma de gestión del consentimiento certificada por Google y compatible con el marco TCF para servir anuncios personalizados en los territorios en los que Google lo exige.</p>
+        <p><strong>4. Publicidad:</strong> Google AdSense no está activado en la configuración actual. Los espacios de publicidad directa solo se mostrarán cuando se configure una colaboración comercial concreta. AdSense no deberá habilitarse hasta disponer de aprobación, identificadores reales de bloques publicitarios e integración verificada de una CMP certificada por Google y compatible con el marco TCF para los territorios donde se exija.</p>
         <p><strong>5. Afiliación:</strong> {AMAZON_DISCLOSURE} {SITE_NAME} puede recibir comisiones por compras atribuidas a enlaces de afiliación sin coste adicional para el usuario. {affiliate_disclosure_for_other_merchants()} Las condiciones, precios, disponibilidad y tecnologías de seguimiento dependen de cada comercio y programa.</p>
         <p>Este texto describe la implementación técnica del sitio, pero no sustituye la revisión legal del titular ni completa por sí solo la información necesaria sobre responsable, base jurídica, conservación de datos y ejercicio de derechos.</p>
     """
