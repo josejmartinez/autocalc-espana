@@ -53,7 +53,7 @@ def main() -> int:
 
     # Priority merchants must be supported by the tracking configuration, even when their
     # templates stay empty until the user has a real approved campaign link.
-    for partner in ("autodoc", "norauto", "oscaro", "aurgi", "feuvert", "costco"):
+    for partner in ("autodoc", "norauto", "ebay", "oscaro", "aurgi", "feuvert", "costco"):
         if partner not in AFFILIATE_PARTNER_DOMAINS:
             raise AssertionError(f"Falta el comercio prioritario {partner} en el sistema de afiliación.")
 
@@ -64,6 +64,13 @@ def main() -> int:
     oscaro_rel = re.search(r'rel="([^"]+)"', oscaro_tracked)
     if "Enlace de afiliado" not in oscaro_tracked or not oscaro_rel or "sponsored" not in oscaro_rel.group(1):
         raise AssertionError("Oscaro no acepta plantilla de seguimiento configurable como afiliado.")
+
+    ebay_html = '<a href="https://www.ebay.es/sch/i.html?_nkw=alternador" target="_blank" rel="nofollow">Buscar en eBay</a>'
+    ebay_tracked = apply_affiliate_links(ebay_html, {
+        "ebay": "https://tracking.example/click?destination={destination}"
+    })
+    if "Enlace de afiliado" not in ebay_tracked:
+        raise AssertionError("eBay no acepta plantilla de seguimiento configurable como afiliado.")
 
     # A paid direct-sponsor placement remains sponsored even when it is not an affiliate link.
     paid_ad = '<a data-autocalc-paid-ad="true" href="https://sponsor.example/oferta" target="_blank" rel="sponsored nofollow">Publicidad</a>'
