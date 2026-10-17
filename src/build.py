@@ -14,7 +14,8 @@ Incluye:
 import os
 import json
 import re
-from html import escape
+from html import escape, unescape
+from urllib.parse import quote, urlsplit
 from datetime import date
 from catalogo import MEDIDAS_ESPANA, MODELOS_COCHES, RUTAS_ESPANA, ZONAS_DESGUACES_ITV, GARGANTA_POR_ANCHO
 
@@ -49,6 +50,153 @@ GOOGLE_SITE_VERIFICATION_TAG = (
     f'<meta name="google-site-verification" content="{escape(GOOGLE_SITE_VERIFICATION, quote=True)}" />'
     if GOOGLE_SITE_VERIFICATION else ""
 )
+
+
+AFFILIATE_LINK_TEMPLATES = CFG.get("affiliate_link_templates", {})
+AFFILIATE_PARTNER_DOMAINS = {
+    "autodoc": ("autodoc.es",),
+    "norauto": ("norauto.es",),
+    "feuvert": ("feuvert.es",),
+    "muchoneumatico": ("muchoneumatico.com",),
+    "recambioverde": ("recambioverde.es",),
+    "desguaceslatorre": ("desguaceslatorre.es",),
+    "elchoque": ("elchoque.com",),
+}
+AFFILIATE_PARTNER_LABELS = {
+    "autodoc": "AUTODOC",
+    "norauto": "Norauto",
+    "feuvert": "Feu Vert",
+    "muchoneumatico": "Muchoneumático",
+    "recambioverde": "RecambioVerde",
+    "desguaceslatorre": "Desguaces La Torre",
+    "elchoque": "El Choque",
+}
+AMAZON_DISCLOSURE = "En calidad de Afiliado de Amazon, obtengo ingresos por las compras adscritas que cumplen los requisitos aplicables."
+
+if not isinstance(AFFILIATE_LINK_TEMPLATES, dict):
+    raise TypeError("affiliate_link_templates debe ser un objeto JSON con plantillas por comercio.")
+
+unknown_affiliate_partners = set(AFFILIATE_LINK_TEMPLATES) - set(AFFILIATE_PARTNER_DOMAINS)
+if unknown_affiliate_partners:
+    raise ValueError("Comercios de afiliación desconocidos: " + ", ".join(sorted(unknown_affiliate_partners)))
+
+for affiliate_partner, affiliate_template in AFFILIATE_LINK_TEMPLATES.items():
+    if not isinstance(affiliate_template, str):
+        raise TypeError(f"La plantilla de afiliación de {affiliate_partner} debe ser texto.")
+    affiliate_template = affiliate_template.strip()
+    AFFILIATE_LINK_TEMPLATES[affiliate_partner] = affiliate_template
+    if affiliate_template and (
+        not affiliate_template.startswith("https://")
+        or "{destination}" not in affiliate_template
+    ):
+        raise ValueError(
+            f"La plantilla de {affiliate_partner} debe comenzar por https:// "
+            "e incluir el marcador literal {destination}, que se sustituye por la URL de destino codificada."
+        )
+
+
+def build_affiliate_url(partner, destination, templates=None):
+    """Apply a merchant-provided HTTPS tracking template to a destination URL."""
+    selected_templates = AFFILIATE_LINK_TEMPLATES if templates is None else templates
+    template = str(selected_templates.get(partner, "") or "").strip()
+    if not template:
+        return destination
+    if not template.startswith("https://") or "{destination}" not in template:
+        raise ValueError(f"Plantilla de afiliación no válida para {partner}.")
+    return template.replace("{destination}", quote(destination, safe=""))
+
+
+def apply_affiliate_links(markup, templates=None):
+    """Mark genuine affiliate links as sponsored and leave untracked merchant links direct."""
+    selected_templates = AFFILIATE_LINK_TEMPLATES if templates is None else templates
+
+    def rewrite_anchor(match):
+        attrs, body = match.group(1), match.group(2)
+        href_match = re.search(r"""\bhref\s*=\s*(["'])(.*?)\1""", attrs, re.IGNORECASE | re.DOTALL)
+        if not href_match:
+            return match.group(0)
+
+        href = unescape(href_match.group(2))
+        try:
+            host = (urlsplit(href).hostname or "").lower()
+        except ValueError:
+            return match.group(0)
+
+        partner = next(
+            (
+                name for name, domains in AFFILIATE_PARTNER_DOMAINS.items()
+                if any(host == domain or host.endswith("." + domain) for domain in domains)
+            ),
+            None,
+        )
+        is_amazon_affiliate = (
+            (host == "amazon.es" or host.endswith(".amazon.es"))
+            and re.search(r"(?:[?&]|&amp;)tag=", href, re.IGNORECASE) is not None
+        )
+        if partner is None and not is_amazon_affiliate:
+            return match.group(0)
+        template = str(selected_templates.get(partner, "") or "").strip() if partner else ""
+        is_affiliate = is_amazon_affiliate or bool(template)
+
+        # Static URLs can be rewritten at build time. Dynamic JS template literals
+        # are handled by buildPartnerUrl() when the user changes calculator inputs.
+        if (
+            partner
+            and template
+            and "{destination}" in template
+            and (chr(36) + "{") not in href
+            and "__" not in href
+        ):
+            tracked_href = template.replace("{destination}", quote(href, safe=""))
+            attrs = (
+                attrs[:href_match.start(2)]
+                + escape(tracked_href, quote=True)
+                + attrs[href_match.end(2):]
+            )
+
+        rel_match = re.search(r"""\brel\s*=\s*(["'])(.*?)\1""", attrs, re.IGNORECASE | re.DOTALL)
+        existing_rel = rel_match.group(2).split() if rel_match else []
+        rel_tokens = [
+            token for token in existing_rel
+            if token.lower() not in {"sponsored", "noopener", "noreferrer", "nofollow"}
+        ]
+        rel_tokens.insert(0, "nofollow")
+        if is_affiliate:
+            rel_tokens.append("sponsored")
+        if re.search(r"""\btarget\s*=\s*["']_blank["']""", attrs, re.IGNORECASE):
+            rel_tokens.extend(["noopener", "noreferrer"])
+        rel_tokens = list(dict.fromkeys(rel_tokens))
+        new_rel = 'rel="' + " ".join(rel_tokens) + '"'
+        if rel_match:
+            attrs = attrs[:rel_match.start()] + new_rel + attrs[rel_match.end():]
+        else:
+            attrs += " " + new_rel
+
+        if is_affiliate and "Enlace de afiliado" not in body:
+            body += '<span class="block mt-1 text-[9px] font-semibold opacity-75">Enlace de afiliado · puede generar comisión</span>'
+
+        return "<a" + attrs + ">" + body + "</a>"
+
+    # Also processes anchors created later via inline JavaScript template literals.
+    return re.sub(r"<a\b([^>]*)>(.*?)</a\s*>", rewrite_anchor, markup, flags=re.IGNORECASE | re.DOTALL)
+
+
+def affiliate_disclosure_for_other_merchants():
+    active = [
+        label for key, label in AFFILIATE_PARTNER_LABELS.items()
+        if str(AFFILIATE_LINK_TEMPLATES.get(key, "") or "").strip()
+    ]
+    if active:
+        names = ", ".join(active)
+        return (
+            "Los enlaces de afiliación de otros comercios actualmente configurados corresponden a: "
+            + escape(names)
+            + ". La remuneración depende de las condiciones del programa y de la compra atribuida."
+        )
+    return (
+        "Los enlaces a AUTODOC, Norauto, Feu Vert, Muchoneumático y los desguaces son enlaces directos "
+        "mientras no se configure una URL de seguimiento de afiliación aprobada para cada comercio."
+    )
 
 if ADSENSE_CLIENT:
     if not GOOGLE_CERTIFIED_CMP_CONFIGURED:
@@ -674,7 +822,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             </div>
         </section>
 
-        <!-- ==================== SECCIÓN 6: ¿DESGUACE, AUTODOC O TALLER? (CATÁLOGO DE 16 PIEZAS REALES) ==================== -->
+        <!-- ==================== SECCIÓN 6: COMPARADOR DE 16 REFERENCIAS ORIENTATIVAS EDITABLES ==================== -->
         <section id="sec-desguace" class="space-y-6 hidden">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                 <h2 class="text-lg font-bold mb-1 text-slate-900">6. Calculadora maestra de recambios: ¿desguace, Autodoc o taller (Norauto / Feu Vert)?</h2>
@@ -756,6 +904,12 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             </div>
         </section>
 
+        <aside class="my-6 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs leading-relaxed text-slate-800" aria-label="Transparencia sobre publicidad y afiliación">
+            <p><strong>Publicidad y enlaces de afiliación.</strong> AutoCalc puede recibir una comisión cuando una compra se realiza mediante un enlace afiliado, sin coste adicional para el usuario. Comprueba el precio final, el envío, el montaje y las condiciones directamente en la tienda.</p>
+            <p class="mt-1"><strong>Amazon:</strong> __AMAZON_DISCLOSURE__ Los enlaces con seguimiento se identifican como «Enlace de afiliado».</p>
+            <p class="mt-1">__OTHER_AFFILIATE_DISCLOSURE__</p>
+        </aside>
+
         <!-- COMPARADOR MULTITIENDA (MUCHONEUMÁTICO + AUTODOC + NORAUTO/FEU VERT + AMAZON) -->
         <section class="mt-8 bg-gradient-to-br from-slate-900 to-slate-800 text-white p-6 rounded-2xl shadow-md no-print">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
@@ -826,7 +980,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
         <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div>
                 <p class="font-bold text-slate-200">__SITE_NAME__ © 2026</p>
-                <p class="mt-1">Comparador independiente. Participamos en programas de afiliación (Amazon UE y tiendas del sector motor).</p>
+                <p class="mt-1">Comparador independiente. Los enlaces con seguimiento se identifican como enlaces de afiliación; consulta las condiciones del comercio antes de comprar.</p>
             </div>
             <div class="flex flex-wrap gap-4">
                 <a href="index.html" class="hover:text-white transition">Inicio</a>
@@ -851,7 +1005,15 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
 
     <script>
         const AMAZON_TAG = "__AMAZON_TAG__";
+        const AFFILIATE_LINK_TEMPLATES = __AFFILIATE_LINK_TEMPLATES_JSON__;
         const GOOGLE_ANALYTICS_ID = "__GOOGLE_ANALYTICS_ID__";
+
+        function buildPartnerUrl(partner, destination) {
+            const template = AFFILIATE_LINK_TEMPLATES[partner];
+            if (!template || typeof destination !== 'string') return destination;
+            if (!template.startsWith('https://') || !template.includes('{destination}')) return destination;
+            return template.replaceAll('{destination}', encodeURIComponent(destination));
+        }
         const AUTOCALC_CONSENT_KEY = "autocalc_privacidad_v2";
         const TAB_INICIAL = "__INITIAL_TAB__";
         const GARGANTAS = {155:'4.5"-5.5"',165:'4.5"-6.0"',175:'5.0"-6.0"',185:'5.0"-6.5"',195:'5.5"-7.0"',205:'5.5"-7.5"',215:'6.0"-7.5"',225:'6.0"-8.0"',235:'6.5"-8.5"',245:'7.0"-9.0"',255:'7.5"-9.5"',265:'8.0"-10.0"',275:'8.5"-10.5"'};
@@ -1212,7 +1374,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                 <p class="text-xs text-rose-700 font-semibold mt-1"><strong>Impacto en la estación ITV:</strong> ${info.itv}</p>
                 <p class="text-xs text-emerald-800 font-medium mt-1"><strong>Solución recomendada:</strong> ${info.solucion}</p>
                 <div class="flex flex-wrap gap-2 mt-3">
-                    <a href="https://www.autodoc.es/search?keyword=${info.query}" target="_blank" rel="nofollow sponsored" class="text-xs bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg transition">Buscar recambio en Autodoc →</a>
+                    <a href="${buildPartnerUrl('autodoc', 'https://www.autodoc.es/search?keyword=' + encodeURIComponent(info.query.replace(/\+/g, ' ')))}" target="_blank" rel="nofollow sponsored" class="text-xs bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg transition">Buscar recambio en Autodoc →</a>
                     <a href="https://www.amazon.es/s?k=${info.query}&tag=${AMAZON_TAG}" target="_blank" rel="nofollow sponsored" class="text-xs bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded-lg transition">Ver aditivos / recambio en Amazon →</a>
                 </div>
             `;
@@ -1261,7 +1423,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const consulta = p[4].split('+').join(' ');
             const linkAutodoc = document.getElementById('link-pieza-autodoc');
             if (linkAutodoc) {
-                linkAutodoc.href = 'https://www.autodoc.es/search?keyword=' + encodeURIComponent(consulta);
+                linkAutodoc.href = buildPartnerUrl('autodoc', 'https://www.autodoc.es/search?keyword=' + encodeURIComponent(consulta));
             }
 
             calcularDesguace();
@@ -1506,10 +1668,10 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
 
             dibujarComparadorSVG(a1, p1, l1, d1, a2, p2, l2, d2);
 
-            document.getElementById('cta-muchoneumatico').href = `https://www.muchoneumatico.com/buscar?controller=search&s=${a1}+${p1}+${l1}`;
+            document.getElementById('cta-muchoneumatico').href = buildPartnerUrl('muchoneumatico', `https://www.muchoneumatico.com/buscar?controller=search&s=${a1}+${p1}+${l1}`);
             document.getElementById('txt-cta-mucho').innerText = `Muchoneumático ${a1}/${p1} R${l1}`;
-            document.getElementById('cta-norauto').href = `https://www.norauto.es/c/47595-neumaticos.html?q=${a2}%2F${p2}R${l2}`;
-            document.getElementById('cta-feuvert').href = `https://www.feuvert.es/neumaticos?q=${a2}+${p2}+${l2}`;
+            document.getElementById('cta-norauto').href = buildPartnerUrl('norauto', `https://www.norauto.es/c/47595-neumaticos.html?q=${a2}%2F${p2}R${l2}`);
+            document.getElementById('cta-feuvert').href = buildPartnerUrl('feuvert', `https://www.feuvert.es/neumaticos?q=${a2}+${p2}+${l2}`);
             document.getElementById('txt-cta-norauto').innerText = `Montaje ${a2}/${p2} R${l2}`;
             document.getElementById('cta-neumatico-orig').href = `https://www.amazon.es/s?k=neumaticos+${a1}+${p1}+R${l1}&tag=${AMAZON_TAG}`;
             document.getElementById('txt-cta-orig').innerText = `Amazon: ${a1}/${p1} R${l1} y V16`;
@@ -1963,6 +2125,9 @@ def render_page(
         "__SEO_TEXT_BLOCK__": seo_text,
         "__INTERNAL_LINKS_HTML__": internal_links,
         "__AMAZON_TAG__": AMAZON_TAG,
+        "__AFFILIATE_LINK_TEMPLATES_JSON__": json.dumps(AFFILIATE_LINK_TEMPLATES, ensure_ascii=False),
+        "__AMAZON_DISCLOSURE__": AMAZON_DISCLOSURE,
+        "__OTHER_AFFILIATE_DISCLOSURE__": affiliate_disclosure_for_other_merchants(),
         "__GOOGLE_ANALYTICS_ID__": GOOGLE_ANALYTICS_ID,
         "__GOOGLE_SITE_VERIFICATION_TAG__": GOOGLE_SITE_VERIFICATION_TAG,
         "__CAR_CONTEXT_NAME__": car_context_name,
@@ -1972,6 +2137,8 @@ def render_page(
 
     for k, v in replacements.items():
         html = html.replace(k, v)
+
+    html = apply_affiliate_links(html)
 
     with open(os.path.join(OUTPUT_DIR, filename), "w", encoding="utf-8") as out:
         out.write(html)
@@ -2196,7 +2363,7 @@ def main():
         <p><strong>2. Analítica:</strong> Google Analytics 4 (si está configurado) solo se carga tras aceptar expresamente la opción «Aceptar analítica». Si se elige «Rechazar analítica», la etiqueta no se carga; si se revoca una aceptación durante la visita, se envía la señal de denegación cuando procede y se intenta eliminar las cookies de Analytics accesibles desde este dominio. La elección se recuerda en el almacenamiento local del navegador.</p>
         <p><strong>3. Cambiar la decisión:</strong> puede volver a abrir el aviso desde el enlace «Configurar cookies» del pie de página y cambiar su elección. Los enlaces a sitios de terceros se rigen también por las políticas de esos proveedores.</p>
         <p><strong>4. Publicidad:</strong> Google AdSense no está activado en la configuración actual. No deberá habilitarse hasta integrar una plataforma de gestión del consentimiento certificada por Google y compatible con el marco TCF para servir anuncios personalizados en los territorios en los que Google lo exige.</p>
-        <p><strong>5. Afiliación:</strong> {SITE_NAME} incluye enlaces a comercios del sector del automóvil y participa en programas de afiliación, entre ellos Amazon. Si se compra desde algunos enlaces, el sitio puede recibir una comisión, sin coste adicional para el usuario. Las condiciones, precios, disponibilidad y posibles tecnologías de seguimiento dependen del comercio de destino.</p>
+        <p><strong>5. Afiliación:</strong> {AMAZON_DISCLOSURE} {SITE_NAME} puede recibir comisiones por compras atribuidas a enlaces de afiliación sin coste adicional para el usuario. {affiliate_disclosure_for_other_merchants()} Las condiciones, precios, disponibilidad y tecnologías de seguimiento dependen de cada comercio y programa.</p>
         <p>Este texto describe la implementación técnica del sitio, pero no sustituye la revisión legal del titular ni completa por sí solo la información necesaria sobre responsable, base jurídica, conservación de datos y ejercicio de derechos.</p>
     """
     render_page(
