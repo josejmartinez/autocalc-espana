@@ -1156,6 +1156,31 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             if (!template.startsWith('https://') || !template.includes('{destination}')) return destination;
             return template.replaceAll('{destination}', encodeURIComponent(destination));
         }
+
+        function setPartnerLink(elementOrId, partner, destination) {
+            const el = typeof elementOrId === 'string' ? document.getElementById(elementOrId) : elementOrId;
+            if (!el || typeof destination !== 'string') return;
+            const template = AFFILIATE_LINK_TEMPLATES[partner] || '';
+            const tracked = Boolean(template && template.startsWith('https://') && template.includes('{destination}'));
+            el.href = tracked ? buildPartnerUrl(partner, destination) : destination;
+
+            const relTokens = (el.getAttribute('rel') || '').split(/\s+/).filter(Boolean)
+                .filter(token => !['nofollow', 'sponsored', 'noopener', 'noreferrer'].includes(token.toLowerCase()));
+            relTokens.push('nofollow');
+            if (tracked) relTokens.push('sponsored');
+            if (el.target === '_blank') relTokens.push('noopener', 'noreferrer');
+            el.setAttribute('rel', [...new Set(relTokens)].join(' '));
+
+            let label = el.querySelector('.autocalc-affiliate-label');
+            if (tracked && !label) {
+                label = document.createElement('span');
+                label.className = 'autocalc-affiliate-label block mt-1 text-[9px] font-semibold opacity-75';
+                label.textContent = 'Enlace de afiliado · puede generar comisión';
+                el.appendChild(label);
+            } else if (!tracked && label) {
+                label.remove();
+            }
+        }
         const AUTOCALC_CONSENT_KEY = "autocalc_privacidad_v2";
         const TAB_INICIAL = "__INITIAL_TAB__";
         const GARGANTAS = {155:'4.5"-5.5"',165:'4.5"-6.0"',175:'5.0"-6.0"',185:'5.0"-6.5"',195:'5.5"-7.0"',205:'5.5"-7.5"',215:'6.0"-7.5"',225:'6.0"-8.0"',235:'6.5"-8.5"',245:'7.0"-9.0"',255:'7.5"-9.5"',265:'8.0"-10.0"',275:'8.5"-10.5"'};
