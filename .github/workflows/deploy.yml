@@ -49,6 +49,9 @@ jobs:
       - name: Test domain migration in both modes
         run: python scripts/test_domain_switch.py
 
+      - name: Validate IndexNow key and sitemap
+        run: python scripts/test_indexnow.py
+
       - name: Validate generated site
         run: |
           python - <<'PY'
@@ -156,3 +159,18 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Checkout source for IndexNow notification
+        uses: actions/checkout@v4
+
+      - name: Set up Python for IndexNow
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Regenerate sitemap and IndexNow key for submission
+        run: python src/build.py
+
+      - name: Notify IndexNow about published sitemap URLs
+        run: python scripts/submit_indexnow.py
+        continue-on-error: true
