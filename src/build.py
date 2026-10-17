@@ -29,6 +29,9 @@ with open(CONFIG_PATH, "r", encoding="utf-8-sig") as f:
 GITHUB_PAGES_URL = CFG.get("github_pages_url", CFG.get("domain", "")).strip().rstrip("/")
 CUSTOM_DOMAIN = CFG.get("custom_domain", "autocalc.es").strip().lower().rstrip(".")
 USE_CUSTOM_DOMAIN = CFG.get("use_custom_domain", False) is True
+INDEXNOW_KEY = str(CFG.get("indexnow_key", "") or "").strip()
+if INDEXNOW_KEY and not re.fullmatch(r"[A-Fa-f0-9-]{8,128}", INDEXNOW_KEY):
+    raise ValueError("indexnow_key debe tener entre 8 y 128 caracteres hexadecimales y guiones.")
 
 if not GITHUB_PAGES_URL.startswith("https://"):
     raise ValueError("La URL de GitHub Pages debe ser HTTPS.")
@@ -2392,6 +2395,20 @@ def main():
             f.write(f"{CUSTOM_DOMAIN}\n")
     elif os.path.exists(cname_path):
         os.remove(cname_path)
+
+    # IndexNow verification: a public root file whose filename and contents
+    # both contain the same API key proves control of the submitted host.
+    # The file is emitted only for the active custom-domain deployment.
+    indexnow_key_filename = f"{INDEXNOW_KEY}.txt" if INDEXNOW_KEY else ""
+    for existing_name in os.listdir(OUTPUT_DIR):
+        if (
+            re.fullmatch(r"[A-Fa-f0-9-]{8,128}\\.txt", existing_name)
+            and existing_name != indexnow_key_filename
+        ):
+            os.remove(os.path.join(OUTPUT_DIR, existing_name))
+    if USE_CUSTOM_DOMAIN and INDEXNOW_KEY:
+        with open(os.path.join(OUTPUT_DIR, indexnow_key_filename), "w", encoding="utf-8") as f:
+            f.write(f"{INDEXNOW_KEY}\\n")
 
     ads_txt_path = os.path.join(OUTPUT_DIR, "ads.txt")
     if ADSENSE_CLIENT:
