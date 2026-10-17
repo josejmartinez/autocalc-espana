@@ -2402,13 +2402,13 @@ def main():
     indexnow_key_filename = f"{INDEXNOW_KEY}.txt" if INDEXNOW_KEY else ""
     for existing_name in os.listdir(OUTPUT_DIR):
         if (
-            re.fullmatch(r"[A-Fa-f0-9-]{8,128}\\.txt", existing_name)
+            re.fullmatch(r"[A-Fa-f0-9-]{8,128}\.txt", existing_name)
             and existing_name != indexnow_key_filename
         ):
             os.remove(os.path.join(OUTPUT_DIR, existing_name))
     if USE_CUSTOM_DOMAIN and INDEXNOW_KEY:
         with open(os.path.join(OUTPUT_DIR, indexnow_key_filename), "w", encoding="utf-8") as f:
-            f.write(f"{INDEXNOW_KEY}\\n")
+            f.write(f"{INDEXNOW_KEY}\n")
 
     ads_txt_path = os.path.join(OUTPUT_DIR, "ads.txt")
     if ADSENSE_CLIENT:
