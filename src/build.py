@@ -249,17 +249,19 @@ for ad_slot_name in DIRECT_AD_SLOT_NAMES:
 
 
 
-def render_ad_slot(slot_name):
+def render_ad_slot(slot_name, direct_slots=None, adsense_slots=None):
     """Render a direct sponsor or approved AdSense unit; keep unconfigured slots invisible."""
     if slot_name not in DIRECT_AD_SLOT_NAMES:
         raise ValueError(f"Posición publicitaria desconocida: {slot_name}")
+    selected_direct_slots = DIRECT_AD_SLOTS if direct_slots is None else direct_slots
+    selected_adsense_slots = ADSENSE_SLOT_IDS if adsense_slots is None else adsense_slots
     if slot_name.startswith("sidebar_"):
         side = "left" if slot_name.endswith("_left") else "right"
         wrapper_class = f"autocalc-ad-slot autocalc-ad-sidebar autocalc-ad-sidebar-{side} no-print"
     else:
         wrapper_class = "autocalc-ad-slot autocalc-ad-inline no-print"
 
-    sponsor = DIRECT_AD_SLOTS.get(slot_name, {})
+    sponsor = selected_direct_slots.get(slot_name, {})
     if sponsor.get("enabled") is True:
         advertiser = escape(sponsor["advertiser"].strip())
         headline = escape(sponsor["headline"].strip())
@@ -284,7 +286,7 @@ def render_ad_slot(slot_name):
             '</a></aside>'
         )
 
-    slot_id = str(ADSENSE_SLOT_IDS.get(slot_name, "") or "").strip()
+    slot_id = str(selected_adsense_slots.get(slot_name, "") or "").strip()
     if ADSENSE_CLIENT and GOOGLE_CERTIFIED_CMP_CONFIGURED and slot_id:
         ad_style = "display:block;min-height:100px;width:100%;"
         if slot_name.startswith("sidebar_"):
