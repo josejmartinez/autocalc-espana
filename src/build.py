@@ -2343,7 +2343,7 @@ def render_page(
         "__AFFILIATE_LINK_TEMPLATES_JSON__": json.dumps(AFFILIATE_LINK_TEMPLATES, ensure_ascii=False),
         "__AMAZON_DISCLOSURE__": AMAZON_DISCLOSURE,
         "__OTHER_AFFILIATE_DISCLOSURE__": affiliate_disclosure_for_other_merchants(),
-        "__SIDEBAR_LEFT_AD_HTML__": render_sidebar_ad("sidebar_left", "autodoc", "AUTODOC · recambios para tu vehículo", "Consulta piezas nuevas por modelo o referencia y comprueba compatibilidad antes de comprar.", f"https://www.autodoc.es/search?keyword={quote(car_autodoc_query.replace(chr(43), chr(32)), safe="")}"),
+        "__SIDEBAR_LEFT_AD_HTML__": render_sidebar_ad("sidebar_left", "autodoc", "AUTODOC · recambios para tu vehículo", "Consulta piezas nuevas por modelo o referencia y comprueba compatibilidad antes de comprar.", f"https://www.autodoc.es/search?keyword={quote(car_autodoc_query.replace(chr(43), chr(32)), safe='')}"),
         "__SIDEBAR_RIGHT_AD_HTML__": render_sidebar_ad("sidebar_right", "norauto", "Norauto · neumáticos y montaje", "Consulta disponibilidad y precio de montaje; confirma las condiciones en el centro.", f"https://www.norauto.es/c/47595-neumaticos.html?q={a2}%2F{p2}R{l2}"),
         "__INLINE_AD_HTML__": render_ad_slot("inline"),
         "__GOOGLE_ANALYTICS_ID__": GOOGLE_ANALYTICS_ID,
