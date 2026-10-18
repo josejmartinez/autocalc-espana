@@ -443,7 +443,7 @@ def generar_tabla_equivalencias_html(a_orig, p_orig, l_orig):
             <thead>
                 <tr class="border-b-2 border-slate-200 text-xs text-slate-500">
                     <th class="py-2 px-3 font-semibold">Medida equivalente</th>
-                    <th class="py-2 px-3 text-center font-semibold">Ancho de llanta</th>
+                    <th class="py-2 px-3 text-center font-semibold">Garganta de llanta orientativa</th>
                     <th class="py-2 px-3 text-center font-semibold">Diámetro</th>
                     <th class="py-2 px-3 text-center font-semibold">Variación diámetro</th>
                     <th class="py-2 px-3 text-center font-semibold">Altura chasis</th>
@@ -589,10 +589,17 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                             <div>
                                 <label class="block text-xs text-slate-500 mb-1">Cód. velocidad</label>
                                 <select id="vel1" onchange="calcularITV()" class="w-full p-1.5 border rounded-lg text-center text-xs font-semibold bg-white">
+                                    <option value="100">J (100 km/h)</option>
+                                    <option value="110">K (110 km/h)</option>
+                                    <option value="120">L (120 km/h)</option>
+                                    <option value="130">M (130 km/h)</option>
+                                    <option value="140">N (140 km/h)</option>
+                                    <option value="150">P (150 km/h)</option>
                                     <option value="160">Q (160 km/h)</option>
                                     <option value="170">R (170 km/h)</option>
                                     <option value="180">S (180 km/h)</option>
                                     <option value="190">T (190 km/h)</option>
+                                    <option value="200">U (200 km/h)</option>
                                     <option value="210">H (210 km/h)</option>
                                     <option value="240" selected>V (240 km/h)</option>
                                     <option value="270">W (270 km/h)</option>
@@ -626,10 +633,17 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                             <div>
                                 <label class="block text-xs text-slate-500 mb-1">Cód. velocidad</label>
                                 <select id="vel2" onchange="calcularITV()" class="w-full p-1.5 border rounded-lg text-center text-xs font-semibold bg-white">
+                                    <option value="100">J (100 km/h)</option>
+                                    <option value="110">K (110 km/h)</option>
+                                    <option value="120">L (120 km/h)</option>
+                                    <option value="130">M (130 km/h)</option>
+                                    <option value="140">N (140 km/h)</option>
+                                    <option value="150">P (150 km/h)</option>
                                     <option value="160">Q (160 km/h)</option>
                                     <option value="170">R (170 km/h)</option>
                                     <option value="180">S (180 km/h)</option>
                                     <option value="190">T (190 km/h)</option>
+                                    <option value="200">U (200 km/h)</option>
                                     <option value="210">H (210 km/h)</option>
                                     <option value="240">V (240 km/h)</option>
                                     <option value="270" selected>W (270 km/h)</option>
@@ -657,7 +671,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             <!-- 1B. Calculadora de ET (Offset) de llanta, ancho de vías y separadores -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                 <h2 class="text-lg font-bold text-slate-900 mb-1">1B. Calculadora de desplazamiento de llanta (ET / Offset) y ancho de vías ITV</h2>
-                <p class="text-xs text-slate-500 mb-4">Comprueba si tus nuevas llantas o separadores rozarán con el amortiguador interior o si superan el límite legal de ancho de vías en la ITV (±30 mm totales en turismos).</p>
+                <p class="text-xs text-slate-500 mb-4">Estima cómo cambia la holgura interior, la salida hacia la aleta y el ancho de vías al cambiar de llanta u offset (ET). Los ±30 mm son solo una referencia inicial: el cálculo no determina por sí solo si la modificación constituye una reforma legalizable.</p>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <div>
                         <label class="block text-xs text-slate-600 mb-1">Ancho llanta orig. (pulg.)</label>
@@ -723,7 +737,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             <!-- 2A. Coste de viaje completo (con peajes, desgaste y tiempo) -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                 <h2 class="text-lg font-bold mb-1 text-slate-900">2A. Calculadora de coste de viaje, peajes, desgaste y tiempo</h2>
-                <p class="text-xs text-slate-500 mb-4">Calcula el gasto exacto de carburante, el coste real incluyendo desgaste mecánico (neumáticos, frenos y aceite: ~0,06 €/km) y cuánto paga cada pasajero.</p>
+                <p class="text-xs text-slate-500 mb-4">Estima combustible, peajes, tiempo teórico y un coste adicional editable por kilómetro para desgaste y mantenimiento. La cifra por kilómetro es una hipótesis que puedes ajustar, no una tarifa universal ni una factura.</p>
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1">Distancia (km)</label>
@@ -749,6 +763,10 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                         <label class="block text-xs font-medium text-slate-600 mb-1">Ocupantes</label>
                         <input type="number" id="ocupantes" value="2" min="1" oninput="calcularConsumo()" class="w-full p-2 border rounded-lg font-bold">
                     </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Desgaste y mantenimiento estimado (€/km)</label>
+                            <input type="number" id="coste-desgaste-km" value="0.06" min="0" max="10" step="0.01" oninput="calcularConsumo()" class="w-full p-2 border rounded-lg font-bold">
+                        </div>
                 </div>
                 <div id="res-consumo" class="mt-5 p-4 rounded-xl bg-slate-50 border border-slate-200"></div>
             </div>
@@ -756,7 +774,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             <!-- 2B. Calculadora inversa: averigua el consumo real de tu coche (L/100 km) -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                 <h2 class="text-lg font-bold mb-1 text-slate-900">2B. Calculadora de consumo real de tu coche (depósito lleno)</h2>
-                <p class="text-xs text-slate-500 mb-4">El ordenador de a bordo suele mentir entre un 5 % y un 10 %. Llena el depósito, pon el cuentakilómetros parcial a cero y, en el siguiente repostaje, introduce los litros que han entrado y los kilómetros recorridos:</p>
+                <p class="text-xs text-slate-500 mb-4">Para medir el consumo real, llena el depósito en condiciones similares, reinicia el cuentakilómetros parcial y vuelve a llenar en el siguiente repostaje. Introduce los litros repuestos y la distancia recorrida. La diferencia frente al ordenador depende del vehículo y del uso; no hay un porcentaje de error universal.</p>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1">Litros repostados (L)</label>
@@ -813,8 +831,8 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
         <!-- ==================== SECCIÓN 3: COMPARADOR TOTAL (GASOLINA VS DIÉSEL VS HÍBRIDO VS GLP) ==================== -->
         <section id="sec-amortizacion" class="space-y-6 hidden">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <h2 class="text-lg font-bold mb-1 text-slate-900">3. Calculadora de rentabilidad total: ¿gasolina, diésel, híbrido o GLP?</h2>
-                <p class="text-xs text-slate-500 mb-4">Incluye precio de compra, consumo real, diferencia de mantenimiento anual (aceite, filtros, AdBlue/GLP) e impuestos para hallar el kilómetro exacto de amortización.</p>
+                <h2 class="text-lg font-bold mb-1 text-slate-900">3. Comparador de coste de uso: ¿gasolina, diésel, híbrido o GLP?</h2>
+                <p class="text-xs text-slate-500 mb-4">Compara gasto anual en combustible y mantenimiento junto al sobreprecio de compra. Es una simulación: no incluye depreciación, valor de reventa, seguros, financiación, impuestos, averías ni otros costes salvo que los incorpores al mantenimiento.</p>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1">Kilómetros recorridos al año</label>
@@ -893,7 +911,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                 <h2 class="text-lg font-bold mb-1 text-slate-900">4B. Calculadora de caballos fiscales (CVF), etiqueta DGT e impuestos (IVTM y CO₂)</h2>
                 <p class="text-xs text-slate-500 mb-4">Calcula la potencia fiscal con la fórmula del Anexo V del Reglamento General de Vehículos y obtiene una orientación inicial sobre el distintivo ambiental y el impuesto de matriculación. El IVTM depende del ayuntamiento: mostramos el tramo de potencia fiscal, no una cuota municipal.</p>
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1">Motorización</label>
                         <select id="dgt-motor" onchange="calcularDGT()" class="w-full p-2 border rounded-lg font-bold bg-white text-xs">
@@ -902,6 +920,14 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                             <option value="hibrido">Híbrido no enchufable / GLP (posible ECO)</option>
                             <option value="electrico">Eléctrico puro</option>
                             <option value="phev">Híbrido enchufable (PHEV)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Territorio fiscal</label>
+                        <select id="dgt-territorio" onchange="calcularDGT()" class="w-full p-2 border rounded-lg font-bold bg-white text-xs">
+                            <option value="peninsula" selected>Península / Baleares</option>
+                            <option value="canarias">Canarias</option>
+                            <option value="ceuta">Ceuta / Melilla</option>
                         </select>
                     </div>
                     <div>
@@ -914,7 +940,11 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1">Cilindros térmicos</label>
-                        <input type="number" id="dgt-cil" value="4" min="2" max="12" oninput="calcularDGT()" class="w-full p-2 border rounded-lg font-bold">
+                        <input type="number" id="dgt-cil" value="4" min="1" max="16" oninput="calcularDGT()" class="w-full p-2 border rounded-lg font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Potencia efectiva eléctrica (kW, BEV)</label>
+                        <input type="number" id="dgt-kw" value="100" min="0.1" max="3000" step="0.1" oninput="calcularDGT()" class="w-full p-2 border rounded-lg font-bold">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1">CO₂ (g/km)</label>
@@ -926,7 +956,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                     </div>
                 </div>
                 <div id="res-dgt" class="mt-5 p-4 rounded-xl bg-slate-50 border border-slate-200"></div>
-                <p class="mt-3 text-xs leading-relaxed text-slate-500">Orientativo, no una liquidación oficial: la etiqueta DGT no se confirma solo con año y combustible; depende de la categoría, homologación y norma Euro. Consulta el distintivo por matrícula en <a href="https://www.dgt.es/nuestros-servicios/tu-vehiculo/tus-vehiculos/distintivo-ambiental/" target="_blank" rel="noopener noreferrer" class="underline font-semibold">la web oficial de la DGT</a>. El IVTM final depende de la ordenanza y bonificaciones municipales. El impuesto de matriculación puede variar según territorio, base imponible fiscal y exenciones o reducciones aplicables.</p>
+                <p class="mt-3 text-xs leading-relaxed text-slate-500">Orientativo, no una liquidación oficial. La etiqueta DGT no se confirma solo con año y combustible: consulta la matrícula en <a href="https://www.dgt.es/nuestros-servicios/tu-vehiculo/tus-vehiculos/distintivo-ambiental/" target="_blank" rel="noopener noreferrer" class="underline font-semibold">la web oficial de la DGT</a>. El CVF térmico usa la fórmula convencional de cuatro tiempos; para BEV debe introducirse la potencia efectiva oficial homologada (no necesariamente la potencia comercial). Para PHEV no inferimos el CVF con datos parciales. El IEDMT usa tipos generales del territorio elegido y no contempla incrementos autonómicos, epígrafes especiales ni exenciones: confirma el supuesto en la <a href="https://sede.agenciatributaria.gob.es/Sede/vehiculos-embarcaciones/primera-matriculacion-medios-transporte/son-tipos-impuesto-aplicar-caso/tipos-impositivos.html" target="_blank" rel="noopener noreferrer" class="underline font-semibold">Agencia Tributaria</a>. El IVTM final depende de la ordenanza y bonificaciones municipales.</p>
             </div>
         </section>
 
@@ -1283,18 +1313,18 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
 
         const DICCIONARIO_OBD = {
             "P0401": {
-                titulo: "P0401 / P0402 — Fallo de caudal en válvula EGR",
-                causa: "Carbonilla acumulada obstruyendo la válvula de recirculación de gases de escape o membrana perforada.",
-                itv: "Rechazo directo (Defecto Grave) en lectura OBD y aumento de emisiones NOx.",
-                solucion: "Limpiar con spray descarbonizador de admisión/EGR o sustituir la válvula EGR completa.",
-                query: "valvula+egr+limpiador"
+                titulo: "P0401 — Caudal insuficiente en el sistema EGR",
+                causa: "Puede deberse a conductos obstruidos, válvula EGR, sensores, vacío o cableado; el código por sí solo no identifica la pieza averiada.",
+                itv: "Un código relacionado con emisiones o el testigo MIL puede influir en la ITV según la categoría del vehículo y el procedimiento aplicable.",
+                solucion: "Lee datos congelados y comprueba conductos, sensores, actuador y cableado con el procedimiento del fabricante antes de limpiar o sustituir piezas.",
+                query: "diagnostico+valvula+egr"
             },
             "P2002": {
-                titulo: "P2002 / P2463 — Saturación de hollín en filtro de partículas (DPF / FAP)",
-                causa: "Exceso de trayectos cortos urbanos que impiden completar la regeneración térmica o sensor diferencial de presión averiado.",
-                itv: "Rechazo grave en prueba de opacidad de humos y lectura OBD.",
-                solucion: "Añadir aditivo regenerador de filtro de partículas, forzar regeneración en carretera a 3.000 rpm o sustituir sensor de presión DPF.",
-                query: "aditivo+limpiador+filtro+particulas+dpf"
+                titulo: "P2002 — Eficiencia del filtro de partículas (DPF/FAP) por debajo del umbral",
+                causa: "Puede relacionarse con el filtro, fugas de escape, sensores de presión diferencial/temperatura o condiciones de regeneración; no equivale automáticamente a saturación.",
+                itv: "El estado del sistema de emisiones y el testigo MIL pueden influir en la inspección; el código aislado no permite anticipar el resultado.",
+                solucion: "Comprueba presión diferencial, sensores, fugas y carga de hollín con el procedimiento del fabricante. No fuerces una regeneración ni uses aditivos sin confirmar que es adecuado para ese vehículo.",
+                query: "diagnostico+filtro+particulas+dpf"
             },
             "P0420": {
                 titulo: "P0420 — Baja eficiencia del catalizador (Banco 1)",
@@ -1406,8 +1436,8 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const km = leerNumeroCampo('real-km');
             const precio = leerNumeroCampo('real-precio');
             if (litros === null || km === null || precio === null ||
-                litros < 0 || km <= 0 || precio < 0) {
-                mostrarErrorCalculo('res-consumo-real', 'Introduce litros y precio no negativos, y una distancia recorrida mayor que cero.');
+                litros <= 0 || litros > 5000 || km <= 0 || km > 1000000 || precio < 0 || precio > 100) {
+                mostrarErrorCalculo('res-consumo-real', 'Introduce litros repostados mayores que cero (máximo 5.000 L), una distancia entre 1 y 1.000.000 km y un precio entre 0 y 100 €/L.');
                 return;
             }
 
@@ -1539,32 +1569,28 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const v3 = alfabeto.indexOf(letras[2]);
             const indice = (v1 * 400) + (v2 * 20) + v3; // 0 (BBB) a 7999
 
-            // Hitos orientativos de la serie alfanumérica (índice base 20 -> año.mes); la interpolación no es una consulta oficial por matrícula.
+            // Referencias históricas aproximadas. La serie NTG (índice 4284) aparece en octubre de 2026.
+            // Esta interpolación no consulta un registro oficial; no se extrapola a letras posteriores.
             const hitos = [
-                [0, 2000.6666667], [140, 2001.0], [420, 2002.0], [680, 2003.0],
-                [980, 2004.0], [1310, 2005.0], [1650, 2006.0], [2010, 2007.0],
-                [2350, 2008.0], [2580, 2009.0], [2740, 2010.0], [2900, 2011.0],
-                [3040, 2012.0], [3150, 2013.0], [3260, 2014.0], [3420, 2015.0],
-                [3620, 2016.0], [3860, 2017.0], [4120, 2018.0], [4390, 2019.0],
-                [4620, 2020.0], [4790, 2021.0], [4960, 2022.0], [5140, 2023.0],
-                [5340, 2024.0], [5550, 2025.0], [5770, 2026.0], [6000, 2027.0]
+                [0, 2000.72], [400, 2002.83], [800, 2004.73], [1200, 2006.41],
+                [1600, 2008.12], [2000, 2010.97], [2400, 2014.84], [2800, 2017.47],
+                [3200, 2019.68], [3387, 2021.04], [3522, 2022.04], [3652, 2023.04],
+                [3801, 2024.04], [3961, 2025.04], [4000, 2025.29], [4132, 2025.99],
+                [4228, 2026.48], [4284, 2026.79]
             ];
+            const ultimoIndiceDocumentado = hitos[hitos.length - 1][0];
+            if (indice > ultimoIndiceDocumentado) {
+                box.innerHTML = '<p class="text-xs text-amber-800 font-semibold">La serie indicada es posterior al último punto de referencia documentado (octubre de 2026). Para evitar una fecha inventada, consulta la fecha real en la documentación del vehículo o en un registro de matriculaciones actualizado.</p>';
+                return;
+            }
 
             let fechaEst = hitos[0][1];
-            let intervaloEncontrado = false;
             for (let i = 0; i < hitos.length - 1; i++) {
-                if (indice >= hitos[i][0] && indice <= hitos[i+1][0]) {
-                    const ratio = (indice - hitos[i][0]) / (hitos[i+1][0] - hitos[i][0]);
-                    fechaEst = hitos[i][1] + ratio * (hitos[i+1][1] - hitos[i][1]);
-                    intervaloEncontrado = true;
+                if (indice >= hitos[i][0] && indice <= hitos[i + 1][0]) {
+                    const ratio = (indice - hitos[i][0]) / (hitos[i + 1][0] - hitos[i][0]);
+                    fechaEst = hitos[i][1] + ratio * (hitos[i + 1][1] - hitos[i][1]);
                     break;
                 }
-            }
-            if (!intervaloEncontrado && indice > hitos[hitos.length - 1][0]) {
-                const anterior = hitos[hitos.length - 2];
-                const ultimo = hitos[hitos.length - 1];
-                const ritmoAnual = (ultimo[1] - anterior[1]) / (ultimo[0] - anterior[0]);
-                fechaEst = ultimo[1] + (indice - ultimo[0]) * ritmoAnual;
             }
 
             const anioMat = Math.floor(fechaEst);
@@ -1572,7 +1598,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
             const ahora = new Date();
             const diasMes = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0).getDate();
-            const fraccionActual = (ahora.getMonth() + (ahora.getDate() / diasMes)) / 12;
+            const fraccionActual = (ahora.getMonth() + ((ahora.getDate() - 1) / diasMes)) / 12;
             const edad = Math.max(0, (ahora.getFullYear() + fraccionActual - fechaEst));
 
             let frecuenciaITV = "Anual (cada año por tener más de 10 años)";
@@ -1584,7 +1610,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             calcularDGT();
 
             box.innerHTML = `
-                <p class="mb-3 text-xs text-slate-500">La fecha se calcula por interpolación entre hitos y puede diferir de la fecha real. No determina por sí sola la próxima ITV ni sustituye la consulta de la documentación del vehículo.</p>
+                <p class="mb-3 text-xs text-slate-500">La fecha se estima por interpolación entre series históricas de referencia y puede diferir de la fecha real en semanas. La periodicidad ITV indicada solo es orientativa para un turismo ordinario; para trámites usa la primera matriculación del permiso de circulación o una consulta actualizada.</p>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                     <div class="bg-white p-3 rounded-lg border">
                         <div class="text-xs text-slate-500">Fecha estimada de matriculación (aproximación)</div>
@@ -1960,22 +1986,25 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const peajes = leerNumeroCampo('peajes-viaje');
             const vel = leerNumeroCampo('vel-viaje');
             const personas = leerNumeroCampo('ocupantes');
-            if (km === null || l100 === null || precio === null || peajes === null || vel === null || personas === null ||
-                km < 0 || l100 < 0 || precio < 0 || peajes < 0 || vel <= 0 ||
-                !Number.isInteger(personas) || personas < 1) {
-                mostrarErrorCalculo('res-consumo', 'Revisa los datos: distancias, consumo, precio y peajes no pueden ser negativos; la velocidad debe ser mayor que cero y los ocupantes un entero positivo.');
+            const desgastePorKm = leerNumeroCampo('coste-desgaste-km');
+            if (km === null || l100 === null || precio === null || peajes === null || vel === null || personas === null || desgastePorKm === null ||
+                km < 0 || km > 1000000 || l100 < 0 || l100 > 100 || precio < 0 || precio > 100 ||
+                peajes < 0 || peajes > 1000000 || vel <= 0 || vel > 300 || desgastePorKm < 0 || desgastePorKm > 10 ||
+                !Number.isInteger(personas) || personas < 1 || personas > 100) {
+                mostrarErrorCalculo('res-consumo', 'Revisa los datos: km (0–1.000.000), consumo (0–100 L/100 km), precio (0–100 €/L), peajes (0–1.000.000 €), velocidad (0–300 km/h), desgaste (0–10 €/km) y ocupantes (1–100, entero).');
                 return;
             }
 
             const litrosTotales = (km / 100) * l100;
             const costeCombustible = litrosTotales * precio;
             const costeDirectoViaje = costeCombustible + peajes;
-            const costeConDesgaste = costeDirectoViaje + (km * 0.06);
+            const costeConDesgaste = costeDirectoViaje + (km * desgastePorKm);
             const costePorPersona = costeDirectoViaje / personas;
 
-            const horasTotales = km / vel;
-            const h = Math.floor(horasTotales);
-            const m = Math.round((horasTotales - h) * 60);
+            // El redondeo al minuto total evita resultados como «5 h 60 min».
+            const totalMinutos = Math.round((km / vel) * 60);
+            const h = Math.floor(totalMinutos / 60);
+            const m = totalMinutos % 60;
 
             document.getElementById('res-consumo').innerHTML = `
                 <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center">
@@ -1984,7 +2013,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                         <div class="text-xl font-bold text-slate-900">${costeDirectoViaje.toFixed(2)} €</div>
                     </div>
                     <div class="bg-white p-3 rounded-lg border">
-                        <div class="text-xs text-slate-500">Por ocupante (${personas})</div>
+                        <div class="text-xs text-slate-500">Por ocupante (${personas}; combustible + peajes)</div>
                         <div class="text-xl font-bold text-amber-600">${costePorPersona.toFixed(2)} €</div>
                     </div>
                     <div class="bg-white p-3 rounded-lg border">
@@ -1992,7 +2021,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                         <div class="text-xl font-bold text-slate-900">${litrosTotales.toFixed(1)} L</div>
                     </div>
                     <div class="bg-white p-3 rounded-lg border">
-                        <div class="text-xs text-slate-500">Tiempo estimado</div>
+                        <div class="text-xs text-slate-500">Conducción teórica (sin paradas)</div>
                         <div class="text-lg font-bold text-slate-900">${h} h ${m} min</div>
                     </div>
                     <div class="bg-white p-3 rounded-lg border col-span-2 sm:col-span-1">
@@ -2072,20 +2101,28 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const co2 = leerNumeroCampo('dgt-co2');
             const base = leerNumeroCampo('dgt-base');
             const anioActual = new Date().getFullYear();
-            const cvfNoEstimableConEstosDatos = motor === 'electrico' || motor === 'phev';
+            const kwElectrico = leerNumeroCampo('dgt-kw');
+            const cvfNoEstimableConEstosDatos = motor === 'phev';
+            const datosCombustionInvalidos = motor !== 'electrico' && motor !== 'phev' &&
+                (cc === null || cc <= 0 || cc > 20000 || cil === null || !Number.isInteger(cil) || cil < 1 || cil > 16);
+            const datosElectricosInvalidos = motor === 'electrico' &&
+                (kwElectrico === null || kwElectrico <= 0 || kwElectrico > 3000);
 
             if (anio === null || !Number.isInteger(anio) || anio < 1980 || anio > anioActual + 1 ||
-                co2 === null || co2 < 0 || base === null || base < 0 ||
-                (!cvfNoEstimableConEstosDatos && (cc === null || cc <= 0 || cil === null || !Number.isInteger(cil) || cil < 1 || cil > 16))) {
-                mostrarErrorCalculo('res-dgt', 'Revisa año, cilindrada, cilindros, emisiones y base imponible. Usa valores numéricos no negativos y un año de matriculación válido.');
+                co2 === null || co2 < 0 || co2 > 1000 || base === null || base < 0 || base > 10000000 ||
+                datosCombustionInvalidos || datosElectricosInvalidos) {
+                mostrarErrorCalculo('res-dgt', 'Revisa el año, cilindrada/cilindros si hay motor térmico, potencia efectiva eléctrica si es BEV, CO₂ y base imponible. Utiliza valores dentro de rangos plausibles.');
                 return;
             }
 
-            // El Anexo V usa una fórmula distinta para motores eléctricos; para eléctricos puros y PHEV
-            // no inferimos la potencia fiscal a partir de la cilindrada térmica.
+            // RGV, Anexo V: fórmula térmica convencional de cuatro tiempos; en BEV se utiliza Pe/5,152,
+            // con Pe como potencia efectiva homologada oficial, no la potencia comercial.
+            // En PHEV no inferimos CVF con datos parciales.
             const cvf = cvfNoEstimableConEstosDatos
                 ? null
-                : Math.floor((0.08 * Math.pow(cc / cil, 0.6) * cil) * 100) / 100;
+                : motor === 'electrico'
+                    ? Math.floor((kwElectrico / 5.152) * 100) / 100
+                    : Math.floor((0.08 * Math.pow(cc / cil, 0.6) * cil) * 100) / 100;
 
             // El tramo IVTM se muestra sin cuota; cada ayuntamiento puede aplicar coeficientes y bonificaciones.
             let tramoIVTM = "Consulta la ficha técnica";
@@ -2131,11 +2168,14 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                 }
             }
 
+            // Tipos generales IEDMT: pueden existir incrementos autonómicos, epígrafes y exenciones.
+            const territorio = document.getElementById('dgt-territorio')?.value || 'peninsula';
+            const territorioLabel = territorio === 'canarias' ? 'Canarias' : territorio === 'ceuta' ? 'Ceuta/Melilla' : 'Península/Baleares';
             let tipoImpositivo = 0;
-            if (motor !== 'electrico') {
-                if (co2 > 120 && co2 < 160) tipoImpositivo = 4.75;
-                else if (co2 >= 160 && co2 < 200) tipoImpositivo = 9.75;
-                else if (co2 >= 200) tipoImpositivo = 14.75;
+            if (territorio !== 'ceuta') {
+                if (co2 > 120 && co2 < 160) tipoImpositivo = territorio === 'canarias' ? 3.75 : 4.75;
+                else if (co2 >= 160 && co2 < 200) tipoImpositivo = territorio === 'canarias' ? 8.75 : 9.75;
+                else if (co2 >= 200) tipoImpositivo = territorio === 'canarias' ? 13.75 : 14.75;
             }
             const cuotaImpuesto = base * (tipoImpositivo / 100);
 
@@ -2154,7 +2194,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                         <div class="text-xs font-bold text-slate-800 mt-1">${tramoIVTM}</div>
                     </div>
                     <div class="bg-white p-3 rounded-lg border">
-                        <div class="text-xs text-slate-500">IEDMT de referencia (${tipoImpositivo}%)</div>
+                        <div class="text-xs text-slate-500">IEDMT orientativo · ${territorioLabel} (${tipoImpositivo}%)</div>
                         <div class="text-xl font-bold text-amber-600">${cuotaImpuesto.toFixed(0)} €</div>
                     </div>
                 </div>
