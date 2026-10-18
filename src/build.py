@@ -1011,8 +1011,8 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                     <label class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border cursor-pointer hover:bg-slate-100 transition">
                         <input type="checkbox" class="chk-itv mt-1 w-4 h-4" onchange="evaluarChecklist()">
                         <div>
-                            <span class="font-bold block text-slate-900">4. Centralita sin fallos OBD2 y descarbonización pre-ITV</span>
-                            <span class="text-xs text-slate-500">En diésel, circular 20 min a ~3.000 rpm en autovía con motor caliente antes de la prueba de opacidad.</span>
+                            <span class="font-bold block text-slate-900">4. Sin testigos de avería y mantenimiento preventivo</span>
+                            <span class="text-xs text-slate-500">Si se enciende un testigo o hay códigos OBD, diagnostica la causa antes de la ITV. No fuerces regeneraciones ni mantengas un régimen elevado como receta universal: sigue el manual del fabricante y realiza únicamente el procedimiento adecuado para ese vehículo.</span>
                         </div>
                     </label>
                     <label class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border cursor-pointer hover:bg-slate-100 transition">
