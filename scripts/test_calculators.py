@@ -68,7 +68,7 @@ def main() -> int:
         for symbol, speed in (("J", 100), ("K", 110), ("L", 120), ("M", 130),
                               ("N", 140), ("P", 150), ("Q", 160), ("U", 200),
                               ("H", 210), ("V", 240), ("W", 270), ("Y", 300)):
-            if f'value="{speed}">{symbol} (' not in selector:
+            if not re.search(r'<option value="' + str(speed) + r'"(?: selected)?\s*>' + symbol + r' \(', selector):
                 raise AssertionError(f"Falta {symbol} ({speed} km/h) en {select_id}.")
 
     # OBD content must not present unsupported universal rejection or generic 3,000 rpm procedures.
