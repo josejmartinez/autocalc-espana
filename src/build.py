@@ -1488,10 +1488,18 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                     const numero = Number(valor);
                     return Number.isFinite(numero) && numero >= 0.5 && numero <= 10 ? numero : null;
                 };
-                lista.sort((a, b) =>
-                    (parsePrecio(a["Precio Gasoleo A"]) ?? parsePrecio(a["Precio Gasolina 95 E5"]) ?? 99) -
-                    (parsePrecio(b["Precio Gasoleo A"]) ?? parsePrecio(b["Precio Gasolina 95 E5"]) ?? 99)
-                );
+                const ordenCombustible = document.getElementById('orden-combustible')?.value === 'gasolina' ? 'gasolina' : 'diesel';
+                const campoOrden = ordenCombustible === 'gasolina' ? "Precio Gasolina 95 E5" : "Precio Gasoleo A";
+                const campoDesempate = ordenCombustible === 'gasolina' ? "Precio Gasoleo A" : "Precio Gasolina 95 E5";
+                // Clasificar por el precio del combustible elegido; no comparar directamente diésel con gasolina.
+                lista.sort((a, b) => {
+                    const pa = parsePrecio(a[campoOrden]);
+                    const pb = parsePrecio(b[campoOrden]);
+                    if (pa === null && pb !== null) return 1;
+                    if (pa !== null && pb === null) return -1;
+                    if (pa !== null && pb !== null && pa !== pb) return pa - pb;
+                    return (parsePrecio(a[campoDesempate]) ?? 99) - (parsePrecio(b[campoDesempate]) ?? 99);
+                });
 
                 const top = lista.slice(0, 8);
                 let filas = top.map(e => {
