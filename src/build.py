@@ -1490,18 +1490,14 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                 };
                 const ordenCombustible = document.getElementById('orden-combustible')?.value === 'gasolina' ? 'gasolina' : 'diesel';
                 const campoOrden = ordenCombustible === 'gasolina' ? "Precio Gasolina 95 E5" : "Precio Gasoleo A";
-                const campoDesempate = ordenCombustible === 'gasolina' ? "Precio Gasoleo A" : "Precio Gasolina 95 E5";
-                // Clasificar por el precio del combustible elegido; no comparar directamente diésel con gasolina.
-                lista.sort((a, b) => {
-                    const pa = parsePrecio(a[campoOrden]);
-                    const pb = parsePrecio(b[campoOrden]);
-                    if (pa === null && pb !== null) return 1;
-                    if (pa !== null && pb === null) return -1;
-                    if (pa !== null && pb !== null && pa !== pb) return pa - pb;
-                    return (parsePrecio(a[campoDesempate]) ?? 99) - (parsePrecio(b[campoDesempate]) ?? 99);
-                });
+                const listaConPrecio = lista.filter(e => parsePrecio(e[campoOrden]) !== null);
+                if (!listaConPrecio.length) {
+                    cont.innerHTML = '<div class="p-3 bg-slate-100 rounded-lg">No hay precios disponibles del combustible seleccionado en este municipio. Prueba a elegir el otro combustible.</div>';
+                    return;
+                }
+                listaConPrecio.sort((a, b) => parsePrecio(a[campoOrden]) - parsePrecio(b[campoOrden]));
 
-                const top = lista.slice(0, 8);
+                const top = listaConPrecio.slice(0, 8);
                 let filas = top.map(e => {
                     const pDieselNum = parsePrecio(e["Precio Gasoleo A"]);
                     const pGas95Num = parsePrecio(e["Precio Gasolina 95 E5"]);
