@@ -2053,9 +2053,14 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const precB = leerNumeroCampo('prec-b');
             const mantB = leerNumeroCampo('mant-b');
             const valores = [kmAnual, difPrecio, aniosUso, consA, precA, mantA, consB, precB, mantB];
-            if (valores.some(valor => valor === null) || kmAnual <= 0 || difPrecio < 0 || aniosUso <= 0 ||
-                [consA, precA, mantA, consB, precB, mantB].some(valor => valor < 0)) {
-                mostrarErrorCalculo('res-amortizacion', 'Introduce kilómetros anuales y años de uso mayores que cero. El sobreprecio, los consumos, precios de combustible y mantenimientos no pueden ser negativos.');
+            if (valores.some(valor => valor === null) ||
+                kmAnual <= 0 || kmAnual > 200000 ||
+                difPrecio < 0 || difPrecio > 1000000 ||
+                !Number.isInteger(aniosUso) || aniosUso < 1 || aniosUso > 25 ||
+                consA < 0 || consA > 100 || consB < 0 || consB > 100 ||
+                precA < 0 || precA > 100 || precB < 0 || precB > 100 ||
+                mantA < 0 || mantA > 100000 || mantB < 0 || mantB > 100000) {
+                mostrarErrorCalculo('res-amortizacion', 'Revisa los límites: km/año (1–200.000), sobreprecio (0–1.000.000 €), años enteros (1–25), consumos (0–100 L/100 km), combustible (0–100 €/L) y mantenimiento (0–100.000 €/año).');
                 return;
             }
 
