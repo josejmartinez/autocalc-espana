@@ -90,11 +90,14 @@ def read_rows(path: Path):
     with path.open("r", encoding="utf-8-sig", newline="") as stream:
         sample = stream.read(65536)
         stream.seek(0)
-        try:
-            dialect = csv.Sniffer().sniff(sample, delimiters=",;\t|")
-        except csv.Error:
-            dialect = csv.excel
-        reader = csv.DictReader(stream, dialect=dialect)
+        # Detect the delimiter from the header, not the whole sample: decimal
+        # commas in numeric cells can make Sniffer misclassify a semicolon CSV.
+        first_line = next((line for line in sample.splitlines() if line.strip()), "")
+        candidates = (",", ";", "\\t", "|")
+        delimiter = max(candidates, key=lambda candidate: first_line.count(candidate))
+        if first_line.count(delimiter) == 0:
+            delimiter = ","
+        reader = csv.DictReader(stream, delimiter=delimiter)
         if not reader.fieldnames:
             raise ValueError("El archivo no tiene cabecera CSV.")
         return reader.fieldnames, list(reader)
@@ -105,6 +108,10 @@ def import_dataset(input_path: Path, kind: str, year: int | None = None, country
     columns = choose_columns(headers)
     if not any(field in columns for field in ("manufacturer", "commercial_name", "type_approval")):
         raise ValueError("No se reconocen columnas de fabricante/modelo/homologación. Revisa la cabecera del CSV EEA.")
+    if country and "country" not in columns:
+        raise ValueError("Se solicitó filtrar por país, pero el CSV no contiene una columna de país reconocida.")
+    if year is not None and "year" not in columns:
+        raise ValueError("Se solicitó filtrar por año, pero el CSV no contiene una columna de año reconocida.")
 
     source_url = EEA_CARS if kind == "cars" else EEA_VANS
     kept = []
@@ -136,7 +143,7 @@ def import_dataset(input_path: Path, kind: str, year: int | None = None, country
             "type": get("type") or None,
             "variant": get("variant") or None,
             "version": get("version") or None,
-            "registration_year": int(row_year) if row_year is not None else year,
+            "registration_year": int(row_year) if row_year is not None else None,
             "fuel": get("fuel") or None,
             "source": "European Environment Agency",
             "source_url": source_url,
