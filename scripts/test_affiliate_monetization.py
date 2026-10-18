@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from build import (  # noqa: E402
+    ADSENSE_ADS_ENABLED, ADSENSE_CLIENT, GOOGLE_CERTIFIED_CMP_CONFIGURED,
     AMAZON_DISCLOSURE, AFFILIATE_PARTNER_DOMAINS, apply_affiliate_links,
     build_affiliate_url, render_ad_slot, render_affiliate_sidebar,
     validate_commercial_contact,
@@ -24,10 +25,24 @@ def main() -> int:
     if not pages:
         raise AssertionError("No hay páginas generadas en public/.")
 
+    # The publisher snippet is for site verification; ad serving stays disabled.
+    if ADSENSE_CLIENT != "ca-pub-1754459878527476":
+        raise AssertionError("El identificador de editor no coincide con el facilitado por el titular.")
+    if ADSENSE_ADS_ENABLED:
+        raise AssertionError("Los anuncios deben seguir desactivados hasta la aprobación y la CMP.")
+    if GOOGLE_CERTIFIED_CMP_CONFIGURED:
+        raise AssertionError("No se debe declarar una CMP certificada hasta completar la integración real.")
+    ads_txt = PUBLIC / "ads.txt"
+    expected_ads_line = "google.com, pub-1754459878527476, DIRECT, f08c47fec0942fa0"
+    if not ads_txt.is_file() or expected_ads_line not in ads_txt.read_text(encoding="utf-8"):
+        raise AssertionError("Falta ads.txt con la entrada de editor correcta.")
+
     for page in pages:
         html = page.read_text(encoding="utf-8")
         if AMAZON_DISCLOSURE not in html:
             raise AssertionError(f"Falta la declaración de Amazon en {page.name}.")
+        if "adsbygoogle.js?client=ca-pub-1754459878527476" not in html:
+            raise AssertionError(f"Falta el código de verificación de AdSense en {page.name}.")
         if "Publicidad y enlaces de afiliación." not in html:
             raise AssertionError(f"Falta el aviso comercial en {page.name}.")
         if "__AFFILIATE_LINK_TEMPLATES_JSON__" in html or "__AMAZON_DISCLOSURE__" in html:
@@ -103,6 +118,8 @@ def main() -> int:
     else:
         raise AssertionError("Un correo de ejemplo no puede habilitar publicidad display.")
 
+    if render_ad_slot("inline", adsense_slots={"inline": "1234567890"}):
+        raise AssertionError("No deben mostrarse bloques AdSense mientras ADSENSE_ADS_ENABLED esté desactivado.")
     if render_ad_slot("sidebar_left") or render_ad_slot("sidebar_right") or render_ad_slot("inline"):
         raise AssertionError("Las posiciones de anuncios no configuradas deben permanecer invisibles.")
     safe_slot = render_ad_slot("inline", direct_slots={
