@@ -819,6 +819,10 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                             <option value="8116">Zaragoza</option>
                             <option value="4540">Málaga</option>
                         </select>
+                        <select id="orden-combustible" aria-label="Ordenar estaciones por precio" onchange="cargarGasolinerasMunicipio()" class="p-2 border rounded-xl text-xs font-bold bg-slate-50">
+                            <option value="diesel" selected>Ordenar: diésel A</option>
+                            <option value="gasolina">Ordenar: gasolina 95</option>
+                        </select>
                         <button onclick="cargarGasolinerasMunicipio()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-3 py-2 rounded-xl transition">Actualizar</button>
                     </div>
                 </div>
