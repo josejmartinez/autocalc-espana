@@ -88,3 +88,26 @@ Si en el futuro se necesitan búsquedas complejas, perfiles de usuario, matrícu
 ## Estado
 
 Esta nota documenta la investigación y la arquitectura previa a la importación. No añade todavía datos inventados ni modifica el comportamiento de las calculadoras. La siguiente entrega de código debe ser el importador reproducible y un informe de cobertura; después se puede conectar el selector con datos reales.
+
+
+## Fase B implementada: importador EEA y diagnóstico de cobertura
+
+Se ha añadido `scripts/importar_datos_eea.py`. El proceso toma el CSV descargado desde el portal EEA (turismos o furgonetas), detecta separadores comunes, normaliza columnas reconocibles y genera:
+- `public/data/eea-vehicles.json`: registros normalizados con procedencia y limitaciones.
+- `reports/eea-coverage.json`: columnas reconocidas, países encontrados, número de registros y porcentaje de cobertura por campo.
+
+Ejemplo para un CSV de turismos descargado de la EEA:
+```bash
+python scripts/importar_datos_eea.py --input data/eea_cars.csv --kind cars --year 2025
+```
+
+Para filtrar registros reportados por España (si el fichero tiene columna de país):
+```bash
+python scripts/importar_datos_eea.py --input data/eea_cars.csv --kind cars --country ES --year 2025
+```
+
+Fuentes oficiales:
+- Turismos, con datasets por año y edición provisional/definitiva: https://www.eea.europa.eu/en/datahub/datahubitem-view/fa8b1229-3db6-495d-b18e-9c9b3267c02b.
+- Furgonetas: https://www.eea.europa.eu/en/datahub/datahubitem-view/9636827c-bd0c-40f5-814e-c4065c11c9a0.
+
+**Importante:** el importador no descarga automáticamente el CSV porque la EEA publica varias ediciones/años y el enlace de distribución cambia. El usuario debe descargar el fichero desde la página oficial, conservando su definición de columnas. La normalización por nombres de columna es deliberadamente conservadora; antes de usar los valores en una calculadora hay que contrastar las unidades con la tabla de definición correspondiente a esa edición. La salida no debe desplegarse automáticamente hasta que el informe de cobertura haya sido revisado.
