@@ -89,7 +89,7 @@ def main() -> int:
     # Independent numerical sanity checks for important formulas.
     minutes = round((620 / 105) * 60)
     assert (minutes // 60, minutes % 60) == (5, 54)
-    assert round((100 / 5.152) // 0.01) / 100 == 19.41
+    assert int((100 / 5.152) * 100) / 100 == 19.4
     assert round(22000 * 0.0875) == 1925
 
     print("[OK] Regresión de calculadoras: viaje, CVF/IEDMT, matrículas, índices de velocidad, OBD y espacios publicitarios.")
