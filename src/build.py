@@ -2172,7 +2172,8 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const territorio = document.getElementById('dgt-territorio')?.value || 'peninsula';
             const territorioLabel = territorio === 'canarias' ? 'Canarias' : territorio === 'ceuta' ? 'Ceuta/Melilla' : 'Península/Baleares';
             let tipoImpositivo = 0;
-            if (territorio !== 'ceuta') {
+            // Un BEV no debe heredar un tipo de CO₂ residual si el usuario cambia de motorización.
+            if (motor !== 'electrico' && territorio !== 'ceuta') {
                 if (co2 > 120 && co2 < 160) tipoImpositivo = territorio === 'canarias' ? 3.75 : 4.75;
                 else if (co2 >= 160 && co2 < 200) tipoImpositivo = territorio === 'canarias' ? 8.75 : 9.75;
                 else if (co2 >= 200) tipoImpositivo = territorio === 'canarias' ? 13.75 : 14.75;
