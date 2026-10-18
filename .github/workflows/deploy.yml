@@ -40,6 +40,9 @@ jobs:
       - name: Validate catalog data
         run: python scripts/test_catalogue.py
 
+      - name: Validate calculator methods and ad-slot configuration
+        run: python scripts/test_calculators.py
+
       - name: Validate generated JavaScript syntax
         run: python scripts/test_inline_js.py
 
