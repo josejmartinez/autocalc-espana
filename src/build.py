@@ -799,7 +799,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                         <h2 class="text-lg font-bold text-slate-900">2C. Precio de gasolineras hoy en tiempo real (datos oficiales del Ministerio)</h2>
                         <p class="text-xs text-slate-500">Consulta las estaciones más económicas de tu municipio hoy mismo y comprueba cuánto ahorras por depósito.</p>
                     </div>
-                    <div class="flex gap-2">
+                    <div class="flex flex-wrap gap-2">
                         <select id="municipio-gas" onchange="cargarGasolinerasMunicipio()" class="p-2 border rounded-xl text-xs font-bold bg-slate-50">
                             <option value="4281" selected>Aranjuez (Madrid)</option>
                             <option value="4313">Ciempozuelos (Madrid)</option>
@@ -971,12 +971,12 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                 <h2 class="text-lg font-bold mb-1 text-slate-900">5A. Consulta rápida de códigos de fallo OBD2 frecuentes</h2>
                 <p class="text-xs text-slate-500 mb-4">La lectura OBD se aplica según la categoría del vehículo y el procedimiento de inspección vigente. Algunos defectos relacionados con emisiones, el testigo MIL o los resultados de la lectura pueden afectar la ITV; el resultado depende del vehículo, del defecto detectado y del manual aplicable. Selecciona un código frecuente para consultar una posible causa:</p>
                 <select id="obd-select" onchange="mostrarFalloOBD()" class="w-full p-3 border rounded-xl font-bold text-sm bg-slate-50">
-                    <option value="P0401">P0401 / P0402 — Flujo insuficiente o excesivo en válvula EGR (recirculación de gases)</option>
-                    <option value="P2002">P2002 / P2463 — Eficiencia del filtro de partículas diésel (DPF / FAP) por debajo del umbral</option>
+                    <option value="P0401">P0401 — Caudal insuficiente en el sistema EGR</option>
+                    <option value="P2002">P2002 — Eficiencia del filtro de partículas (DPF / FAP) por debajo del umbral</option>
                     <option value="P0420">P0420 — Eficiencia del sistema catalizador por debajo del umbral (Banco 1)</option>
-                    <option value="P0101">P0101 / P0102 — Problema de rango/rendimiento en caudalímetro (sensor MAF)</option>
-                    <option value="P0380">P0380 / P0670 — Fallo en circuito de bujías de precalentamiento (calentadores diésel)</option>
-                    <option value="P0135">P0135 / P0141 — Fallo en circuito calentador de sonda lambda (sensor de oxígeno)</option>
+                    <option value="P0101">P0101 — Rango/rendimiento del caudalímetro (sensor MAF)</option>
+                    <option value="P0380">P0380 — Circuito de precalentamiento diésel</option>
+                    <option value="P0135">P0135 — Circuito del calentador de la sonda lambda</option>
                     <option value="P0299">P0299 — Presión de sobrealimentación del turbocompresor baja (geometría o manguito)</option>
                 </select>
                 <div id="res-obd" class="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200"></div>
@@ -1331,37 +1331,37 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
                 query: "diagnostico+filtro+particulas+dpf"
             },
             "P0420": {
-                titulo: "P0420 — Baja eficiencia del catalizador (Banco 1)",
-                causa: "Desgaste del monolito cerámico del catalizador o lectura errónea de la segunda sonda lambda trasera.",
-                itv: "Defecto grave en prueba de gases (CO alto en gasolina) y testigo MIL encendido.",
-                solucion: "Comprobar primero la sonda lambda posterior antes de sustituir el catalizador.",
+                titulo: "P0420 — Eficiencia del catalizador por debajo del umbral (Banco 1)",
+                causa: "Puede deberse al catalizador, sondas lambda, fugas de escape, mezcla incorrecta o fallos de encendido; el código no identifica por sí solo la pieza.",
+                itv: "El sistema de emisiones y el testigo MIL pueden afectar a la inspección; el código aislado no determina el resultado.",
+                solucion: "Comprueba fugas, otros códigos, fallos de encendido y señales de ambas sondas lambda según el procedimiento del fabricante antes de sustituir el catalizador.",
                 query: "sonda+lambda+catalizador"
             },
             "P0101": {
                 titulo: "P0101 — Rango incorrecto en sensor de masa de aire (caudalímetro MAF)",
-                causa: "Hilo térmico del caudalímetro sucio por polvo/aceite o toma de aire parásita en el manguito de admisión.",
-                itv: "Pérdida de potencia, tirones y fallo registrado en centralita.",
-                solucion: "Limpiar con spray de residuo cero para sensores MAF o cambiar el caudalímetro (10 min).",
+                causa: "Puede relacionarse con fugas en la admisión, filtro, sensor MAF, conectores, cableado o una lectura fuera del rango esperado.",
+                itv: "Puede afectar al funcionamiento y a emisiones; el código por sí solo no anticipa el resultado de ITV.",
+                solucion: "Revisa filtro y manguitos, busca tomas de aire y comprueba alimentación, cableado y datos en vivo antes de limpiar o sustituir el sensor. Usa solo productos compatibles con MAF si el fabricante lo permite.",
                 query: "caudalimetro+sensor+maf"
             },
             "P0380": {
-                titulo: "P0380 / P0670 — Avería en calentadores o caja de precalentamiento diésel",
-                causa: "Uno o varios calentadores cortados (resistencia infinita) o relé de precalentamiento dañado.",
-                itv: "En muchos vehículos enciende el testigo de avería o parpadea el muelle, causando rechazo en lectura OBD.",
-                solucion: "Medir continuidad con multímetro y sustituir el juego de calentadores.",
+                titulo: "P0380 — Fallo en el circuito de precalentamiento diésel",
+                causa: "Puede estar en uno o varios calentadores, módulo/relé, fusibles, conectores o cableado; P0380 no equivale a P0670.",
+                itv: "El efecto sobre la ITV depende del vehículo, de la avería real y del procedimiento aplicable.",
+                solucion: "Comprueba fusibles, alimentación, conectores y resistencia de los calentadores según el manual; no sustituyas el juego completo sin diagnóstico.",
                 query: "bujias+precalentamiento+calentadores+diesel"
             },
             "P0135": {
                 titulo: "P0135 — Fallo en calentador de sonda lambda (sensor O2)",
-                causa: "Resistencia interna de precalentamiento de la sonda lambda fundida.",
-                itv: "Mezcla aire/combustible imprecisa en frío y fallo grave en lectura OBD de la ITV.",
-                solucion: "Sustituir la sonda lambda afectada con llave hexagonal de 22 mm.",
+                causa: "Puede deberse al calentador de la sonda, alimentación, fusible, masa, conector o cableado; el código no determina cuál.",
+                itv: "Un defecto del sistema de emisiones puede afectar a la inspección, pero el código aislado no fija el resultado.",
+                solucion: "Verifica alimentación, masa, continuidad y conectores con el esquema del fabricante antes de sustituir la sonda.",
                 query: "sonda+lambda+universal"
             },
             "P0299": {
                 titulo: "P0299 — Presión de sobrealimentación del turbo inferior a la demandada",
                 causa: "Manguito del intercooler rajado, electroválvula N75 defectuosa o geometría variable del turbo atascada por carbonilla.",
-                itv: "El coche entra en modo protección (limp mode), humea negro y registra fallo en ECU.",
+                itv: "Puede afectar al rendimiento y a emisiones; las consecuencias en ITV dependen del estado real del vehículo y del procedimiento aplicable.",
                 solucion: "Revisar fugas en tubos de vacío/intercooler y comprobar la electroválvula de control del turbo.",
                 query: "electrovalvula+control+presion+turbo"
             }
