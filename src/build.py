@@ -896,7 +896,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             <!-- 4A. Datador de matrículas españolas (mes/año, antigüedad y periodicidad ITV) -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                 <h2 class="text-lg font-bold mb-1 text-slate-900">4A. Calculadora de fecha de matriculación por matrícula, edad y próxima ITV</h2>
-                <p class="text-xs text-slate-500 mb-4">Introduce las 3 letras de cualquier matrícula europea española (desde BBB en el año 2000 hasta la actualidad) para conocer el mes y año estimado de matriculación, su antigüedad y cada cuánto debe pasar la ITV.</p>
+                <p class="text-xs text-slate-500 mb-4">Introduce las tres letras de una matrícula ordinaria española (serie iniciada en 2000) para obtener una fecha y antigüedad aproximadas. La estimación no sustituye la fecha oficial del permiso de circulación ni permite determinar por sí sola la próxima ITV.</p>
                 <div class="flex flex-col sm:flex-row items-center gap-4">
                     <div class="flex items-center border-2 border-slate-900 rounded-xl overflow-hidden bg-white shadow-sm w-64 h-14">
                         <div class="bg-blue-700 text-white h-full px-2.5 flex flex-col justify-center items-center text-[10px] font-bold">
@@ -2074,12 +2074,14 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
 
             if (ahorroAnualNeto <= 0) {
                 box.className = 'mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm font-semibold text-amber-900';
-                box.textContent = 'Con estos datos (incluyendo mantenimiento), el vehículo B no genera ahorro anual respecto al vehículo A. No existe un plazo de amortización positivo.';
+                box.textContent = difPrecio === 0
+                    ? 'No hay sobreprecio que amortizar. Con estos datos, el vehículo B no reduce el gasto anual respecto al A.'
+                    : 'Con estos datos (incluido el mantenimiento), el vehículo B no genera ahorro anual frente al A. No hay un plazo de amortización positivo.';
                 return;
             }
 
-            const kmParaAmortizar = difPrecio / ahorroPorKm;
-            const aniosParaAmortizar = difPrecio / ahorroAnualNeto;
+            const kmParaAmortizar = difPrecio === 0 ? 0 : difPrecio / ahorroPorKm;
+            const aniosParaAmortizar = difPrecio === 0 ? 0 : difPrecio / ahorroAnualNeto;
 
             box.innerHTML = `
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
@@ -2152,7 +2154,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             let colorEtiqueta = "bg-slate-200 text-slate-800";
 
             if (motor === "electrico") {
-                etiqueta = "CERO probable para BEV; confirma por matrícula";
+                etiqueta = "CERO para BEV en condiciones ordinarias; confirma por matrícula";
                 colorEtiqueta = "bg-sky-200 text-sky-950";
             } else if (motor === "phev") {
                 etiqueta = "CERO si autonomía eléctrica homologada ≥40 km; si no, ECO sujeto a Euro";
