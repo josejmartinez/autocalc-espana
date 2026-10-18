@@ -81,6 +81,8 @@ def main() -> int:
     # OBD content must not present unsupported universal rejection or generic 3,000 rpm procedures.
     if "forzar regeneración en carretera a 3.000 rpm" in source:
         raise AssertionError("Se mantiene una instrucción genérica de regeneración DPF.")
+    if "circular 20 min a ~3.000 rpm" in source or "descarbonización pre-ITV" in source:
+        raise AssertionError("Se mantiene la recomendación universal de régimen alto antes de la ITV.")
     if "Rechazo directo (Defecto Grave) en lectura OBD" in source:
         raise AssertionError("El código OBD se presenta como rechazo ITV automático.")
     if "suele mentir entre un 5 % y un 10 %" in source:
