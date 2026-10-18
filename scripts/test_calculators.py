@@ -34,6 +34,10 @@ def main() -> int:
         "const totalMinutos = Math.round((km / vel) * 60);",
         "const m = totalMinutos % 60;",
         "Por ocupante",
+        "!Number.isInteger(aniosUso)",
+        "kmAnual > 200000",
+        'id="orden-combustible"',
+        "listaConPrecio.sort((a, b) => parsePrecio(a[campoOrden]) - parsePrecio(b[campoOrden]))",
     ):
         if marker not in source:
             raise AssertionError("Falta una mejora de coste/tiempo de viaje: " + marker)
