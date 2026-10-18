@@ -75,7 +75,7 @@ Google recomienda etiquetar los enlaces de afiliación con `rel="sponsored"`: [g
 
 ## 5. Publicidad display: AdSense
 
-No activar AdSense aún. Antes:
+El código que facilita Google para verificar el sitio está ya integrado y se genera `ads.txt`. Esto no significa que el sitio esté aprobado ni que los anuncios estén activos. Mantén `adsense_ads_enabled = false` hasta que AdSense apruebe el dominio y se haya integrado y probado una CMP certificada. Antes de solicitar la revisión final, comprueba en la consola de AdSense que el código se detecta. Antes de activar la entrega de anuncios:
 
 - Confirma que el sitio es accesible por HTTPS, y comprueba que `robots.txt`, el sitemap, la política de privacidad y el aviso legal están correctos.
 - Completa y revisa los datos identificativos y de contacto del responsable. El código actual avisa de que esa información debe completarse; no publiques datos de ejemplo.
