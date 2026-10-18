@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-SOURCE_URL = "https://cdn.jsdelivr.net/gh/vehiclesdb/vehiclesdb@2026.10.3/dist/vehicles.json"
+SOURCE_URL = "https://cdn.jsdelivr.net/gh/vehiclesdb/vehiclesdb@v2026.10.3/dist/vehicles.json"
 SOURCE_HOME = "https://github.com/vehiclesdb/vehiclesdb"
 ATTRIBUTION = "Vehicle data by VehiclesDB"
 SCHEMA_VERSION = 1
