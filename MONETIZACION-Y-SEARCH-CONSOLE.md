@@ -5,12 +5,12 @@
 ## 1. Estado actual del proyecto
 
 - Dominio principal configurado en el generador: `https://autocalc.es`.
-- **HTTPS pendiente de certificado** en GitHub Pages: las DNS aparecen como correctas, pero el navegador llegó a mostrar `NET::ERR_CERT_COMMON_NAME_INVALID` y GitHub todavía indicaba que no había emitido el certificado. No dar la migración por cerrada ni completar el alta de Awin hasta que la URL HTTPS sea segura.
+- **HTTPS:** el usuario confirma que ya dispone de HTTPS; la captura más reciente de GitHub Pages muestra `Enforce HTTPS` marcado. GitHub todavía muestra `DNS Check in Progress`, así que no volver a pedir al titular que active HTTPS ni que compre un certificado. Conviene seguir revisando el estado DNS si algún servicio externo aún no puede acceder al dominio.
 - **Solicitud de publisher en Awin enviada el 17 de octubre de 2026; revisión pendiente.** Después de la aceptación de la red hay que solicitar AUTODOC y Norauto por separado; no hay todavía campañas aprobadas ni enlaces de seguimiento reales en `config.json`.
 - `contact_email` está vacío. El aviso legal se muestra expresamente pendiente de completar; antes de vender publicidad, completa el correo real del responsable y revisa la información identificativa/legal.
 - Identificador de Amazon configurado en enlaces: `autocalces-21`. La configuración del identificador no demuestra por sí sola que la cuenta esté aprobada o en buen estado; confirmar el estado en la consola de Amazon Afiliados.
 - Los enlaces a AUTODOC, Norauto, Oscaro, Aurgi, Feu Vert, eBay, Costco, Muchoneumático y desguaces permanecen directos mientras no se configure el seguimiento oficial de una campaña aprobada.
-- AdSense: desactivado (`adsense_client` vacío). La web tiene un control de consentimiento propio para Analytics, pero no es una CMP certificada de Google para anuncios.
+- El código de editor de AdSense facilitado por el titular (`ca-pub-1754459878527476`) ya está configurado en el generador y `ads.txt` se genera con su entrada. La entrega de anuncios sigue desactivada (`adsense_ads_enabled = false`) y `google_certified_cmp_configured = false`. El banner propio de Analytics no es una CMP certificada de Google para anuncios.
 
 ## 2. Google Search Console tras la migración
 
@@ -82,7 +82,7 @@ El código que facilita Google para verificar el sitio está ya integrado y se g
 - Refuerza el contenido editorial original y útil. Evita generar muchas páginas casi idénticas cuyo principal objetivo sean los enlaces de compra: Google define la afiliación superficial y el contenido escalado de poco valor como riesgos para la calidad de búsqueda.
 - Solicita AdSense y espera a que el sitio sea aceptado.
 - Para publicar anuncios a usuarios del EEE, Reino Unido o Suiza, integra una **CMP certificada por Google y compatible con IAB TCF** según los requisitos aplicables. El aviso actual de AutoCalc gestiona el consentimiento de Google Analytics; no es por sí mismo una CMP certificada para AdSense.
-- Solo cuando haya aprobación, CMP integrada y revisión de privacidad, establece `adsense_client` con el identificador real `ca-pub-...` y cambia `google_certified_cmp_configured` a `true` después de verificar la integración. El generador creará el registro `ads.txt` a partir de ese ID. No uses identificadores ficticios.
+- El identificador real `ca-pub-1754459878527476` ya está configurado para conectar/verificar el sitio y generar `ads.txt`. No cambies `adsense_ads_enabled` a `true` hasta que el sitio esté aprobado, el contacto legal esté completo y se haya integrado y probado una CMP certificada. No actives manualmente anuncios automáticos mientras esos pasos sigan pendientes.
 
 Referencia: [requisitos de CMP de Google AdSense para publishers](https://support.google.com/adsense/answer/13554116?hl=es).
 
