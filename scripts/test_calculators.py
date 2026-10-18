@@ -49,6 +49,9 @@ def main() -> int:
         "territorio === 'canarias' ? 3.75 : 4.75",
         "territorio === 'canarias' ? 8.75 : 9.75",
         "territorio === 'canarias' ? 13.75 : 14.75",
+        "motor !== 'electrico' && territorio !== 'ceuta'",
+        'id="orden-combustible"',
+        "listaConPrecio.sort((a, b) => parsePrecio(a[campoOrden]) - parsePrecio(b[campoOrden]))",
     ):
         if marker not in source:
             raise AssertionError("Falta lógica de fiscalidad/CVF: " + marker)
