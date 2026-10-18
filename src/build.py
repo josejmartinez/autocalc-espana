@@ -46,6 +46,7 @@ AMAZON_TAG = CFG["amazon_tag"]
 SITE_NAME = CFG["site_name"]
 EMAIL_CONTACTO = CFG["contact_email"]
 ADSENSE_CLIENT = CFG.get("adsense_client", "").strip()
+ADSENSE_ADS_ENABLED = CFG.get("adsense_ads_enabled", False) is True
 GOOGLE_ANALYTICS_ID = CFG.get("google_analytics_id", "").strip()
 GOOGLE_CERTIFIED_CMP_CONFIGURED = CFG.get("google_certified_cmp_configured", False) is True
 GOOGLE_SITE_VERIFICATION = CFG.get("google_site_verification", "").strip()
@@ -223,10 +224,10 @@ if set(DIRECT_AD_SLOTS) - set(DIRECT_AD_SLOT_NAMES):
 if set(ADSENSE_SLOT_IDS) - set(DIRECT_AD_SLOT_NAMES):
     raise ValueError("adsense_slots contiene posiciones desconocidas.")
 
-def validate_commercial_contact(contact_email, adsense_client="", direct_slots=None):
+def validate_commercial_contact(contact_email, adsense_ads_enabled=False, direct_slots=None):
     """Do not publish paid display ads until a real contact email is configured."""
     configured_slots = DIRECT_AD_SLOTS if direct_slots is None else direct_slots
-    display_ads_enabled = bool(str(adsense_client or "").strip()) or any(
+    display_ads_enabled = bool(adsense_ads_enabled) or any(
         isinstance(slot, dict) and slot.get("enabled") is True
         for slot in configured_slots.values()
     )
@@ -245,7 +246,7 @@ def validate_commercial_contact(contact_email, adsense_client="", direct_slots=N
     return True
 
 
-validate_commercial_contact(EMAIL_CONTACTO, ADSENSE_CLIENT, DIRECT_AD_SLOTS)
+validate_commercial_contact(EMAIL_CONTACTO, ADSENSE_ADS_ENABLED, DIRECT_AD_SLOTS)
 
 
 for ad_slot_name in DIRECT_AD_SLOT_NAMES:
@@ -312,7 +313,7 @@ def render_ad_slot(slot_name, direct_slots=None, adsense_slots=None):
         )
 
     slot_id = str(selected_adsense_slots.get(slot_name, "") or "").strip()
-    if ADSENSE_CLIENT and GOOGLE_CERTIFIED_CMP_CONFIGURED and slot_id:
+    if ADSENSE_ADS_ENABLED and ADSENSE_CLIENT and GOOGLE_CERTIFIED_CMP_CONFIGURED and slot_id:
         ad_style = "display:block;min-height:100px;width:100%;"
         if slot_name.startswith("sidebar_"):
             ad_style = "display:block;min-height:280px;width:100%;"
@@ -360,14 +361,16 @@ def render_sidebar_ad(slot_name, partner, headline, body, destination):
     return render_affiliate_sidebar(slot_name, partner, headline, body, destination)
 
 
-if ADSENSE_CLIENT:
+if ADSENSE_CLIENT and not (ADSENSE_CLIENT.startswith("ca-pub-") and ADSENSE_CLIENT[7:].isdigit()):
+    raise ValueError("adsense_client debe tener el formato ca-pub- seguido del identificador numérico.")
+if ADSENSE_ADS_ENABLED:
+    if not ADSENSE_CLIENT:
+        raise RuntimeError("Para activar anuncios, primero configura el identificador adsense_client.")
     if not GOOGLE_CERTIFIED_CMP_CONFIGURED:
         raise RuntimeError(
-            "AdSense no se puede activar hasta integrar y verificar una CMP certificada de Google "
-            "compatible con el TCF para el tráfico del EEE/Reino Unido/Suiza."
+            "La publicación de anuncios AdSense está bloqueada hasta integrar y verificar una CMP certificada "
+            "por Google compatible con TCF para el tráfico del EEE/Reino Unido/Suiza."
         )
-    if not (ADSENSE_CLIENT.startswith("ca-pub-") and ADSENSE_CLIENT[7:].isdigit()):
-        raise ValueError("adsense_client debe tener el formato ca-pub- seguido del identificador numérico.")
 
 ANCHOS_COMUNES = sorted(list(GARGANTA_POR_ANCHO.keys()))
 PERFILES_COMUNES = [35, 40, 45, 50, 55, 60, 65, 70, 75]

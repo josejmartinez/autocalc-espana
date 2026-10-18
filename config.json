@@ -2,7 +2,7 @@
   "site_name": "AutoCalc España",
   "domain": "https://josejmartinez.github.io/autocalc-espana",
   "amazon_tag": "autocalces-21",
-  "adsense_client": "",
+  "adsense_client": "ca-pub-1754459878527476",
   "google_site_verification": "ygUlG2Pg9SCogkqx8g4IBREETgPeDhS9pRcb2wbhPxE",
   "contact_email": "",
   "google_analytics_id": "G-QN5542F4NX",
@@ -53,5 +53,6 @@
     "sidebar_left": "",
     "sidebar_right": "",
     "inline": ""
-  }
+  },
+  "adsense_ads_enabled": false
 }
