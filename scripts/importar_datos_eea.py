@@ -88,13 +88,15 @@ def choose_columns(headers):
 
 def read_rows(path: Path):
     with path.open("r", encoding="utf-8-sig", newline="") as stream:
-        sample = stream.read(65536)
+        first_line = stream.readline()
+        if not first_line:
+            raise ValueError("El archivo está vacío.")
+        candidates = (",", ";", "\\t", "|")
+        delimiter = max(candidates, key=first_line.count)
+        if first_line.count(delimiter) == 0:
+            raise ValueError("No se reconoce el separador del CSV.")
         stream.seek(0)
-        try:
-            dialect = csv.Sniffer().sniff(sample, delimiters=",;\t|")
-        except csv.Error:
-            dialect = csv.excel
-        reader = csv.DictReader(stream, dialect=dialect)
+        reader = csv.DictReader(stream, delimiter=delimiter)
         if not reader.fieldnames:
             raise ValueError("El archivo no tiene cabecera CSV.")
         return reader.fieldnames, list(reader)
@@ -105,6 +107,10 @@ def import_dataset(input_path: Path, kind: str, year: int | None = None, country
     columns = choose_columns(headers)
     if not any(field in columns for field in ("manufacturer", "commercial_name", "type_approval")):
         raise ValueError("No se reconocen columnas de fabricante/modelo/homologación. Revisa la cabecera del CSV EEA.")
+    if country and "country" not in columns:
+        raise ValueError("Se ha solicitado filtrar por país, pero el CSV no tiene una columna de país reconocible.")
+    if year is not None and "year" not in columns:
+        raise ValueError("Se ha solicitado filtrar por año, pero el CSV no tiene una columna de año reconocible.")
 
     source_url = EEA_CARS if kind == "cars" else EEA_VANS
     kept = []
@@ -123,7 +129,7 @@ def import_dataset(input_path: Path, kind: str, year: int | None = None, country
             if raw_country.upper() not in allowed:
                 continue
         row_year = parse_number(get("year"))
-        if year is not None and row_year is not None and int(row_year) != year:
+        if year is not None and (row_year is None or int(row_year) != year):
             continue
 
         record = {
