@@ -27,18 +27,18 @@ SCHEMA_VERSION = 1
 
 ALIASES = {
     "country": ["country", "country_code", "countrycode", "reporting_country", "member_state", "ms"],
-    "manufacturer": ["manufacturer", "manufacturer_name", "manufacturername", "make", "brand", "brand_name"],
-    "commercial_name": ["commercial_name", "commercialname", "vehicle_model", "model", "name", "commercial_vehicle_type"],
-    "type_approval": ["type_approval", "type_approval_number", "typeapprovalnumber", "approval_number", "wvta"],
-    "type": ["type", "vehicle_type", "vehicletype"],
-    "variant": ["variant", "vehicle_variant"],
-    "version": ["version", "vehicle_version"],
+    "manufacturer": ["manufacturer", "manufacturer_name", "manufacturername", "make", "brand", "brand_name", "mk"],
+    "commercial_name": ["commercial_name", "commercialname", "vehicle_model", "model", "name", "commercial_vehicle_type", "cn"],
+    "type_approval": ["type_approval", "type_approval_number", "typeapprovalnumber", "approval_number", "wvta", "tan"],
+    "type": ["type", "vehicle_type", "vehicletype", "t"],
+    "variant": ["variant", "vehicle_variant", "va"],
+    "version": ["version", "vehicle_version", "ve"],
     "year": ["year", "registration_year", "reporting_year", "year_of_registration"],
-    "fuel": ["fuel", "fuel_type", "fueltype", "fuel_type_name", "energy_source"],
-    "co2_g_km": ["co2", "co2_g_km", "co2_emissions", "co2_emission", "specific_co2_emissions", "co2_emissions_g_km"],
-    "power_kw": ["power_kw", "engine_power_kw", "maximum_net_power", "max_net_power", "rated_power_kw"],
-    "engine_cc": ["engine_cc", "engine_capacity", "cylinder_capacity", "engine_displacement", "displacement_cc"],
-    "mass_kg": ["mass_kg", "mass", "mass_in_running_order", "mass_in_service", "vehicle_mass"],
+    "fuel": ["fuel", "fuel_type", "fueltype", "fuel_type_name", "energy_source", "ft"],
+    "co2_g_km": ["co2", "co2_g_km", "co2_emissions", "co2_emission", "specific_co2_emissions", "co2_emissions_g_km", "ewltp_g_km"],
+    "power_kw": ["power_kw", "engine_power_kw", "maximum_net_power", "max_net_power", "rated_power_kw", "ep_kw"],
+    "engine_cc": ["engine_cc", "engine_capacity", "cylinder_capacity", "engine_displacement", "displacement_cc", "ec_cm3"],
+    "mass_kg": ["mass_kg", "mass", "mass_in_running_order", "mass_in_service", "vehicle_mass", "m_kg"],
     "wheelbase_mm": ["wheelbase_mm", "wheelbase", "wheel_base"],
     "width_mm": ["width_mm", "width"],
     "height_mm": ["height_mm", "height"],
@@ -193,7 +193,7 @@ def import_dataset(input_path: Path, kind: str, year: int | None = None, country
         "generated_at": report["generated_at"],
         "record_count": len(kept),
         "records": kept,
-        "notice": "Datos de vehículos nuevos registrados. No constituye un catálogo completo ni una certificación de homologación.",
+        "notice": "Datos de vehículos nuevos registrados; no incluye todos los vehículos en circulación y no constituye una certificación de homologación.",
     }, report
 
 
