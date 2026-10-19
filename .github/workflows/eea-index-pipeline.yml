@@ -1,0 +1,155 @@
+name: EEA Search Index Pipeline
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "scripts/validar_indice_eea.py"
+      - "scripts/test_validar_indice_eea.py"
+      - "scripts/exportar_indice_eea.py"
+      - "scripts/importar_catalogo_eea.py"
+      - ".github/workflows/eea-index-pipeline.yml"
+  workflow_dispatch:
+    inputs:
+      csv_url:
+        description: "URL directa HTTPS del CSV oficial EEA (no una página HTML)"
+        required: true
+        type: string
+      year:
+        description: "Año de matriculación del conjunto"
+        required: true
+        default: "2025"
+        type: string
+      status:
+        description: "Estado del conjunto EEA"
+        required: true
+        default: "P"
+        type: choice
+        options:
+          - P
+          - F
+          - ALL
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eea-index-pipeline
+  cancel-in-progress: false
+
+jobs:
+  test:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Test EEA index exporter and validator
+        run: |
+          python scripts/test_exportar_indice_eea.py
+          python scripts/test_validar_indice_eea.py
+
+  build-index:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Validate official EEA URL
+        env:
+          EEA_CSV_URL: ${{ inputs.csv_url }}
+        run: |
+          python - <<'PY'
+          import os
+          from urllib.parse import urlparse
+          url = os.environ["EEA_CSV_URL"].strip()
+          parsed = urlparse(url)
+          host = (parsed.hostname or "").lower().rstrip(".")
+          if parsed.scheme != "https" or not (host == "eea.europa.eu" or host.endswith(".eea.europa.eu")):
+              raise SystemExit("La URL debe ser HTTPS y pertenecer al dominio oficial eea.europa.eu.")
+          if not parsed.path:
+              raise SystemExit("La URL no contiene una ruta de descarga.")
+          print(f"URL oficial aceptada: https://{host}{parsed.path}")
+          PY
+      - name: Download EEA CSV
+        env:
+          EEA_CSV_URL: ${{ inputs.csv_url }}
+        run: |
+          mkdir -p data build
+          curl --fail --location --retry 3 --retry-delay 5 \
+            --proto '=https' --proto-redir '=https' \
+            --max-filesize 3500000000 \
+            --output data/eea-source.csv \
+            --write-out '%{url_effective}' \
+            "$EEA_CSV_URL" > build/eea-effective-url.txt
+          python - <<'PY'
+          from pathlib import Path
+          from urllib.parse import urlparse
+          url = Path("build/eea-effective-url.txt").read_text(encoding="utf-8").strip()
+          host = (urlparse(url).hostname or "").lower().rstrip(".")
+          if urlparse(url).scheme != "https" or not (host == "eea.europa.eu" or host.endswith(".eea.europa.eu")):
+              raise SystemExit("La descarga redirigió fuera del dominio oficial EEA; se detiene el proceso.")
+          source = Path("data/eea-source.csv")
+          if not source.is_file() or source.stat().st_size == 0:
+              raise SystemExit("La descarga está vacía.")
+          print(f"CSV descargado: {source.stat().st_size:,} bytes")
+          PY
+      - name: Import and aggregate official data
+        run: |
+          python scripts/importar_catalogo_eea.py \
+            --input data/eea-source.csv \
+            --year "${{ inputs.year }}" \
+            --country ES \
+            --status "${{ inputs.status }}" \
+            --output build/eea-variants.json \
+            --report build/eea-variants-report.json
+      - name: Export compact search index
+        run: |
+          python scripts/exportar_indice_eea.py \
+            --input build/eea-variants.json \
+            --output build/eea-search-index.json
+      - name: Validate compact search index
+        run: |
+          python scripts/validar_indice_eea.py \
+            --input build/eea-search-index.json \
+            --report build/eea-index-validation.json
+      - name: Record artifact size and metadata
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          index = Path("build/eea-search-index.json")
+          metadata = {
+              "index_bytes": index.stat().st_size,
+              "index_mib": round(index.stat().st_size / (1024 * 1024), 2),
+              "variant_count": json.loads(index.read_text(encoding="utf-8"))["variant_count"],
+              "year": int("${{ inputs.year }}"),
+              "country": "ES",
+              "status": "${{ inputs.status }}",
+              "note": "Artefacto de validación; no se publica automáticamente en producción."
+          }
+          Path("build/eea-artifact-metadata.json").write_text(
+              json.dumps(metadata, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+          )
+          print(json.dumps(metadata, ensure_ascii=False, indent=2))
+          PY
+      - name: Upload review artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: eea-search-index-${{ inputs.year }}-${{ inputs.status }}
+          path: |
+            build/eea-search-index.json
+            build/eea-index-validation.json
+            build/eea-variants-report.json
+            build/eea-artifact-metadata.json
+          if-no-files-found: error
+          retention-days: 14
