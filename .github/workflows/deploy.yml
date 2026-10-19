@@ -48,6 +48,9 @@ jobs:
 
       - name: Validate compact EEA vehicle catalogue
         run: python scripts/test_importar_catalogo_eea.py
+      
+      - name: Validate EEA search index exporter
+        run: python scripts/test_exportar_indice_eea.py
 
       - name: Validate calculator methods and ad-slot configuration
         run: python scripts/test_calculators.py
