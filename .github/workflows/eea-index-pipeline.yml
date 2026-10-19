@@ -64,13 +64,22 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Validate official EEA URL
+      - name: Validate workflow inputs and official EEA URL
         env:
           EEA_CSV_URL: ${{ inputs.csv_url }}
+          EEA_YEAR: ${{ inputs.year }}
+          EEA_STATUS: ${{ inputs.status }}
         run: |
           python - <<'PY'
           import os
+          import re
           from urllib.parse import urlparse
+          year = os.environ["EEA_YEAR"].strip()
+          status = os.environ["EEA_STATUS"].strip()
+          if not re.fullmatch(r"20[0-9]{2}", year):
+              raise SystemExit("El año debe tener formato YYYY entre 2000 y 2099.")
+          if status not in {"P", "F", "ALL"}:
+              raise SystemExit("Estado EEA no válido.")
           url = os.environ["EEA_CSV_URL"].strip()
           parsed = urlparse(url)
           host = (parsed.hostname or "").lower().rstrip(".")
@@ -104,12 +113,15 @@ jobs:
           print(f"CSV descargado: {source.stat().st_size:,} bytes")
           PY
       - name: Import and aggregate official data
+        env:
+          EEA_YEAR: ${{ inputs.year }}
+          EEA_STATUS: ${{ inputs.status }}
         run: |
           python scripts/importar_catalogo_eea.py \
             --input data/eea-source.csv \
-            --year "${{ inputs.year }}" \
+            --year "$EEA_YEAR" \
             --country ES \
-            --status "${{ inputs.status }}" \
+            --status "$EEA_STATUS" \
             --output build/eea-variants.json \
             --report build/eea-variants-report.json
       - name: Export compact search index
@@ -123,18 +135,22 @@ jobs:
             --input build/eea-search-index.json \
             --report build/eea-index-validation.json
       - name: Record artifact size and metadata
+        env:
+          EEA_YEAR: ${{ inputs.year }}
+          EEA_STATUS: ${{ inputs.status }}
         run: |
           python - <<'PY'
           import json
+          import os
           from pathlib import Path
           index = Path("build/eea-search-index.json")
           metadata = {
               "index_bytes": index.stat().st_size,
               "index_mib": round(index.stat().st_size / (1024 * 1024), 2),
               "variant_count": json.loads(index.read_text(encoding="utf-8"))["variant_count"],
-              "year": int("${{ inputs.year }}"),
+              "year": int(os.environ["EEA_YEAR"]),
               "country": "ES",
-              "status": "${{ inputs.status }}",
+              "status": os.environ["EEA_STATUS"],
               "note": "Artefacto de validación; no se publica automáticamente en producción."
           }
           Path("build/eea-artifact-metadata.json").write_text(
