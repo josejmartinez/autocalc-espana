@@ -55,6 +55,9 @@ jobs:
       - name: Validate EEA search index validator
         run: python scripts/test_validar_indice_eea.py
 
+      - name: Validate EEA manufacturer sharding
+        run: python scripts/test_fragmentar_indice_eea.py
+
       - name: Validate calculator methods and ad-slot configuration
         run: python scripts/test_calculators.py
 
