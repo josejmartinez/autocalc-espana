@@ -57,7 +57,7 @@ def main() -> int:
         source = json.loads(args.input.read_text(encoding="utf-8"))
         result = export_index(source)
         args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(json.dumps(result, ensure_ascii=False, separators=(",", ":")) + "\\n", encoding="utf-8")
+        args.output.write_text(json.dumps(result, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
         print(f"Índice de búsqueda: {args.output} ({result['variant_count']:,} variantes)")
         return 0
     except (OSError, json.JSONDecodeError, ValueError) as exc:
