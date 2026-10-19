@@ -29,6 +29,11 @@ class EEACatalogueTests(unittest.TestCase):
             self.assertEqual(audit["counters"]["rows_selected"], 3)
             self.assertEqual(audit["recognized_columns"]["power_kw"], "ep (KW)")
             self.assertEqual(data["records"][0]["source_status"], "P")
+            self.assertEqual(data["records"][0]["wltp_test_mass_kg"], 1500)
+            self.assertEqual(data["records"][0]["emissions_reduction_wltp_g_km"], None)
+            self.assertEqual(data["records"][0]["emissions_reduction_nedc_g_km"], None)
+            self.assertNotIn("mass_other_kg", data["records"][0])
+            self.assertNotIn("electric_co2_wltp_g_km", data["records"][0])
 
     def test_rejects_unrecognized_schema(self):
         with tempfile.TemporaryDirectory() as tmp:

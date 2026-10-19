@@ -17,24 +17,24 @@ ALIASES = {
     "commercial_name": ["Cn"], "manufacturer_name": ["Man"],
     "manufacturer_parent": ["Mp"], "type_approval": ["Tan"], "type": ["T"],
     "variant": ["Va"], "version": ["Ve"], "vehicle_category": ["Ct"],
-    "vehicle_class": ["Cr"], "mass_kg": ["m (kg)"], "mass_other_kg": ["Mt"],
+    "vehicle_class": ["Cr"], "mass_kg": ["m (kg)"], "wltp_test_mass_kg": ["Mt"],
     "co2_wltp_g_km": ["Ewltp (g/km)"], "co2_nedc_g_km": ["Enedc (g/km)"],
     "fuel": ["Ft"], "fuel_mode": ["Fm"], "engine_cc": ["ec (cm3)"],
     "power_kw": ["ep (KW)"], "electricity_wh_km": ["z (Wh/km)"],
     "status": ["Status"], "year": ["year"], "registration_date": ["Date of registration"],
     "fuel_consumption": ["Fuel consumption"], "electric_range_km": ["Electric range (km)"],
-    "electric_co2_wltp_g_km": ["Erwltp (g/km)"], "electric_co2_nedc_g_km": ["Ernedc (g/km)"],
+    "emissions_reduction_wltp_g_km": ["Erwltp (g/km)"], "emissions_reduction_nedc_g_km": ["Ernedc (g/km)"],
 }
 CONFIG_FIELDS = (
     "manufacturer", "commercial_name", "type_approval", "type", "variant", "version",
-    "vehicle_category", "vehicle_class", "mass_kg", "mass_other_kg", "co2_wltp_g_km",
+    "vehicle_category", "vehicle_class", "mass_kg", "wltp_test_mass_kg", "co2_wltp_g_km",
     "co2_nedc_g_km", "fuel", "fuel_mode", "engine_cc", "power_kw", "electricity_wh_km",
-    "fuel_consumption", "electric_range_km", "electric_co2_wltp_g_km", "electric_co2_nedc_g_km",
+    "fuel_consumption", "electric_range_km", "emissions_reduction_wltp_g_km", "emissions_reduction_nedc_g_km",
 )
 NUMERIC_FIELDS = {
-    "mass_kg", "mass_other_kg", "co2_wltp_g_km", "co2_nedc_g_km", "engine_cc",
+    "mass_kg", "wltp_test_mass_kg", "co2_wltp_g_km", "co2_nedc_g_km", "engine_cc",
     "power_kw", "electricity_wh_km", "fuel_consumption", "electric_range_km",
-    "electric_co2_wltp_g_km", "electric_co2_nedc_g_km",
+    "emissions_reduction_wltp_g_km", "emissions_reduction_nedc_g_km",
 }
 COUNTRY_ALIASES = {"ES": {"ES", "ESP", "SPAIN", "ESPAÑA", "ESPANA", "724"}}
 
@@ -148,7 +148,7 @@ def main():
         generated_at = datetime.now(timezone.utc).isoformat()
         notice = ("Fuente de vehículos nuevos registrados; no representa todo el parque circulante. "
                   "No certifica medidas de neumáticos, compatibilidad de llantas ni legalidad ITV. "
-                  "Las unidades y definiciones deben contrastarse con la tabla EEA de esta edición.")
+                  "Los campos Mt, Erwltp y Ernedc se identifican como masa de ensayo WLTP y reducciones de emisiones por tecnologías innovadoras, respectivamente; no deben confundirse con masa en orden de marcha ni con emisiones directas de un vehículo eléctrico. Las unidades y definiciones de otros campos deben contrastarse con la tabla EEA de esta edición.")
         output = {
             "schema_version": 1, "dataset": "EEA monitoring of CO2 emissions from passenger cars",
             "source_url": SOURCE_URL, "generated_at": generated_at, "country": args.country.upper(),
