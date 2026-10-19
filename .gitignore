@@ -9,3 +9,6 @@ venv/
 
 # Carpeta generada automáticamente
 public/
+# Datos fuente y artefactos generados (no versionar datasets grandes)
+build/
+data/
