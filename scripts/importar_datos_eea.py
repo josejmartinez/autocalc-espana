@@ -193,7 +193,7 @@ def import_dataset(input_path: Path, kind: str, year: int | None = None, country
         "generated_at": report["generated_at"],
         "record_count": len(kept),
         "records": kept,
-        "notice": "Datos de vehículos nuevos registrados; no incluye todos los vehículos en circulación y no constituye una certificación de homologación.",
+        "notice": "Datos de vehículos nuevos registrados; no todos los vehículos en circulación están incluidos y no constituye una certificación de homologación.",
     }, report
 
 
