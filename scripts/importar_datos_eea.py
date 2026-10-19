@@ -27,18 +27,18 @@ SCHEMA_VERSION = 1
 
 ALIASES = {
     "country": ["country", "country_code", "countrycode", "reporting_country", "member_state", "ms"],
-    "manufacturer": ["manufacturer", "manufacturer_name", "manufacturername", "make", "brand", "brand_name"],
-    "commercial_name": ["commercial_name", "commercialname", "vehicle_model", "model", "name", "commercial_vehicle_type"],
-    "type_approval": ["type_approval", "type_approval_number", "typeapprovalnumber", "approval_number", "wvta"],
-    "type": ["type", "vehicle_type", "vehicletype"],
-    "variant": ["variant", "vehicle_variant"],
-    "version": ["version", "vehicle_version"],
+    "manufacturer": ["manufacturer", "manufacturer_name", "manufacturername", "make", "brand", "brand_name", "mk"],
+    "commercial_name": ["commercial_name", "commercialname", "vehicle_model", "model", "name", "commercial_vehicle_type", "cn"],
+    "type_approval": ["type_approval", "type_approval_number", "typeapprovalnumber", "approval_number", "wvta", "tan"],
+    "type": ["type", "vehicle_type", "vehicletype", "t"],
+    "variant": ["variant", "vehicle_variant", "va"],
+    "version": ["version", "vehicle_version", "ve"],
     "year": ["year", "registration_year", "reporting_year", "year_of_registration"],
-    "fuel": ["fuel", "fuel_type", "fueltype", "fuel_type_name", "energy_source"],
-    "co2_g_km": ["co2", "co2_g_km", "co2_emissions", "co2_emission", "specific_co2_emissions", "co2_emissions_g_km"],
-    "power_kw": ["power_kw", "engine_power_kw", "maximum_net_power", "max_net_power", "rated_power_kw"],
-    "engine_cc": ["engine_cc", "engine_capacity", "cylinder_capacity", "engine_displacement", "displacement_cc"],
-    "mass_kg": ["mass_kg", "mass", "mass_in_running_order", "mass_in_service", "vehicle_mass"],
+    "fuel": ["fuel", "fuel_type", "fueltype", "fuel_type_name", "energy_source", "ft"],
+    "co2_g_km": ["co2", "co2_g_km", "co2_emissions", "co2_emission", "specific_co2_emissions", "co2_emissions_g_km", "ewltp_g_km"],
+    "power_kw": ["power_kw", "engine_power_kw", "maximum_net_power", "max_net_power", "rated_power_kw", "ep_kw"],
+    "engine_cc": ["engine_cc", "engine_capacity", "cylinder_capacity", "engine_displacement", "displacement_cc", "ec_cm3"],
+    "mass_kg": ["mass_kg", "mass", "mass_in_running_order", "mass_in_service", "vehicle_mass", "m_kg"],
     "wheelbase_mm": ["wheelbase_mm", "wheelbase", "wheel_base"],
     "width_mm": ["width_mm", "width"],
     "height_mm": ["height_mm", "height"],
@@ -88,13 +88,15 @@ def choose_columns(headers):
 
 def read_rows(path: Path):
     with path.open("r", encoding="utf-8-sig", newline="") as stream:
-        sample = stream.read(65536)
+        first_line = stream.readline()
+        if not first_line:
+            raise ValueError("El archivo está vacío.")
+        candidates = (",", ";", "\\t", "|")
+        delimiter = max(candidates, key=first_line.count)
+        if first_line.count(delimiter) == 0:
+            raise ValueError("No se reconoce el separador del CSV.")
         stream.seek(0)
-        try:
-            dialect = csv.Sniffer().sniff(sample, delimiters=",;\t|")
-        except csv.Error:
-            dialect = csv.excel
-        reader = csv.DictReader(stream, dialect=dialect)
+        reader = csv.DictReader(stream, delimiter=delimiter)
         if not reader.fieldnames:
             raise ValueError("El archivo no tiene cabecera CSV.")
         return reader.fieldnames, list(reader)
@@ -105,6 +107,10 @@ def import_dataset(input_path: Path, kind: str, year: int | None = None, country
     columns = choose_columns(headers)
     if not any(field in columns for field in ("manufacturer", "commercial_name", "type_approval")):
         raise ValueError("No se reconocen columnas de fabricante/modelo/homologación. Revisa la cabecera del CSV EEA.")
+    if country and "country" not in columns:
+        raise ValueError("Se ha solicitado filtrar por país, pero el CSV no tiene una columna de país reconocible.")
+    if year is not None and "year" not in columns:
+        raise ValueError("Se ha solicitado filtrar por año, pero el CSV no tiene una columna de año reconocible.")
 
     source_url = EEA_CARS if kind == "cars" else EEA_VANS
     kept = []
@@ -123,7 +129,7 @@ def import_dataset(input_path: Path, kind: str, year: int | None = None, country
             if raw_country.upper() not in allowed:
                 continue
         row_year = parse_number(get("year"))
-        if year is not None and row_year is not None and int(row_year) != year:
+        if year is not None and (row_year is None or int(row_year) != year):
             continue
 
         record = {
@@ -193,7 +199,7 @@ def import_dataset(input_path: Path, kind: str, year: int | None = None, country
         "generated_at": report["generated_at"],
         "record_count": len(kept),
         "records": kept,
-        "notice": "Datos de vehículos nuevos registrados. No constituye un catálogo completo ni una certificación de homologación.",
+        "notice": "Datos de vehículos nuevos registrados; no todos los vehículos en circulación están incluidos y no constituye una certificación de homologación.",
     }, report
 
 
