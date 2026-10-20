@@ -6,6 +6,8 @@ on:
     paths:
       - "scripts/validar_indice_eea.py"
       - "scripts/test_validar_indice_eea.py"
+      - "scripts/fragmentar_indice_eea.py"
+      - "scripts/test_fragmentar_indice_eea.py"
       - "scripts/exportar_indice_eea.py"
       - "scripts/importar_catalogo_eea.py"
       - ".github/workflows/eea-index-pipeline.yml"
@@ -52,6 +54,7 @@ jobs:
         run: |
           python scripts/test_exportar_indice_eea.py
           python scripts/test_validar_indice_eea.py
+          python scripts/test_fragmentar_indice_eea.py
 
   build-index:
     if: github.event_name == 'workflow_dispatch'
@@ -134,6 +137,8 @@ jobs:
           python scripts/validar_indice_eea.py \
             --input build/eea-search-index.json \
             --report build/eea-index-validation.json
+      - name: Split compact index into on-demand manufacturer shards
+        run: python scripts/fragmentar_indice_eea.py --input build/eea-search-index.json --output-dir build/eea-shards
       - name: Record artifact size and metadata
         env:
           EEA_YEAR: ${{ inputs.year }}
@@ -146,6 +151,8 @@ jobs:
           index = Path("build/eea-search-index.json")
           metadata = {
               "index_bytes": index.stat().st_size,
+              "shard_count": len(list(Path("build/eea-shards").glob("*.json"))) - 1,
+              "shard_bytes": sum(p.stat().st_size for p in Path("build/eea-shards").glob("*.json")),
               "index_mib": round(index.stat().st_size / (1024 * 1024), 2),
               "variant_count": json.loads(index.read_text(encoding="utf-8"))["variant_count"],
               "year": int(os.environ["EEA_YEAR"]),
@@ -164,6 +171,7 @@ jobs:
           name: eea-search-index-${{ inputs.year }}-${{ inputs.status }}
           path: |
             build/eea-search-index.json
+            build/eea-shards/
             build/eea-index-validation.json
             build/eea-variants-report.json
             build/eea-artifact-metadata.json

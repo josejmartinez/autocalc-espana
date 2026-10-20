@@ -14,6 +14,7 @@ Incluye:
 import os
 import json
 import re
+import shutil
 from html import escape, unescape
 from urllib.parse import quote, urlsplit
 from datetime import date
@@ -2673,6 +2674,102 @@ def main():
         "Política de privacidad y cookies (RGPD)", "Transparencia sobre cookies, Google AdSense y programas de afiliación.",
         205, 55, 16, 225, 45, 17, 450, 5.8, "itv", "", texto_privacidad, internal_links_html, faqs_home, robots="noindex, follow"
     )
+
+    # Solo se publica el buscador cuando hay fragmentos generados y validados.
+    eea_shards_dir = os.path.join(BASE_DIR, "build", "eea-shards")
+    eea_manifest_path = os.path.join(eea_shards_dir, "manifest.json")
+    if os.path.isfile(eea_manifest_path):
+        with open(eea_manifest_path, "r", encoding="utf-8") as manifest_file:
+            eea_manifest = json.load(manifest_file)
+        if (
+            eea_manifest.get("schema_version") == 1
+            and isinstance(eea_manifest.get("manufacturers"), list)
+            and eea_manifest.get("manufacturer_count") == len(eea_manifest["manufacturers"])
+        ):
+            eea_public_dir = os.path.join(OUTPUT_DIR, "eea-data")
+            if os.path.exists(eea_public_dir):
+                shutil.rmtree(eea_public_dir)
+            shutil.copytree(eea_shards_dir, eea_public_dir)
+            eea_page = r'''<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Buscador técnico de vehículos EEA | AutoCalc España</title>
+<meta name="description" content="Busca variantes técnicas de turismos por fabricante y nombre comercial en el catálogo EEA. Carga datos bajo demanda.">
+<link rel="canonical" href="__EEA_CANONICAL__">
+<style>
+:root{color-scheme:light;--ink:#0f172a;--muted:#64748b;--line:#e2e8f0}
+*{box-sizing:border-box}body{margin:0;background:#f8fafc;color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:1000px;margin:0 auto;padding:28px 18px 64px}.top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+a{color:#92400e}h1{font-size:clamp(1.7rem,4vw,2.4rem);line-height:1.15;margin:24px 0 10px}p{color:#475569}
+.panel{background:white;border:1px solid var(--line);border-radius:16px;padding:20px;margin:20px 0}
+label{display:block;font-size:.9rem;font-weight:700;margin:12px 0 5px}input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font:inherit;background:white}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}.status{font-size:.9rem;color:var(--muted);margin:14px 0}
+.item{padding:14px 0;border-top:1px solid var(--line)}.item h3{margin:0 0 5px;font-size:1.05rem}.meta{font-size:.9rem;color:#475569;overflow-wrap:anywhere}
+.pill{display:inline-block;background:#fef3c7;border-radius:999px;padding:3px 9px;font-size:.8rem;margin:3px 5px 3px 0}
+.notice{font-size:.9rem;background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:12px}
+</style></head><body><main>
+<div class="top"><a href="./">← Volver a AutoCalc España</a><span id="dataset-meta" class="meta">Preparando catálogo…</span></div>
+<h1>Buscador técnico de vehículos</h1>
+<p>Consulta variantes publicadas en el conjunto de datos de la Agencia Europea de Medio Ambiente (EEA). Los resultados describen registros de la fuente; no certifican compatibilidad de piezas, neumáticos ni homologación ITV.</p>
+<div class="panel"><div class="controls">
+<div><label for="manufacturer">Fabricante</label><select id="manufacturer" disabled><option>Preparando catálogo…</option></select></div>
+<div><label for="query">Modelo, tipo o versión</label><input id="query" type="search" placeholder="Ej. Golf, tipo, variante…" disabled></div>
+</div><div id="status" class="status" role="status" aria-live="polite">Cargando manifiesto…</div>
+<div class="notice" id="notice">Se descarga un pequeño manifiesto inicial. El archivo de variantes se solicita solo cuando eliges un fabricante.</div>
+<div id="results" aria-live="polite"></div></div>
+<p><small>Fuente y límites: catálogo EEA seleccionado para España y el año indicado en los metadatos. Puede no cubrir todos los vehículos en circulación. Los campos ausentes en la fuente no se deducen.</small></p>
+</main><script>
+(function(){
+"use strict";
+const select=document.getElementById("manufacturer"),query=document.getElementById("query"),status=document.getElementById("status"),results=document.getElementById("results"),meta=document.getElementById("dataset-meta"),notice=document.getElementById("notice");
+const cache=new Map();let currentRecords=[];let manifestRef=null;
+const fmt=n=>new Intl.NumberFormat("es-ES").format(Number(n)||0);
+function el(tag,cls,text){const node=document.createElement(tag);if(cls)node.className=cls;if(text!==undefined)node.textContent=String(text);return node;}
+function render(){
+ const term=query.value.trim().toLocaleLowerCase("es");
+ const found=currentRecords.filter(r=>[r.commercial_name,r.type,r.variant,r.version,r.type_approval,r.fuel].some(v=>String(v||"").toLocaleLowerCase("es").includes(term))).slice(0,100);
+ results.replaceChildren();
+ if(!found.length){results.append(el("p","status",term?"No hay coincidencias en este fabricante.":"Selecciona un fabricante para consultar sus variantes."));return;}
+ results.append(el("p","status","Mostrando "+fmt(found.length)+" resultado(s)"+(currentRecords.length>found.length?" (máximo 100; concreta la búsqueda)":"")+"." ));
+ for(const r of found){
+  const item=el("article","item");item.append(el("h3","",r.commercial_name||"Nombre comercial no indicado"));
+  const pills=[];if(r.fuel)pills.push("Combustible: "+r.fuel);if(r.engine_cc)pills.push("Cilindrada: "+fmt(r.engine_cc)+" cm³");
+  if(r.power_kw)pills.push("Potencia: "+r.power_kw+" kW");if(r.co2_wltp_g_km)pills.push("CO₂ WLTP: "+r.co2_wltp_g_km+" g/km");
+  if(r.electric_range_km)pills.push("Autonomía eléctrica: "+r.electric_range_km+" km");
+  for(const p of pills)item.append(el("span","pill",p));
+  const detail=[["Tipo",r.type],["Variante",r.variant],["Versión",r.version],["Homologación",r.type_approval],["Categoría",r.vehicle_category],["Masa (kg)",r.mass_kg],["Masa de ensayo WLTP (kg)",r.wltp_test_mass_kg],["Electricidad (Wh/km)",r.electricity_wh_km],["Registros",r.registration_count]].filter(pair=>pair[1]!==null&&pair[1]!==undefined&&pair[1]!=="");
+  if(detail.length)item.append(el("p","meta",detail.map(pair=>pair[0]+": "+pair[1]).join(" · ")));results.append(item);
+ }
+}
+async function loadManufacturer(name){
+ results.replaceChildren();currentRecords=[];query.disabled=true;
+ if(!name){status.textContent="Selecciona un fabricante para cargar sus variantes.";return;}
+ const entry=manifestRef.manufacturers.find(m=>m.name===name);if(!entry)return;
+ status.textContent="Cargando "+name+" ("+fmt(entry.variant_count)+" variantes)…";
+ try{
+  if(!cache.has(name)){const response=await fetch("./eea-data/"+encodeURIComponent(entry.file));if(!response.ok)throw new Error("HTTP "+response.status);
+   const payload=await response.json();if(payload.manufacturer!==name||!Array.isArray(payload.records))throw new Error("El fragmento no coincide con el manifiesto.");cache.set(name,payload.records);}
+  currentRecords=cache.get(name);query.disabled=false;status.textContent=fmt(currentRecords.length)+" variantes cargadas para "+name+".";render();
+ }catch(error){status.textContent="No se pudo cargar el fragmento: "+error.message+". Comprueba que el conjunto de datos está completo.";results.replaceChildren();}
+}
+fetch("./eea-data/manifest.json").then(response=>{if(!response.ok)throw new Error("HTTP "+response.status);return response.json();}).then(manifest=>{
+ if(manifest.schema_version!==1||!Array.isArray(manifest.manufacturers))throw new Error("Versión de manifiesto no compatible.");
+ manifestRef=manifest;meta.textContent=fmt(manifest.variant_count)+" variantes · "+fmt(manifest.manufacturer_count)+" fabricantes";
+ notice.textContent=(manifest.notice||"Catálogo EEA.")+" Se consulta por fabricante; no se descarga el índice completo.";
+ select.replaceChildren(new Option("Selecciona fabricante…",""));for(const m of manifest.manufacturers)select.add(new Option(m.name+" ("+fmt(m.variant_count)+")",m.name));
+ select.disabled=false;query.disabled=false;status.textContent="Elige fabricante para cargar solo su fragmento.";
+}).catch(error=>{meta.textContent="Catálogo no disponible";status.textContent="No se pudo cargar el manifiesto: "+error.message+". La página solo se genera cuando el conjunto EEA fragmentado está disponible.";select.disabled=true;query.disabled=true;});
+select.addEventListener("change",()=>loadManufacturer(select.value));query.addEventListener("input",render);
+})();
+</script></body></html>'''
+            eea_page = eea_page.replace("__EEA_CANONICAL__", DOMINIO + "/buscador-vehiculos-eea.html")
+            with open(os.path.join(OUTPUT_DIR, "buscador-vehiculos-eea.html"), "w", encoding="utf-8") as page_file:
+                page_file.write(eea_page)
+            sitemap_urls.append((
+                "buscador-vehiculos-eea.html",
+                f"{DOMINIO}/buscador-vehiculos-eea.html",
+                "Buscador técnico de vehículos EEA por fabricante y variante",
+            ))
 
     hoy = date.today().isoformat()
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
