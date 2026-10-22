@@ -2783,6 +2783,7 @@ select.addEventListener("change",()=>loadManufacturer(select.value));query.addEv
                 "Buscador técnico de vehículos EEA por fabricante y variante",
             ))
 
+    # Sitemap dates are generated below; keep them tied to real content changes.
     hoy = date.today().isoformat()
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     for _, full_url, _ in sitemap_urls:
