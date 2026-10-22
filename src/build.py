@@ -2786,10 +2786,10 @@ select.addEventListener("change",()=>loadManufacturer(select.value));query.addEv
     # timestamps, and assigning today's date to every URL on every deploy would
     # misrepresent when each page materially changed. Omit optional lastmod and
     # changefreq until reliable per-page metadata is available.
-    xml = '<?xml version="1.0" encoding="UTF-8"?>\\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\\n'
+    xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     for _, full_url, _ in sitemap_urls:
-        xml += f"  <url>\\n    <loc>{full_url}</loc>\\n  </url>\\n"
-    xml += "</urlset>\\n"
+        xml += f"  <url>\n    <loc>{full_url}</loc>\n  </url>\n"
+    xml += "</urlset>\n"
 
     with open(os.path.join(OUTPUT_DIR, "sitemap.xml"), "w", encoding="utf-8") as f:
         f.write(xml)
