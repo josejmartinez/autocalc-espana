@@ -78,6 +78,8 @@ jobs:
 
       - name: Validate IndexNow key and sitemap
         run: python scripts/test_indexnow.py
+      - name: Validate sitemap SEO metadata and priority URLs
+        run: python scripts/test_sitemap_seo.py
 
       - name: Validate generated site
         run: |

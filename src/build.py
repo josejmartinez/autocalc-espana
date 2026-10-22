@@ -17,7 +17,6 @@ import re
 import shutil
 from html import escape, unescape
 from urllib.parse import quote, urlsplit
-from datetime import date
 from catalogo import MEDIDAS_ESPANA, MODELOS_COCHES, RUTAS_ESPANA, ZONAS_DESGUACES_ITV, GARGANTA_POR_ANCHO
 from carga_electrica import render_charge_page
 
@@ -2783,10 +2782,13 @@ select.addEventListener("change",()=>loadManufacturer(select.value));query.addEv
                 "Buscador técnico de vehículos EEA por fabricante y variante",
             ))
 
-    hoy = date.today().isoformat()
+    # Do not fabricate lastmod dates: this static build has no per-page content
+    # timestamps, and assigning today's date to every URL on every deploy would
+    # misrepresent when each page materially changed. Omit optional lastmod and
+    # changefreq until reliable per-page metadata is available.
     xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     for _, full_url, _ in sitemap_urls:
-        xml += f"  <url>\n    <loc>{full_url}</loc>\n    <lastmod>{hoy}</lastmod>\n    <changefreq>monthly</changefreq>\n  </url>\n"
+        xml += f"  <url>\n    <loc>{full_url}</loc>\n  </url>\n"
     xml += "</urlset>\n"
 
     with open(os.path.join(OUTPUT_DIR, "sitemap.xml"), "w", encoding="utf-8") as f:
