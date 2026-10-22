@@ -19,6 +19,7 @@ def main() -> int:
         raise AssertionError("No se genera public/carga-vehiculo-electrico.html.")
     page = PAGE_PATH.read_text(encoding="utf-8")
 
+    searchable = (page + "\\n" + MODULE_SOURCE).casefold()
     for marker in (
         '<html lang="es">',
         "<title>Calculadora de carga para coche eléctrico",
@@ -47,7 +48,7 @@ def main() -> int:
         "declaración UE de conformidad",
         "no uses alargadores",
     ):
-        if marker not in page and marker not in MODULE_SOURCE:
+        if marker.casefold() not in searchable:
             raise AssertionError("Falta un elemento esperado en la guía/calc eléctrica: " + marker)
 
     if "adsbygoogle.js?client=ca-pub-1754459878527476" not in page:
