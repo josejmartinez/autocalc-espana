@@ -34,6 +34,9 @@ jobs:
       - name: Generate Programmatic SEO Pages
         run: python src/build.py
 
+      - name: Audit generated site integrity
+        run: python scripts/audit_static_site.py
+
       - name: Validate section 6 parts comparator
         run: python scripts/test_part_comparator.py
 
