@@ -2653,6 +2653,7 @@ def main():
         205, 55, 16, 225, 45, 17, 450, 5.8, "itv",
         bloque_mapa, "", internal_links_html, faqs_home
     )
+    sitemap_urls.append(("mapa-web.html", f"{DOMINIO}/mapa-web.html", "Mapa web y buscador de calculadoras y guías"))
 
     contacto_publico = (
         f'<strong>{EMAIL_CONTACTO}</strong>'
