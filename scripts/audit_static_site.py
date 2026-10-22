@@ -13,7 +13,7 @@ class AuditParser(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.ids=[]; self.links=[]; self.canonicals=[]; self.titles=0; self.title=""; self.in_title=False
-        self.descriptions=0; self.lang=""; self.json_blocks=[]; self.in_json=False; self.json_buf=""
+        self.descriptions=0; self.lang=""; self.robots=[]; self.json_blocks=[]; self.in_json=False; self.json_buf=""
     def handle_starttag(self,tag,attrs):
         a={k.lower():(v or "") for k,v in attrs}
         if tag=="html": self.lang=a.get("lang","")
@@ -22,6 +22,7 @@ class AuditParser(HTMLParser):
         if tag=="link" and a.get("rel","").lower()=="canonical": self.canonicals.append(a.get("href",""))
         if tag=="title": self.titles+=1; self.in_title=True
         if tag=="meta" and a.get("name","").lower()=="description" and a.get("content","").strip(): self.descriptions+=1
+        if tag=="meta" and a.get("name","").lower()=="robots": self.robots.append(a.get("content","").lower())
         if tag=="script" and a.get("type","").lower()=="application/ld+json": self.in_json=True; self.json_buf=""
     def handle_data(self,data):
         if self.in_title: self.title+=data
@@ -35,10 +36,12 @@ def main():
     base=("https://"+cfg["custom_domain"].strip().lower()) if cfg.get("use_custom_domain") else str(cfg.get("github_pages_url") or cfg.get("domain","")).rstrip("/")
     if not base.startswith("https://"): raise SystemExit("Dominio activo HTTPS inválido en config.json")
     pages=sorted(PUBLIC.glob("*.html")); files={p.name for p in PUBLIC.iterdir() if p.is_file()}
-    errors=[]; warnings=[]; canonicals=set(); sitemap_urls=[]
+    errors=[]; warnings=[]; canonicals=set(); sitemap_urls=[]; link_count=0; indexable_pages=set()
     if not pages: errors.append("No se generaron páginas HTML.")
     for page in pages:
         html=page.read_text(encoding="utf-8"); p=AuditParser(); p.feed(html)
+        if not any("noindex" in value for value in p.robots): indexable_pages.add(page.name)
+        link_count += len(p.links)
         for ident,n in Counter(p.ids).items():
             if n>1: errors.append(f"{page.name}: ID duplicado {ident!r}.")
         if p.lang!="es": errors.append(f"{page.name}: falta lang=es.")
@@ -83,14 +86,14 @@ def main():
                 if path.endswith("/"): path+="index.html"
                 if path.endswith((".html",".xml",".txt")) and path not in files: errors.append(f"Sitemap apunta a archivo inexistente: {url}")
             for page in pages:
-                if page.name!="404.html" and base+("/" if page.name=="index.html" else "/"+page.name) not in sitemap_urls: errors.append(f"{page.name}: no aparece en sitemap.")
+                if page.name in indexable_pages and page.name!="404.html" and base+("/" if page.name=="index.html" else "/"+page.name) not in sitemap_urls: errors.append(f"{page.name}: página indexable que no aparece en sitemap.")
         except (ET.ParseError,OSError) as exc: errors.append(f"Sitemap XML inválido: {exc}")
     if not robots.is_file(): errors.append("Falta robots.txt.")
     elif f"Sitemap: {base}/sitemap.xml" not in robots.read_text(encoding="utf-8"): errors.append("robots.txt no declara el sitemap activo.")
     if not (PUBLIC/"privacidad-cookies.html").is_file(): errors.append("Falta privacidad-cookies.html.")
     if cfg.get("adsense_ads_enabled") is True and cfg.get("google_certified_cmp_configured") is not True: errors.append("AdSense activado sin CMP certificada.")
     if not str(cfg.get("contact_email","")).strip(): warnings.append("contact_email vacío: completar datos legales antes de explotación comercial.")
-    print(f"Auditoría: {len(pages)} páginas HTML; {sum(len(AuditParser().links) for _ in [])} enlaces revisados; {len(sitemap_urls)} URLs en sitemap.")
+    print(f"Auditoría: {len(pages)} páginas HTML; {link_count} enlaces revisados; {len(sitemap_urls)} URLs en sitemap.")
     for w in warnings: print("[AVISO]",w)
     for e in errors[:120]: print("[ERROR]",e)
     if len(errors)>120: print(f"... y {len(errors)-120} errores más.")
