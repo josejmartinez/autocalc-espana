@@ -104,6 +104,11 @@ EV_PAGE = r"""<!DOCTYPE html>
           <label for="ev-target" class="block text-sm font-semibold mb-1.5">Carga objetivo (%)</label>
           <input id="ev-target" class="field" type="number" min="0" max="100" step="1" value="80" inputmode="numeric">
         </div>
+        <div>
+          <label for="ev-price" class="block text-sm font-semibold mb-1.5">Precio de energía (€/kWh)</label>
+          <input id="ev-price" class="field" type="number" min="0" max="5" step="0.01" value="0.20" inputmode="decimal">
+          <p class="mt-1 text-xs text-slate-500">Introduce el precio efectivo por kWh que quieras usar para la estimación.</p>
+        </div>
         <div class="sm:col-span-2">
           <div class="flex items-center justify-between gap-3">
             <label for="ev-efficiency" class="block text-sm font-semibold">Eficiencia global estimada</label>
@@ -144,6 +149,11 @@ EV_PAGE = r"""<!DOCTYPE html>
           <p id="ev-grid-energy" class="mt-2 text-2xl font-extrabold text-slate-900">40,0 kWh</p>
           <p class="mt-1 text-xs text-slate-600">Incluye pérdidas estimadas</p>
         </div>
+        <div class="result-card xl:col-span-2 rounded-xl bg-emerald-50 border border-emerald-100 p-4">
+          <p class="text-xs font-bold text-emerald-900 uppercase tracking-wide">Coste estimado de energía</p>
+          <p id="ev-cost" class="mt-2 text-2xl font-extrabold text-slate-900">8,00 €</p>
+          <p class="mt-1 text-xs text-slate-600">kWh de red × precio introducido; no incluye cargos fijos</p>
+        </div>
       </div>
       <div class="mt-5 rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-950">
         <strong>Importante:</strong> es una estimación simplificada. La potencia real puede variar por temperatura, gestión de carga, tensión, nivel de batería y curva de carga del vehículo.
@@ -172,6 +182,23 @@ EV_PAGE = r"""<!DOCTYPE html>
         </tbody>
       </table>
     </div>
+
+    <h2>Comparativa de cargadores portátiles y wallbox</h2>
+    <p>La diferencia no es solo la potencia: importa dónde se conecta el equipo, cómo se alimenta el circuito y si necesitas movilidad o una solución fija. La tabla compara categorías de producto; las características concretas cambian según el modelo.</p>
+    <div class="not-prose overflow-x-auto rounded-xl border border-slate-200">
+      <table class="w-full min-w-[680px] text-sm">
+        <thead class="bg-slate-100 text-left text-slate-700">
+          <tr><th class="p-3">Tipo de equipo</th><th class="p-3">Uso posible</th><th class="p-3">Ventaja principal</th><th class="p-3">Límite o precaución</th></tr>
+        </thead>
+        <tbody class="divide-y divide-slate-200">
+          <tr><td class="p-3 font-bold">Portátil para toma doméstica</td><td class="p-3">Recarga lenta ocasional, si el fabricante y la instalación lo permiten.</td><td class="p-3">Fácil de transportar.</td><td class="p-3">Potencia reducida; el estado del enchufe y del circuito es esencial. No uses alargadores.</td></tr>
+          <tr><td class="p-3 font-bold">Portátil con toma industrial compatible</td><td class="p-3">Garajes o espacios con toma CEE adecuada; potencia según tensión y amperaje.</td><td class="p-3">Puede combinar movilidad y mayor potencia.</td><td class="p-3">No basta con que el enchufe encaje: verifica fases, intensidad, protecciones e instrucciones.</td></tr>
+          <tr><td class="p-3 font-bold">Wallbox fijo monofásico</td><td class="p-3">Punto de recarga doméstico dedicado.</td><td class="p-3">Instalación estable; algunos modelos incorporan balanceo de potencia.</td><td class="p-3">Requiere dimensionar el circuito, protecciones y montaje conforme a normativa.</td></tr>
+          <tr><td class="p-3 font-bold">Wallbox fijo trifásico</td><td class="p-3">Instalaciones trifásicas y vehículos compatibles con carga AC trifásica.</td><td class="p-3">Puede alcanzar 11 o 22 kW según el equipo.</td><td class="p-3">Muchos vehículos limitan la carga AC a una potencia inferior; confirma la ficha del modelo.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Para comparar modelos concretos, revisa potencia real, compatibilidad de la toma, protecciones declaradas, resistencia ambiental, documentación de conformidad, garantía, soporte y coste de envío. Un mayor número de kW no significa automáticamente una mejor compra.</p>
 
     <h2>Cómo elegir un cargador para tu coche eléctrico</h2>
     <div class="not-prose grid gap-3 md:grid-cols-2">
@@ -205,7 +232,7 @@ EV_PAGE = r"""<!DOCTYPE html>
     <h3>¿Es mejor un cargador portátil o un wallbox?</h3>
     <p>Depende de la frecuencia de carga, la potencia necesaria y la instalación. Un equipo portátil aporta flexibilidad si se utiliza en una conexión autorizada y compatible; un wallbox fijo permite una solución dedicada y puede incorporar control dinámico de potencia. No existe una opción universalmente mejor.</p>
     <h3>¿La calculadora predice el coste de la recarga?</h3>
-    <p>Calcula kWh aproximados, no el precio de la electricidad. Para estimar el coste, multiplica la energía de red por el precio efectivo de tu tarifa, incluyendo los conceptos variables aplicables. Los costes fijos e impuestos pueden requerir cálculos adicionales.</p>
+    <p>Sí, ofrece una aproximación multiplicando la energía de red calculada por el precio por kWh que introduzcas. No incluye términos fijos ni otros conceptos que no estén incorporados en ese precio; la factura real puede variar.</p>
 
     <div class="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-600">
       <strong>Alcance:</strong> AutoCalc España ofrece una estimación informativa, no una certificación de compatibilidad ni un proyecto eléctrico. Verifica los datos del vehículo y las instrucciones del fabricante; para dimensionar o modificar una instalación, consulta a un profesional cualificado.
@@ -265,6 +292,7 @@ EV_PAGE = r"""<!DOCTYPE html>
     const start = number('ev-start');
     const target = number('ev-target');
     const efficiency = number('ev-efficiency');
+    const pricePerKwh = number('ev-price');
     const error = document.getElementById('ev-error');
     document.getElementById('ev-efficiency-value').textContent = fmt(efficiency, 0) + ' %';
 
@@ -274,17 +302,19 @@ EV_PAGE = r"""<!DOCTYPE html>
       && Number.isFinite(installLimit) && installLimit > 0 && installLimit <= 100
       && Number.isFinite(start) && start >= 0 && start <= 100
       && Number.isFinite(target) && target >= 0 && target <= 100
-      && Number.isFinite(efficiency) && efficiency >= 80 && efficiency <= 98;
+      && Number.isFinite(efficiency) && efficiency >= 80 && efficiency <= 98
+      && Number.isFinite(pricePerKwh) && pricePerKwh >= 0 && pricePerKwh <= 5;
 
     if (!valuesValid || target < start) {
       error.textContent = !valuesValid
-        ? 'Revisa los valores: batería entre 1 y 250 kWh, potencias superiores a 0 y porcentajes entre 0 y 100.'
+        ? 'Revisa los valores: batería entre 1 y 250 kWh, potencias superiores a 0, porcentajes entre 0 y 100 y precio entre 0 y 5 €/kWh.'
         : 'La carga objetivo debe ser igual o superior al porcentaje inicial.';
       error.classList.remove('hidden');
       document.getElementById('ev-time').textContent = '—';
       document.getElementById('ev-effective-power').textContent = '—';
       document.getElementById('ev-battery-energy').textContent = '—';
       document.getElementById('ev-grid-energy').textContent = '—';
+      document.getElementById('ev-cost').textContent = '—';
       return;
     }
 
@@ -292,6 +322,7 @@ EV_PAGE = r"""<!DOCTYPE html>
     const effectivePower = Math.min(charger, carLimit, installLimit);
     const batteryEnergy = battery * (target - start) / 100;
     const gridEnergy = batteryEnergy / (efficiency / 100);
+    const estimatedCost = gridEnergy * pricePerKwh;
     const totalMinutes = effectivePower > 0 ? Math.round((gridEnergy / effectivePower) * 60) : 0;
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
@@ -300,6 +331,7 @@ EV_PAGE = r"""<!DOCTYPE html>
     document.getElementById('ev-effective-power').textContent = fmt(effectivePower, 2) + ' kW';
     document.getElementById('ev-battery-energy').textContent = fmt(batteryEnergy, 1) + ' kWh';
     document.getElementById('ev-grid-energy').textContent = fmt(gridEnergy, 1) + ' kWh';
+    document.getElementById('ev-cost').textContent = fmt(estimatedCost, 2) + ' €';
   }
 
   function readConsent() {
@@ -361,7 +393,7 @@ EV_PAGE = r"""<!DOCTYPE html>
   };
 
   document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('#ev-battery,#ev-charger,#ev-car-limit,#ev-install-limit,#ev-start,#ev-target,#ev-efficiency')
+    document.querySelectorAll('#ev-battery,#ev-charger,#ev-car-limit,#ev-install-limit,#ev-start,#ev-target,#ev-price,#ev-efficiency')
       .forEach((control) => control.addEventListener('input', calculateCharge));
     document.getElementById('ev-reset').addEventListener('click', () => {
       document.getElementById('ev-battery').value = '60';
@@ -370,6 +402,7 @@ EV_PAGE = r"""<!DOCTYPE html>
       document.getElementById('ev-install-limit').value = '7.4';
       document.getElementById('ev-start').value = '20';
       document.getElementById('ev-target').value = '80';
+      document.getElementById('ev-price').value = '0.20';
       document.getElementById('ev-efficiency').value = '90';
       calculateCharge();
     });
@@ -421,7 +454,7 @@ def render_charge_page(
         ),
         (
             "¿La calculadora predice el coste de la recarga?",
-            "No calcula el precio de la electricidad; muestra energía en kWh. Para estimar el coste, multiplica la energía de red por el precio efectivo por kWh de tu tarifa.",
+            "La estimación de coste multiplica la energía de red por el precio por kWh introducido. No incluye términos fijos ni conceptos no incorporados en ese precio.",
         ),
     ]
     schema = {

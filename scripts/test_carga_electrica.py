@@ -32,10 +32,15 @@ def main() -> int:
         'id="ev-start"',
         'id="ev-target"',
         'id="ev-efficiency"',
+        'id="ev-price"',
+        'id="ev-cost"',
         "Math.min(charger, carLimit, installLimit)",
         "battery * (target - start) / 100",
         "batteryEnergy / (efficiency / 100)",
         "Math.round((gridEnergy / effectivePower) * 60)",
+        "gridEnergy * pricePerKwh",
+        "Comparativa de cargadores portátiles y wallbox",
+        "Portátil con toma industrial compatible",
         "autocalc_privacidad_v2",
         "Rechazar analítica",
         "Aceptar analítica",
@@ -66,7 +71,8 @@ def main() -> int:
     battery_energy = 60 * (80 - 20) / 100
     grid_energy = battery_energy / 0.90
     minutes = round((grid_energy / 7.4) * 60)
-    if battery_energy != 36 or round(grid_energy, 1) != 40.0 or (minutes // 60, minutes % 60) != (5, 24):
+    estimated_cost = grid_energy * 0.20
+    if battery_energy != 36 or round(grid_energy, 1) != 40.0 or round(estimated_cost, 2) != 8.00 or (minutes // 60, minutes % 60) != (5, 24):
         raise AssertionError("La comprobación numérica del ejemplo inicial no coincide con la fórmula.")
 
     # The page must not imply an EVDANCE endorsement or commission before publisher approval.
@@ -77,7 +83,7 @@ def main() -> int:
     if "curva de carga real" not in page or "potencia efectiva" not in page:
         raise AssertionError("Falta explicar las limitaciones de la estimación.")
 
-    print("[OK] Calculadora eléctrica: generación, SEO, navegación, sitemap, seguridad y ejemplo matemático.")
+    print("[OK] Calculadora eléctrica: tiempo, kWh, coste, comparativa portátil/wallbox, SEO, seguridad y sitemap.")
     return 0
 
 
