@@ -29,7 +29,7 @@ jobs:
           python-version: '3.11'
 
       - name: Validate Python source
-        run: python -m py_compile src/build.py src/catalogo.py
+        run: python -m py_compile src/build.py src/catalogo.py src/carga_electrica.py
 
       - name: Generate Programmatic SEO Pages
         run: python src/build.py
@@ -60,6 +60,9 @@ jobs:
 
       - name: Validate calculator methods and ad-slot configuration
         run: python scripts/test_calculators.py
+
+      - name: Validate electric vehicle charging calculator
+        run: python scripts/test_carga_electrica.py
 
       - name: Validate generated JavaScript syntax
         run: python scripts/test_inline_js.py

@@ -19,6 +19,7 @@ from html import escape, unescape
 from urllib.parse import quote, urlsplit
 from datetime import date
 from catalogo import MEDIDAS_ESPANA, MODELOS_COCHES, RUTAS_ESPANA, ZONAS_DESGUACES_ITV, GARGANTA_POR_ANCHO
+from carga_electrica import render_charge_page
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
@@ -506,6 +507,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             </div>
             <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
                 <a href="desguaces-itv-aranjuez-comarca-las-vegas.html" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Desguaces y talleres</a>
+                <a href="carga-vehiculo-electrico.html" class="bg-amber-500 hover:bg-amber-400 text-xs font-bold text-slate-950 px-3 py-2 rounded-lg transition">Carga eléctrica</a>
                 <a href="mapa-web.html" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Buscador (116 guías)</a>
                 <button onclick="copiarEnlaceCalculo()" id="btn-compartir" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Copiar enlace</button>
                 <button onclick="window.print()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-3 py-2 rounded-lg transition">Guardar PDF</button>
@@ -1234,6 +1236,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             <div class="flex flex-wrap gap-4">
                 <a href="index.html" class="hover:text-white transition">Inicio</a>
                 <a href="desguaces-itv-aranjuez-comarca-las-vegas.html" class="hover:text-white transition">Desguaces Madrid Sur y Aranjuez</a>
+                <a href="carga-vehiculo-electrico.html" class="hover:text-white transition">Carga eléctrica</a>
                 <a href="mapa-web.html" class="hover:text-white transition">Mapa web</a>
                 <a href="aviso-legal.html" class="hover:text-white transition">Aviso legal</a>
                 <a href="privacidad-cookies.html" class="hover:text-white transition">Privacidad y cookies</a>
@@ -2469,6 +2472,7 @@ def main():
             slug = f"equivalencia-neumaticos-{a1}-{p1}-r{l1}.html"
             chips.append(f'<a href="{slug}" class="text-xs bg-white hover:bg-amber-100 text-slate-700 px-2.5 py-1 rounded border border-slate-300 transition">Neumáticos {a1}/{p1} R{l1}</a>')
 
+    chips.append('<a href="carga-vehiculo-electrico.html" class="text-xs bg-amber-50 hover:bg-amber-200 text-slate-900 font-semibold px-2.5 py-1 rounded border border-amber-300 transition">Calculadora de carga eléctrica</a>')
     internal_links_html = "\n".join(chips)
 
     faqs_home = [
@@ -2618,6 +2622,13 @@ def main():
             "", seo_ruta, internal_links_html, faqs_ruta
         )
         sitemap_urls.append((slug_r, f"{DOMINIO}/{slug_r}", f"Calculadora de viaje {orig} a {dest} ({km} km)"))
+
+    ev_filename = "carga-vehiculo-electrico.html"
+    render_charge_page(
+        os.path.join(OUTPUT_DIR, ev_filename), DOMINIO, SITE_NAME,
+        ADSENSE_CLIENT, GOOGLE_ANALYTICS_ID, GOOGLE_SITE_VERIFICATION_TAG
+    )
+    sitemap_urls.append((ev_filename, f"{DOMINIO}/{ev_filename}", "Calculadora de carga para coche eléctrico: tiempo, energía y potencia"))
 
     items_html = "".join([
         f'<li class="item-mapa py-2 px-3 bg-slate-50 rounded-lg border border-slate-200 hover:border-amber-400 transition">'
