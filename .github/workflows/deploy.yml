@@ -34,6 +34,12 @@ jobs:
       - name: Generate Programmatic SEO Pages
         run: python src/build.py
 
+      - name: Generate transparent reviews hub
+        run: python scripts/build_reviews.py
+
+      - name: Validate reviews hub contract
+        run: python scripts/test_reviews_hub.py
+
       - name: Audit generated site integrity
         run: python scripts/audit_static_site.py
 
