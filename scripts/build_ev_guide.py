@@ -26,6 +26,7 @@ PAGE = f'''<!doctype html>
 <link rel="canonical" href="{escape(URL, quote=True)}">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="theme-color" content="#0f172a">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1754459878527476" crossorigin="anonymous"></script>
 <meta property="og:type" content="article">
 <meta property="og:title" content="{escape(TITLE, quote=True)}">
 <meta property="og:description" content="{escape(DESCRIPTION, quote=True)}">
@@ -87,7 +88,7 @@ h1{{font-size:clamp(2rem,5vw,3.2rem);line-height:1.1;letter-spacing:-.04em;max-w
 <h2>5. Seguridad y normativa</h2>
 <p>La instalación y el uso deben ajustarse a la normativa vigente y a las instrucciones del fabricante. En España, las instalaciones de recarga pueden estar sujetas a requisitos del Reglamento electrotécnico para baja tensión y de la ITC-BT-52, según el caso. Consulta a un profesional cualificado y las fuentes oficiales antes de ejecutar una instalación.</p>
 <p>Fuentes oficiales de referencia: <a href="https://www.boe.es/buscar/act.php?id=BOE-A-2002-18099" target="_blank" rel="noopener noreferrer">Reglamento electrotécnico para baja tensión (BOE)</a> y <a href="https://industria.gob.es/Calidad-Industrial/seguridadindustrial/instalacionesindustriales/baja-tension/Paginas/reglamento-electrotecnico.aspx" target="_blank" rel="noopener noreferrer">información sobre baja tensión del Ministerio de Industria</a>. Comprueba siempre la versión y las disposiciones aplicables a tu instalación.</p>
-<div class="note"><strong>Publicidad y afiliación:</strong> AutoCalc España puede incorporar enlaces comerciales cuando un programa esté aprobado y sus enlaces de seguimiento hayan sido verificados. Si un enlace genera comisión, lo identificaremos claramente. La disponibilidad de una colaboración no implica una recomendación positiva ni sustituye una prueba independiente.</div>
+<div class="note"><strong>Publicidad y enlaces de afiliación.</strong> AutoCalc España puede recibir comisiones por compras que cumplan los requisitos de los programas participantes, sin coste adicional para el usuario. En calidad de Afiliado de Amazon, obtengo ingresos por las compras adscritas que cumplen los requisitos aplicables. Cualquier enlace comercial futuro se identificará de forma visible; no se incluyen enlaces EVDANCE hasta verificar una URL de seguimiento aprobada.</div>
 <h2>Preguntas frecuentes</h2>
 <details class="card"><summary><strong>¿Puedo cargar siempre en un enchufe doméstico?</strong></summary><p>No debe asumirse. La toma, el circuito, las protecciones y el uso prolongado deben ser adecuados y verificados por un profesional; sigue las instrucciones del fabricante.</p></details>
 <details class="card"><summary><strong>¿Un cargador de 22 kW cargará mi coche a 22 kW?</strong></summary><p>No necesariamente. La potencia real depende, entre otros factores, de la capacidad de carga AC del vehículo y de la instalación.</p></details>
