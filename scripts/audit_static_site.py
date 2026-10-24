@@ -89,7 +89,7 @@ def main():
             for page in pages:
                 if page.name in indexable_pages and page.name!="404.html":
                     rel=page.relative_to(PUBLIC).as_posix()
-                    expected=base+("/" if rel=="index.html" else "/"+rel)
+                    expected=base+("/" if rel=="index.html" else ("/"+page.parent.relative_to(PUBLIC).as_posix().rstrip("/")+"/" if page.name=="index.html" else "/"+rel))
                     if expected not in sitemap_urls: errors.append(f"{rel}: página indexable que no aparece en sitemap.")
         except (ET.ParseError,OSError) as exc: errors.append(f"Sitemap XML inválido: {exc}")
     if not robots.is_file(): errors.append("Falta robots.txt.")
