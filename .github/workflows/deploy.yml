@@ -40,6 +40,12 @@ jobs:
       - name: Validate reviews hub contract
         run: python scripts/test_reviews_hub.py
 
+      - name: Generate EV charger buying guide
+        run: python scripts/build_ev_guide.py
+
+      - name: Validate EV charger guide SEO and editorial claims
+        run: python scripts/test_ev_guide.py
+
       - name: Audit generated site integrity
         run: python scripts/audit_static_site.py
 
