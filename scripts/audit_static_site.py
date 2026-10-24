@@ -87,7 +87,10 @@ def main():
                 if path.endswith("/"): path+="index.html"
                 if path.endswith((".html",".xml",".txt")) and path not in files: errors.append(f"Sitemap apunta a archivo inexistente: {url}")
             for page in pages:
-                if page.name in indexable_pages and page.name!="404.html":\n                    rel=page.relative_to(PUBLIC).as_posix()\n                    expected=base+("/" if rel=="index.html" else "/"+rel)\n                    if expected not in sitemap_urls: errors.append(f"{rel}: página indexable que no aparece en sitemap.")
+                if page.name in indexable_pages and page.name!="404.html":
+                    rel=page.relative_to(PUBLIC).as_posix()
+                    expected=base+("/" if rel=="index.html" else "/"+rel)
+                    if expected not in sitemap_urls: errors.append(f"{rel}: página indexable que no aparece en sitemap.")
         except (ET.ParseError,OSError) as exc: errors.append(f"Sitemap XML inválido: {exc}")
     if not robots.is_file(): errors.append("Falta robots.txt.")
     elif f"Sitemap: {base}/sitemap.xml" not in robots.read_text(encoding="utf-8"): errors.append("robots.txt no declara el sitemap activo.")
