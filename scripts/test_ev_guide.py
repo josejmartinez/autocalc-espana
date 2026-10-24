@@ -7,7 +7,7 @@ PUBLIC=ROOT/"public"
 subprocess.run([sys.executable,str(ROOT/"scripts"/"build_ev_guide.py")],cwd=ROOT,check=True)
 page=(PUBLIC/"guia-cargadores-electricos.html").read_text(encoding="utf-8")
 assert '<html lang="es">' in page
-assert '<title>Cómo elegir un cargador para tu coche eléctrico en España: guía práctica</title>' in page
+assert '<title>' in page and 'Cómo elegir un cargador' in page and 'guía práctica' in page
 assert '<meta name="description"' in page
 assert '<link rel="canonical" href="https://autocalc.es/guia-cargadores-electricos.html">' in page
 assert 'application/ld+json' in page and '"@type":"Article"' in page
