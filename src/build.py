@@ -507,6 +507,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
                 <a href="desguaces-itv-aranjuez-comarca-las-vegas.html" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Desguaces y talleres</a>
                 <a href="carga-vehiculo-electrico.html" class="bg-amber-500 hover:bg-amber-400 text-xs font-bold text-slate-950 px-3 py-2 rounded-lg transition">Carga eléctrica</a>
+                <a href="guia-cargadores-electricos.html" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Guía de cargadores</a>
                 <a href="mapa-web.html" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Buscador (116 guías)</a>
                 <button onclick="copiarEnlaceCalculo()" id="btn-compartir" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Copiar enlace</button>
                 <button onclick="window.print()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-3 py-2 rounded-lg transition">Guardar PDF</button>

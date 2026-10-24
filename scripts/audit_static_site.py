@@ -35,7 +35,7 @@ def main():
     cfg=json.loads((ROOT/"config.json").read_text(encoding="utf-8"))
     base=("https://"+cfg["custom_domain"].strip().lower()) if cfg.get("use_custom_domain") else str(cfg.get("github_pages_url") or cfg.get("domain","")).rstrip("/")
     if not base.startswith("https://"): raise SystemExit("Dominio activo HTTPS inválido en config.json")
-    pages=sorted(PUBLIC.glob("*.html")); files={p.name for p in PUBLIC.iterdir() if p.is_file()}
+    pages=sorted(PUBLIC.rglob("*.html")); files={p.relative_to(PUBLIC).as_posix() for p in PUBLIC.rglob("*") if p.is_file()}
     errors=[]; warnings=[]; canonicals=set(); sitemap_urls=[]; link_count=0; indexable_pages=set()
     if not pages: errors.append("No se generaron páginas HTML.")
     for page in pages:
@@ -70,6 +70,7 @@ def main():
             path=unquote(u.path).lstrip("/") or "index.html"
             if path.endswith("/"): path+="index.html"
             if path.endswith((".html",".xml",".txt",".svg",".json")) and path not in files: errors.append(f"{page.name}: enlace a archivo inexistente: {href[:140]}")
+            elif path.endswith("/") and (path + "index.html") not in files: errors.append(f"{page.name}: enlace a directorio sin index.html: {href[:140]}")
     sm=PUBLIC/"sitemap.xml"; robots=PUBLIC/"robots.txt"
     if not sm.is_file(): errors.append("Falta sitemap.xml.")
     else:
@@ -86,7 +87,10 @@ def main():
                 if path.endswith("/"): path+="index.html"
                 if path.endswith((".html",".xml",".txt")) and path not in files: errors.append(f"Sitemap apunta a archivo inexistente: {url}")
             for page in pages:
-                if page.name in indexable_pages and page.name!="404.html" and base+("/" if page.name=="index.html" else "/"+page.name) not in sitemap_urls: errors.append(f"{page.name}: página indexable que no aparece en sitemap.")
+                if page.name in indexable_pages and page.name!="404.html":
+                    rel=page.relative_to(PUBLIC).as_posix()
+                    expected=base+("/" if rel=="index.html" else ("/"+page.parent.relative_to(PUBLIC).as_posix().rstrip("/")+"/" if page.name=="index.html" else "/"+rel))
+                    if expected not in sitemap_urls: errors.append(f"{rel}: página indexable que no aparece en sitemap.")
         except (ET.ParseError,OSError) as exc: errors.append(f"Sitemap XML inválido: {exc}")
     if not robots.is_file(): errors.append("Falta robots.txt.")
     elif f"Sitemap: {base}/sitemap.xml" not in robots.read_text(encoding="utf-8"): errors.append("robots.txt no declara el sitemap activo.")
