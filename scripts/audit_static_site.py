@@ -70,6 +70,7 @@ def main():
             path=unquote(u.path).lstrip("/") or "index.html"
             if path.endswith("/"): path+="index.html"
             if path.endswith((".html",".xml",".txt",".svg",".json")) and path not in files: errors.append(f"{page.name}: enlace a archivo inexistente: {href[:140]}")
+            elif path.endswith("/") and (path + "index.html") not in files: errors.append(f"{page.name}: enlace a directorio sin index.html: {href[:140]}")
     sm=PUBLIC/"sitemap.xml"; robots=PUBLIC/"robots.txt"
     if not sm.is_file(): errors.append("Falta sitemap.xml.")
     else:
