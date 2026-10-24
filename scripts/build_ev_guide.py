@@ -99,6 +99,42 @@ h1{{font-size:clamp(2rem,5vw,3.2rem);line-height:1.1;letter-spacing:-.04em;max-w
 <footer><div class="wrap"><strong>AutoCalc España</strong><p>Información general; no sustituye el manual del vehículo, la documentación del fabricante ni el asesoramiento de un instalador cualificado.</p><a href="{BASE}/privacidad-cookies.html">Privacidad y cookies</a> · <a href="{BASE}/aviso-legal.html">Aviso legal</a></div></footer>
 </body></html>'''
 
+
+CONSENT = r'''<div id="cookie-banner" role="dialog" aria-label="Preferencias de privacidad" aria-live="polite" hidden style="position:fixed;z-index:100;bottom:0;left:0;right:0;background:#0f172a;color:white;padding:16px;border-top:1px solid #334155;box-shadow:0 -8px 30px #0f172a22">
+<div style="width:min(1000px,calc(100% - 32px));margin:auto;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:.875rem">
+<p style="flex:1;min-width:240px;margin:0;color:#e2e8f0">La analítica solo se activará si la aceptas. Puedes rechazarla sin perder acceso a las herramientas. Consulta la <a style="color:white;text-decoration:underline" href="__BASE__/privacidad-cookies.html">política de privacidad y cookies</a>.</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button type="button" onclick="gestionarCookies('essential')" style="padding:9px 12px;border:1px solid #94a3b8;border-radius:8px;background:transparent;color:white">Rechazar analítica</button>
+<button type="button" onclick="gestionarCookies('analytics')" style="padding:9px 12px;border:1px solid #f59e0b;border-radius:8px;background:#f59e0b;color:#111827;font-weight:700">Aceptar analítica</button>
+<button type="button" onclick="mostrarPreferenciasCookies()" style="padding:9px 12px;border:0;background:transparent;color:white;text-decoration:underline">Configurar cookies</button>
+</div></div></div>
+<script>
+(function(){
+"use strict";
+const CONSENT_KEY="autocalc_privacidad_v2";
+const GA_ID="__GA_ID__";
+function readChoice(){
+ try { const raw=localStorage.getItem(CONSENT_KEY); if(!raw)return null; const d=JSON.parse(raw); if(!d||!["analytics","essential"].includes(d.choice)||!Number.isFinite(d.timestamp)||Date.now()-d.timestamp>180*86400000||d.timestamp>Date.now()){localStorage.removeItem(CONSENT_KEY);return null;} return d.choice; } catch(e){return null;}
+}
+function clearAnalyticsCookies(){
+ (document.cookie?document.cookie.split(";"):[]).forEach(c=>{const n=c.split("=")[0].trim();if(!/^_ga(?:_|$)/.test(n))return;const exp=n+"=; Max-Age=0; path=/; SameSite=Lax; Secure";document.cookie=exp;document.cookie=exp+"; domain="+location.hostname;});
+}
+function updateAnalytics(allow){
+ if(!GA_ID)return;
+ window["ga-disable-"+GA_ID]=!allow;
+ if(!allow){if(typeof window.gtag==="function")window.gtag("consent","update",{analytics_storage:"denied",ad_storage:"denied",ad_user_data:"denied",ad_personalization:"denied"});clearAnalyticsCookies();return;}
+ if(document.querySelector("script[data-autocalc-analytics]")){if(typeof window.gtag==="function")window.gtag("consent","update",{analytics_storage:"granted"});return;}
+ window.dataLayer=window.dataLayer||[];window.gtag=window.gtag||function(){window.dataLayer.push(arguments);};
+ window.gtag("consent","default",{analytics_storage:"denied",ad_storage:"denied",ad_user_data:"denied",ad_personalization:"denied"});
+ window.gtag("consent","update",{analytics_storage:"granted"});window.gtag("js",new Date());window.gtag("config",GA_ID,{allow_google_signals:false,allow_ad_personalization_signals:false});
+ const s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id="+encodeURIComponent(GA_ID);s.dataset.autocalcAnalytics="true";document.head.appendChild(s);
+}
+window.gestionarCookies=function(choice){const allow=choice==="analytics";try{localStorage.setItem(CONSENT_KEY,JSON.stringify({choice:allow?"analytics":"essential",timestamp:Date.now()}));}catch(e){}updateAnalytics(allow);document.getElementById("cookie-banner").hidden=true;};
+window.mostrarPreferenciasCookies=function(){document.getElementById("cookie-banner").hidden=false;};
+window.addEventListener("DOMContentLoaded",function(){const choice=readChoice();if(choice==="analytics")updateAnalytics(true);else if(choice==="essential")updateAnalytics(false);else{clearAnalyticsCookies();document.getElementById("cookie-banner").hidden=false;}});
+})();
+</script>'''
+
 def update_sitemap() -> None:
     path = PUBLIC / "sitemap.xml"
     tree = ET.parse(path)
@@ -113,7 +149,8 @@ def update_sitemap() -> None:
 
 def main() -> None:
     PUBLIC.mkdir(parents=True, exist_ok=True)
-    (PUBLIC / "guia-cargadores-electricos.html").write_text(PAGE, encoding="utf-8")
+    page = PAGE.replace("</body></html>", CONSENT.replace("__BASE__", escape(BASE, quote=True)).replace("__GA_ID__", escape(str(CFG.get("google_analytics_id", "")), quote=True)) + "</body></html>")
+    (PUBLIC / "guia-cargadores-electricos.html").write_text(page, encoding="utf-8")
     update_sitemap()
     print(f"[OK] Guía de cargadores generada: {URL}")
 
