@@ -496,22 +496,23 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
 
-    <header class="bg-slate-900 text-white py-4 shadow-md sticky top-0 z-30 no-print">
-        <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-3">
-            <div class="flex items-center gap-3">
-                <a href="index.html" class="hover:opacity-90 transition flex items-center gap-2">
-                    <span class="text-2xl font-extrabold tracking-tight text-amber-400">__SITE_NAME__</span>
-                    <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">Portal técnico del motor</span>
+    <header class="bg-slate-900 text-white py-2 sm:py-4 shadow-md sm:sticky top-0 z-30 no-print">
+        <div class="max-w-5xl mx-auto px-3 sm:px-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-3">
+            <div class="flex items-center justify-between gap-2 w-full sm:w-auto min-w-0">
+                <a href="index.html" class="hover:opacity-90 transition flex items-center min-w-0">
+                    <span class="text-xl sm:text-2xl font-extrabold tracking-tight text-amber-400 whitespace-nowrap">__SITE_NAME__</span>
+                    <span class="hidden lg:inline-flex text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded border border-slate-700 ml-3">Portal técnico del motor</span>
                 </a>
+                <a href="mapa-web.html" class="sm:hidden text-xs px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 whitespace-nowrap">Guías</a>
             </div>
-            <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
-                <a href="desguaces-itv-aranjuez-comarca-las-vegas.html" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Desguaces y talleres</a>
-                <a href="carga-vehiculo-electrico.html" class="bg-amber-500 hover:bg-amber-400 text-xs font-bold text-slate-950 px-3 py-2 rounded-lg transition">Carga eléctrica</a>
-                <a href="guia-cargadores-electricos.html" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Guía de cargadores</a>
-                <a href="mapa-web.html" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Buscador (116 guías)</a>
-                <button onclick="copiarEnlaceCalculo()" id="btn-compartir" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Copiar enlace</button>
-                <button onclick="window.print()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-3 py-2 rounded-lg transition">Guardar PDF</button>
-            </div>
+            <nav aria-label="Navegación principal" class="flex flex-nowrap items-center gap-2 w-full sm:w-auto overflow-x-auto sm:overflow-visible pb-1 sm:pb-0">
+                <a href="desguaces-itv-aranjuez-comarca-las-vegas.html" class="shrink-0 bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Desguaces y talleres</a>
+                <a href="carga-vehiculo-electrico.html" class="shrink-0 bg-amber-500 hover:bg-amber-400 text-xs font-bold text-slate-950 px-3 py-2 rounded-lg transition">Carga eléctrica</a>
+                <a href="guia-cargadores-electricos.html" class="shrink-0 bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Guía de cargadores</a>
+                <a href="mapa-web.html" class="hidden sm:inline-flex shrink-0 bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Buscador de guías</a>
+                <button onclick="copiarEnlaceCalculo()" id="btn-compartir" class="hidden sm:inline-flex shrink-0 bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition">Copiar enlace</button>
+                <button onclick="window.print()" class="hidden sm:inline-flex shrink-0 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-3 py-2 rounded-lg transition">Guardar PDF</button>
+            </nav>
         </div>
     </header>
 
@@ -899,18 +900,20 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             <!-- 4A. Datador de matrículas españolas (mes/año, antigüedad y periodicidad ITV) -->
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                 <h2 class="text-lg font-bold mb-1 text-slate-900">4A. Calculadora de fecha de matriculación por matrícula, edad y próxima ITV</h2>
-                <p class="text-xs text-slate-500 mb-4">Introduce las tres letras de una matrícula ordinaria española (serie iniciada en 2000) para obtener una fecha y antigüedad aproximadas. La estimación no sustituye la fecha oficial del permiso de circulación ni permite determinar por sí sola la próxima ITV.</p>
+                <p class="text-xs text-slate-500 mb-4">La matrícula ordinaria española permite estimar cuándo se asignó esa combinación desde el año 2000, pero no confirma la primera matriculación del vehículo. Si fue rematriculado o importado, la placa actual no sirve para calcular su antigüedad original ni su distintivo ambiental.</p>
                 <div class="flex flex-col sm:flex-row items-center gap-4">
-                    <div class="flex items-center border-2 border-slate-900 rounded-xl overflow-hidden bg-white shadow-sm w-64 h-14">
+                    <div class="flex items-center border-2 border-slate-900 rounded-xl overflow-hidden bg-white shadow-sm w-64 h-14 shrink-0">
                         <div class="bg-blue-700 text-white h-full px-2.5 flex flex-col justify-center items-center text-[10px] font-bold">
                             <span>★★★</span>
                             <span>E</span>
                         </div>
-                        <input type="text" id="mat-num" value="4820" maxlength="4" class="w-24 text-center text-2xl font-mono font-extrabold tracking-wider outline-none" placeholder="0000">
-                        <input type="text" id="mat-letras" value="JXK" maxlength="3" oninput="calcularMatricula()" class="w-24 text-center text-2xl font-mono font-extrabold tracking-widest uppercase outline-none text-amber-600" placeholder="BBB">
+                        <input type="text" id="mat-num" value="" maxlength="4" inputmode="numeric" class="w-24 text-center text-2xl font-mono font-extrabold tracking-wider outline-none" placeholder="0000" aria-label="Números de matrícula">
+                        <input type="text" id="mat-letras" value="" maxlength="3" oninput="calcularMatricula()" class="w-24 text-center text-2xl font-mono font-extrabold tracking-widest uppercase outline-none text-amber-600" placeholder="BBB" aria-label="Letras de matrícula">
                     </div>
                     <button onclick="calcularMatricula()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-5 py-3.5 rounded-xl transition">Consultar matrícula</button>
                 </div>
+                    <label class="flex items-start gap-2 text-sm text-slate-700 mt-3"><input id="mat-rematriculado" type="checkbox" class="mt-1" onchange="calcularMatricula()"> <span>Mi vehículo fue rematriculado o importado; la placa actual no corresponde a su primera matriculación.</span></label>
+                    <p class="text-xs text-slate-500 mt-2">Para conocer la fecha original y la etiqueta ambiental, consulta la documentación o la DGT. <a class="underline font-semibold" href="https://sede.dgt.gob.es/es/vehiculos/informe-de-vehiculo/" target="_blank" rel="noopener noreferrer">Solicitar informe oficial del vehículo</a> · <a class="underline font-semibold" href="https://www.dgt.es/nuestros-servicios/tu-vehiculo/tus-vehiculos/distintivo-ambiental/" target="_blank" rel="noopener noreferrer">Consultar distintivo DGT</a></p>
                 <div id="res-matricula" class="mt-5 p-4 rounded-xl bg-slate-50 border border-slate-200"></div>
             </div>
 
@@ -1569,9 +1572,19 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             const letras = inputLetras.value.toUpperCase().replace(/[^BCDFGHJKLMNPRSTVWXYZ]/g, '');
             inputLetras.value = letras;
             const box = document.getElementById('res-matricula');
+            const rematriculado = document.getElementById('mat-rematriculado')?.checked === true;
 
+            if (rematriculado) {
+                box.innerHTML = '<p class="text-sm font-semibold text-amber-900">No estimamos la antigüedad a partir de la placa actual.</p><p class="text-sm text-slate-700 mt-2">En un vehículo rematriculado o importado, la combinación actual no demuestra la fecha de primera matriculación. Tampoco permite deducir con fiabilidad el distintivo ambiental ni la próxima ITV. Utiliza la fecha de primera matriculación de la documentación o un informe oficial de la DGT.</p><p class="mt-3"><a class="underline font-semibold" href="https://sede.dgt.gob.es/es/vehiculos/informe-de-vehiculo/" target="_blank" rel="noopener noreferrer">Consultar informe de vehículo en la DGT</a></p>';
+                return;
+            }
+
+            if (letras.length === 0) {
+                box.innerHTML = '<p class="text-sm text-slate-600">Introduce la matrícula para estimar la fecha de asignación de la placa actual. Esta estimación no equivale a la primera matriculación del vehículo.</p>';
+                return;
+            }
             if (letras.length !== 3) {
-                box.innerHTML = `<p class="text-xs text-rose-700 font-semibold">Introduce las 3 consonantes válidas de la matrícula (sin vocales ni Ñ/Q, ej. JXK, HBB, MNP).</p>`;
+                box.innerHTML = '<p class="text-sm text-rose-700 font-semibold">Introduce las tres letras válidas de la placa (sin vocales, Ñ ni Q).</p>';
                 return;
             }
 
@@ -1617,12 +1630,11 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             if (edad < 4) frecuenciaITV = `Exento hasta los 4 años (1.ª ITV en ${anioMat + 4})`;
             else if (edad < 10) frecuenciaITV = "Bienal (cada 2 años hasta cumplir los 10 años)";
 
-            // Sincronizar con la calculadora de año DGT inferior
-            document.getElementById('dgt-anio').value = anioMat;
-            calcularDGT();
+            // No inferir etiqueta ambiental ni primera matriculación a partir de una estimación de serie.
+            // El año de la placa actual no debe sobrescribir los datos del vehículo.
 
             box.innerHTML = `
-                <p class="mb-3 text-xs text-slate-500">La fecha se estima por interpolación entre series históricas de referencia y puede diferir de la fecha real en semanas. La periodicidad ITV indicada solo es orientativa para un turismo ordinario; para trámites usa la primera matriculación del permiso de circulación o una consulta actualizada.</p>
+                <p class="mb-3 text-xs text-slate-500">Estimación de la fecha de asignación de la combinación de matrícula, no un registro oficial de primera matriculación. Puede diferir de la fecha real. Si el vehículo fue rematriculado o importado, marca la casilla anterior y consulta la documentación o la DGT. La ITV y el distintivo ambiental no se determinan con esta estimación.</p>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                     <div class="bg-white p-3 rounded-lg border">
                         <div class="text-xs text-slate-500">Fecha estimada de matriculación (aproximación)</div>
@@ -2346,7 +2358,6 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             calcularConsumo();
             calcularConsumoReal();
             calcularAmortizacion();
-            calcularMatricula();
             calcularDGT();
             mostrarFalloOBD();
             evaluarChecklist();
