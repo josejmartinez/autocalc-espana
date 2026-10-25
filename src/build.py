@@ -2358,6 +2358,7 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
             calcularConsumo();
             calcularConsumoReal();
             calcularAmortizacion();
+            calcularMatricula();
             calcularDGT();
             mostrarFalloOBD();
             evaluarChecklist();
