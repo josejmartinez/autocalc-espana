@@ -2681,7 +2681,7 @@ def main():
     render_page(
         "aviso-legal.html", f"Aviso legal | {SITE_NAME}", "Aviso legal y condiciones de uso del portal.",
         "Aviso legal y condiciones de uso", "Información legal conforme a la normativa LSSI-CE.",
-        205, 55, 16, 225, 45, 17, 450, 5.8, "itv", "", texto_legal, internal_links_html, faqs_home, robots="noindex, follow"
+        205, 55, 16, 225, 45, 17, 450, 5.8, "itv", "", texto_legal, internal_links_html, faqs_home
     )
 
     texto_privacidad = f"""
@@ -2696,8 +2696,13 @@ def main():
     render_page(
         "privacidad-cookies.html", f"Política de privacidad y cookies | {SITE_NAME}", "Política de privacidad, cookies y divulgación de afiliados.",
         "Política de privacidad y cookies (RGPD)", "Transparencia sobre cookies, Google AdSense y programas de afiliación.",
-        205, 55, 16, 225, 45, 17, 450, 5.8, "itv", "", texto_privacidad, internal_links_html, faqs_home, robots="noindex, follow"
+        205, 55, 16, 225, 45, 17, 450, 5.8, "itv", "", texto_privacidad, internal_links_html, faqs_home
     )
+
+    # Las páginas legales aportan transparencia y deben poder descubrirse en buscadores.
+    # No contienen datos de clientes ni requieren noindex; se incluyen explícitamente en sitemap.
+    sitemap_urls.append(("aviso-legal.html", f"{DOMINIO}/aviso-legal.html", "Aviso legal y condiciones de uso de AutoCalc España"))
+    sitemap_urls.append(("privacidad-cookies.html", f"{DOMINIO}/privacidad-cookies.html", "Política de privacidad, cookies y afiliación de AutoCalc España"))
 
     # Solo se publica el buscador cuando hay fragmentos generados y validados.
     eea_shards_dir = os.path.join(BASE_DIR, "build", "eea-shards")
