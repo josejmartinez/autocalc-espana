@@ -47,8 +47,11 @@ def main() -> int:
             raise AssertionError(f"Falta el aviso comercial en {page.name}.")
         if "__AFFILIATE_LINK_TEMPLATES_JSON__" in html or "__AMAZON_DISCLOSURE__" in html:
             raise AssertionError(f"Quedó un marcador de plantilla en {page.name}.")
-        if page.name == "aviso-legal.html" and "Pendiente de completar por el titular antes de la explotación comercial" not in html:
-            raise AssertionError("El aviso legal no debe aparentar estar completo con el correo de contacto vacío.")
+        if page.name == "aviso-legal.html":
+            if "javierprimero@outlook.es" not in html or "624597253" not in html:
+                raise AssertionError("El aviso legal debe mostrar el correo y teléfono de contacto configurados.")
+            if "El titular debe completar y revisar la información identificativa" not in html:
+                raise AssertionError("El aviso legal debe dejar claro que el contacto no sustituye los datos identificativos legales.")
 
     sample = '<a href="https://www.autodoc.es/search?keyword=alternador" target="_blank" rel="nofollow sponsored">Buscar AUTODOC</a>'
     direct = apply_affiliate_links(sample, {})
