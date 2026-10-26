@@ -46,6 +46,7 @@ else:
 AMAZON_TAG = CFG["amazon_tag"]
 SITE_NAME = CFG["site_name"]
 EMAIL_CONTACTO = CFG["contact_email"]
+TELEFONO_CONTACTO = str(CFG.get("contact_phone", "")).strip()
 ADSENSE_CLIENT = CFG.get("adsense_client", "").strip()
 ADSENSE_ADS_ENABLED = CFG.get("adsense_ads_enabled", False) is True
 GOOGLE_ANALYTICS_ID = CFG.get("google_analytics_id", "").strip()
@@ -2668,13 +2669,18 @@ def main():
     sitemap_urls.append(("mapa-web.html", f"{DOMINIO}/mapa-web.html", "Mapa web y buscador de calculadoras y guías"))
 
     contacto_publico = (
-        f'<strong>{EMAIL_CONTACTO}</strong>'
+        f'<a href="mailto:{escape(EMAIL_CONTACTO, quote=True)}" class="underline">{escape(EMAIL_CONTACTO)}</a>'
         if EMAIL_CONTACTO and "tudominio" not in EMAIL_CONTACTO.lower()
-        else '<strong>Pendiente de completar por el titular antes de la explotación comercial</strong>'
+        else '<strong>Correo de contacto pendiente de completar</strong>'
+    )
+    telefono_publico = (
+        f'<a href="tel:{escape(TELEFONO_CONTACTO, quote=True)}" class="underline">{escape(TELEFONO_CONTACTO)}</a>'
+        if TELEFONO_CONTACTO
+        else '<strong>Teléfono no publicado</strong>'
     )
     texto_legal = f"""
         <h2 class="text-lg font-bold text-slate-900">Aviso legal y condiciones de uso</h2>
-        <p><strong>Portal:</strong> {SITE_NAME} ({DOMINIO}). <strong>Contacto:</strong> {contacto_publico}.</p>
+        <p><strong>Portal:</strong> {SITE_NAME} ({DOMINIO}). <strong>Correo de contacto:</strong> {contacto_publico}. <strong>Teléfono profesional:</strong> {telefono_publico}.</p>
         <p>El titular debe completar y revisar la información identificativa y los datos de contacto de este aviso antes de la explotación comercial. Este sitio ofrece cálculos informativos, no asesoramiento técnico ni una certificación administrativa.</p>
         <p>Los cálculos de equivalencia de neumáticos e impuestos son orientativos. Una diferencia de diámetro de ±3 % no demuestra por sí sola que una medida sea equivalente o admisible en ITV. Verifique ficha técnica, homologación, índice de carga, código de velocidad, compatibilidad mecánica y normativa aplicable antes de realizar modificaciones.</p>
     """
@@ -2686,7 +2692,7 @@ def main():
 
     texto_privacidad = f"""
         <h2 class="text-lg font-bold text-slate-900">Política de privacidad, cookies y afiliación</h2>
-        <p><strong>1. Titular y contacto:</strong> {contacto_publico}. La identidad del responsable y los datos de contacto deben completarse y revisarse por el titular antes de la explotación comercial.</p>
+        <p><strong>1. Contacto:</strong> {contacto_publico}. <strong>Teléfono profesional:</strong> {telefono_publico}. La identidad completa del responsable, domicilio y demás datos legalmente exigibles deben ser revisados y completados por el titular cuando correspondan.</p>
         <p><strong>2. Analítica:</strong> Google Analytics 4 (si está configurado) solo se carga tras aceptar expresamente la opción «Aceptar analítica». Si se elige «Rechazar analítica», la etiqueta no se carga; si se revoca una aceptación durante la visita, se envía la señal de denegación cuando procede y se intenta eliminar las cookies de Analytics accesibles desde este dominio. La elección se recuerda en el almacenamiento local del navegador.</p>
         <p><strong>3. Cambiar la decisión:</strong> puede volver a abrir el aviso desde el enlace «Configurar cookies» del pie de página y cambiar su elección. Los enlaces a sitios de terceros se rigen también por las políticas de esos proveedores.</p>
         <p><strong>4. Publicidad:</strong> Google AdSense no está activado en la configuración actual. Los espacios de publicidad directa solo se mostrarán cuando se configure una colaboración comercial concreta. AdSense no deberá habilitarse hasta disponer de aprobación, identificadores reales de bloques publicitarios e integración verificada de una CMP certificada por Google y compatible con el marco TCF para los territorios donde se exija.</p>
