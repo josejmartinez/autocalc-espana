@@ -50,7 +50,7 @@ def main() -> int:
         if page.name == "aviso-legal.html":
             if "javierprimero@outlook.es" not in html or "624597253" not in html:
                 raise AssertionError("El aviso legal debe mostrar el correo y teléfono de contacto configurados.")
-            if "identidad completa del responsable" not in html:
+            if "El titular debe completar y revisar la información identificativa" not in html:
                 raise AssertionError("El aviso legal debe dejar claro que el contacto no sustituye los datos identificativos legales.")
 
     sample = '<a href="https://www.autodoc.es/search?keyword=alternador" target="_blank" rel="nofollow sponsored">Buscar AUTODOC</a>'
