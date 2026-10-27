@@ -2641,9 +2641,18 @@ def main():
     ev_filename = "carga-vehiculo-electrico.html"
     render_charge_page(
         os.path.join(OUTPUT_DIR, ev_filename), DOMINIO, SITE_NAME,
-        ADSENSE_CLIENT, GOOGLE_ANALYTICS_ID, GOOGLE_SITE_VERIFICATION_TAG
+        ADSENSE_CLIENT, GOOGLE_ANALYTICS_ID, GOOGLE_SITE_VERIFICATION_TAG,
+        str(AFFILIATE_LINK_TEMPLATES.get("evdance", "") or ""), ev_filename
     )
     sitemap_urls.append((ev_filename, f"{DOMINIO}/{ev_filename}", "Calculadora de carga para coche eléctrico: tiempo, energía y potencia"))
+
+    guide_filename = "guia-cargadores-electricos.html"
+    render_charge_page(
+        os.path.join(OUTPUT_DIR, guide_filename), DOMINIO, SITE_NAME,
+        ADSENSE_CLIENT, GOOGLE_ANALYTICS_ID, GOOGLE_SITE_VERIFICATION_TAG,
+        str(AFFILIATE_LINK_TEMPLATES.get("evdance", "") or ""), guide_filename
+    )
+    sitemap_urls.append((guide_filename, f"{DOMINIO}/{guide_filename}", "Guía para elegir cargadores de coche eléctrico con opciones para comparar"))
 
     items_html = "".join([
         f'<li class="item-mapa py-2 px-3 bg-slate-50 rounded-lg border border-slate-200 hover:border-amber-400 transition">'
