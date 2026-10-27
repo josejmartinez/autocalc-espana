@@ -1,13 +1,13 @@
 # Monetización, afiliación y Search Console de AutoCalc España
 
-Última revisión: 17 de octubre de 2026.
+Última revisión: 27 de octubre de 2026.
 
 ## 1. Estado actual del proyecto
 
 - Dominio principal configurado en el generador: `https://autocalc.es`.
 - **HTTPS:** el usuario confirma que ya dispone de HTTPS; la captura más reciente de GitHub Pages muestra `Enforce HTTPS` marcado. GitHub todavía muestra `DNS Check in Progress`, así que no volver a pedir al titular que active HTTPS ni que compre un certificado. Conviene seguir revisando el estado DNS si algún servicio externo aún no puede acceder al dominio.
 - **Solicitud de publisher en Awin enviada el 17 de octubre de 2026; revisión pendiente.** Después de la aceptación de la red hay que solicitar AUTODOC y Norauto por separado; no hay todavía campañas aprobadas ni enlaces de seguimiento reales en `config.json`.
-- `contact_email` está vacío. El aviso legal se muestra expresamente pendiente de completar; antes de vender publicidad, completa el correo real del responsable y revisa la información identificativa/legal.
+- La configuración actual del repositorio contiene un correo de contacto y teléfono. Hay que comprobar que siguen siendo correctos y que el aviso legal publica la identidad y los datos exigibles del responsable; tener un correo configurado no demuestra por sí solo que el aviso legal esté completo.
 - Identificador de Amazon configurado en enlaces: `autocalces-21`. La configuración del identificador no demuestra por sí sola que la cuenta esté aprobada o en buen estado; confirmar el estado en la consola de Amazon Afiliados.
 - Los enlaces a AUTODOC, Norauto, Oscaro, Aurgi, Feu Vert, eBay, Costco, Muchoneumático y desguaces permanecen directos mientras no se configure el seguimiento oficial de una campaña aprobada.
 - El código de editor de AdSense facilitado por el titular (`ca-pub-1754459878527476`) ya está configurado en el generador y `ads.txt` se genera con su entrada. La entrega de anuncios sigue desactivada (`adsense_ads_enabled = false`) y `google_certified_cmp_configured = false`. El banner propio de Analytics no es una CMP certificada de Google para anuncios.
