@@ -239,6 +239,28 @@ EV_PAGE = r"""<!DOCTYPE html>
     </div>
   </section>
 
+  <section id="cargadores-recomendados" class="mt-8 rounded-2xl border border-slate-200 bg-white p-5 sm:p-7 shadow-sm">
+    <p class="text-xs font-bold uppercase tracking-wider text-amber-700">Selección comercial · EVDANCE</p>
+    <h2 class="mt-2 text-2xl font-extrabold text-slate-900">Cargadores portátiles que puedes comparar</h2>
+    <p class="mt-2 text-sm leading-6 text-slate-600">Estas opciones proceden del catálogo del fabricante; no son una clasificación basada en pruebas independientes. Comprueba las especificaciones, compatibilidad, precio y disponibilidad en la ficha oficial.</p>
+    <p class="mt-3 rounded-lg border-l-4 border-amber-400 bg-amber-50 p-3 text-sm text-amber-950"><strong>Transparencia:</strong> AutoCalc España puede recibir una comisión si compras desde estos enlaces, sin coste adicional para ti.</p>
+    <div class="mt-5 grid gap-4 md:grid-cols-2">
+      <article class="rounded-xl border border-slate-200 p-4">
+        <h3 class="text-lg font-extrabold text-slate-900">EVDANCE portátil Type 2 · hasta 3,68 kW</h3>
+        <p class="mt-2 text-sm leading-6 text-slate-600">Opción portátil para vehículos con entrada Type 2 y toma Schuko compatible. La potencia efectiva depende del circuito, la intensidad seleccionada y el límite AC del coche.</p>
+        <p class="mt-2 text-sm text-slate-600">Verifica la toma, las protecciones, la longitud del cable y las instrucciones del fabricante. No uses alargadores ni tomas deterioradas.</p>
+        <a href="__EVDANCE_BASIC_URL__" target="_blank" rel="sponsored nofollow noopener noreferrer" class="mt-4 inline-flex rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-bold text-white">Consultar modelo Basic ↗</a>
+      </article>
+      <article class="rounded-xl border border-slate-200 p-4">
+        <h3 class="text-lg font-extrabold text-slate-900">EVDANCE portátil Type 2 · modelo Advanced</h3>
+        <p class="mt-2 text-sm leading-6 text-slate-600">Alternativa portátil de la gama. Revisa en la ficha actual las funciones incluidas, la intensidad ajustable y los accesorios suministrados.</p>
+        <p class="mt-2 text-sm text-slate-600">Confirma que la toma y la instalación admiten la corriente elegida y compara garantía, devoluciones y asistencia.</p>
+        <a href="__EVDANCE_ADVANCED_URL__" target="_blank" rel="sponsored nofollow noopener noreferrer" class="mt-4 inline-flex rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-bold text-white">Consultar modelo Advanced ↗</a>
+      </article>
+    </div>
+    <p class="mt-4 text-xs leading-5 text-slate-500">La inclusión comercial no certifica la compatibilidad ni sustituye una evaluación de la instalación por un profesional cualificado. Precios y disponibilidad pueden cambiar.</p>
+  </section>
+
   <section class="no-print mt-7 rounded-2xl bg-slate-900 p-5 sm:p-6 text-white">
     <h2 class="text-lg font-extrabold">Sigue explorando AutoCalc España</h2>
     <p class="mt-1 text-sm text-slate-300">Combina esta guía con otras herramientas gratuitas del portal.</p>
@@ -428,9 +450,11 @@ def render_charge_page(
     adsense_client: str = "",
     analytics_id: str = "",
     verification_tag: str = "",
+    evdance_template: str = "",
+    page_filename: str = "carga-vehiculo-electrico.html",
 ) -> None:
     """Write the EV calculator page using the site's active canonical domain."""
-    canonical = f"{domain.rstrip('/')}/carga-vehiculo-electrico.html"
+    canonical = f"{domain.rstrip('/')}/{page_filename}"
     adsense_script = ""
     if adsense_client:
         safe_client = escape(adsense_client, quote=True)
@@ -492,6 +516,8 @@ def render_charge_page(
         "__ADSENSE_HEAD__": adsense_script,
         "__SCHEMA__": json.dumps(schema, ensure_ascii=False).replace("</", "<\\/"),
         "__ANALYTICS_ID__": json.dumps(analytics_id),
+        "__EVDANCE_BASIC_URL__": escape((evdance_template.replace("{destination}", __import__("urllib.parse", fromlist=["quote"]).quote("https://eu.evdances.com/es/products/evdance-single-phase-ev-charger-type-2-16a-3-68-kw-schuko-plug", safe="")) if evdance_template else "https://eu.evdances.com/es/products/evdance-single-phase-ev-charger-type-2-16a-3-68-kw-schuko-plug"), quote=True),
+        "__EVDANCE_ADVANCED_URL__": escape((evdance_template.replace("{destination}", __import__("urllib.parse", fromlist=["quote"]).quote("https://eu.evdances.com/es/products/evdance-schuko-type-2-portable-ev-charger-16a-3-68kw", safe="")) if evdance_template else "https://eu.evdances.com/es/products/evdance-schuko-type-2-portable-ev-charger-16a-3-68kw"), quote=True),
         "__AMAZON_DISCLOSURE__": escape(
             "En calidad de Afiliado de Amazon, obtengo ingresos por las compras adscritas que cumplen los requisitos aplicables."
         ),
