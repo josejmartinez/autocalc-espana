@@ -71,6 +71,7 @@ AFFILIATE_PARTNER_DOMAINS = {
     "recambioverde": ("recambioverde.es",),
     "desguaceslatorre": ("desguaceslatorre.es",),
     "elchoque": ("elchoque.com",),
+    "evdance": ("evdances.com",),
 }
 AFFILIATE_PARTNER_LABELS = {
     "autodoc": "AUTODOC",
@@ -84,6 +85,7 @@ AFFILIATE_PARTNER_LABELS = {
     "recambioverde": "RecambioVerde",
     "desguaceslatorre": "Desguaces La Torre",
     "elchoque": "El Choque",
+    "evdance": "EVDANCE",
 }
 AMAZON_DISCLOSURE = "En calidad de Afiliado de Amazon, obtengo ingresos por las compras adscritas que cumplen los requisitos aplicables."
 
@@ -210,7 +212,7 @@ def affiliate_disclosure_for_other_merchants():
             + ". La remuneración depende de las condiciones del programa y de la compra atribuida."
         )
     return (
-        "Los enlaces a AUTODOC, Norauto, Oscaro, Aurgi, Feu Vert, eBay, Costco, Muchoneumático y los desguaces son enlaces directos "
+        "Los enlaces a AUTODOC, Norauto, Oscaro, Aurgi, Feu Vert, eBay, Costco, Muchoneumático, EVDANCE y los desguaces son enlaces directos "
         "mientras no se configure una URL de seguimiento de afiliación aprobada para cada comercio."
     )
 
