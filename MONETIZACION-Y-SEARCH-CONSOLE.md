@@ -155,3 +155,17 @@ Antes de solicitar publicidad programática, completa los datos legales reales y
 - Solicitud de Awin recibida; no hay que repetir el registro. Esperar el correo y, cuando se habilite la cuenta, solicitar AUTODOC y Norauto antes que los demás.
 - En la última revisión, el contenido público se desplegó correctamente en GitHub Pages, pero el certificado HTTPS no estaba emitido. No cambies más DNS si GitHub marca DNS correcto; si sigue sin certificado después del periodo indicado por GitHub, contacta con soporte de GitHub Pages y adjunta la captura de `DNS check successful` junto con el error del certificado.
 - El build bloquea la activación accidental de espacios publicitarios display cuando `contact_email` está vacío. Ese correo no se inventa: debe completarlo el titular.
+
+
+## 10. Nueva auditoría editorial automatizada (octubre de 2026)
+
+El flujo de integración continua ejecuta ahora `scripts/audit_seo_content_quality.py` después de generar las páginas y de la auditoría técnica del sitio. Genera `build/seo-content-quality-report.json` con el recuento aproximado de palabras visibles, páginas sin H1, descripciones cortas o ausentes y grupos de títulos, H1 o cuerpos exactamente repetidos.
+
+**Cómo interpretar el informe:**
+- Es una herramienta para priorizar revisión editorial, no una puntuación de Google ni un requisito oficial de longitud.
+- Una página corta puede resolver bien una intención concreta; no se debe ampliar con texto de relleno solo para alcanzar un número.
+- Un H1 o título similar puede ser correcto si las páginas responden a intenciones distintas, pero hay que comprobar que cada URL aporta una utilidad específica.
+- No se aplica `noindex`, no se elimina ninguna URL y no se modifica el sitemap automáticamente a partir de estas señales.
+- Las incidencias de Search Console deben cruzarse con la URL concreta, su canonical, contenido real, enlaces internos y estado de rastreo antes de decidir cambios.
+
+Este informe complementa `scripts/audit_static_site.py`, que ya revisa canonicals, enlaces locales, metadatos básicos, JSON-LD, sitemap, robots y salvaguardas de monetización. La auditoría editorial no sustituye la inspección de URL de Search Console ni garantiza indexación o aprobación de AdSense.
