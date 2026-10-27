@@ -510,6 +510,13 @@ def render_charge_page(
         ],
     }
     page = EV_PAGE
+    if page_filename != "guia-cargadores-electricos.html":
+        product_start = page.find('  <section id="cargadores-recomendados"')
+        if product_start >= 0:
+            product_end = page.find("</section>", product_start)
+            if product_end >= 0:
+                product_end += len("</section>")
+                page = page[:product_start] + page[product_end:]
     replacements = {
         "__CANONICAL__": escape(canonical, quote=True),
         "__VERIFY_TAG__": verification_tag,
