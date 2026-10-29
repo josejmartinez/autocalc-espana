@@ -1,13 +1,13 @@
 # Monetización, afiliación y Search Console de AutoCalc España
 
-Última revisión: 17 de octubre de 2026.
+Última revisión: 27 de octubre de 2026.
 
 ## 1. Estado actual del proyecto
 
 - Dominio principal configurado en el generador: `https://autocalc.es`.
 - **HTTPS:** el usuario confirma que ya dispone de HTTPS; la captura más reciente de GitHub Pages muestra `Enforce HTTPS` marcado. GitHub todavía muestra `DNS Check in Progress`, así que no volver a pedir al titular que active HTTPS ni que compre un certificado. Conviene seguir revisando el estado DNS si algún servicio externo aún no puede acceder al dominio.
 - **Solicitud de publisher en Awin enviada el 17 de octubre de 2026; revisión pendiente.** Después de la aceptación de la red hay que solicitar AUTODOC y Norauto por separado; no hay todavía campañas aprobadas ni enlaces de seguimiento reales en `config.json`.
-- `contact_email` está vacío. El aviso legal se muestra expresamente pendiente de completar; antes de vender publicidad, completa el correo real del responsable y revisa la información identificativa/legal.
+- La configuración actual del repositorio contiene un correo de contacto y teléfono. Hay que comprobar que siguen siendo correctos y que el aviso legal publica la identidad y los datos exigibles del responsable; tener un correo configurado no demuestra por sí solo que el aviso legal esté completo.
 - Identificador de Amazon configurado en enlaces: `autocalces-21`. La configuración del identificador no demuestra por sí sola que la cuenta esté aprobada o en buen estado; confirmar el estado en la consola de Amazon Afiliados.
 - Los enlaces a AUTODOC, Norauto, Oscaro, Aurgi, Feu Vert, eBay, Costco, Muchoneumático y desguaces permanecen directos mientras no se configure el seguimiento oficial de una campaña aprobada.
 - El código de editor de AdSense facilitado por el titular (`ca-pub-1754459878527476`) ya está configurado en el generador y `ads.txt` se genera con su entrada. La entrega de anuncios sigue desactivada (`adsense_ads_enabled = false`) y `google_certified_cmp_configured = false`. El banner propio de Analytics no es una CMP certificada de Google para anuncios.
@@ -155,3 +155,17 @@ Antes de solicitar publicidad programática, completa los datos legales reales y
 - Solicitud de Awin recibida; no hay que repetir el registro. Esperar el correo y, cuando se habilite la cuenta, solicitar AUTODOC y Norauto antes que los demás.
 - En la última revisión, el contenido público se desplegó correctamente en GitHub Pages, pero el certificado HTTPS no estaba emitido. No cambies más DNS si GitHub marca DNS correcto; si sigue sin certificado después del periodo indicado por GitHub, contacta con soporte de GitHub Pages y adjunta la captura de `DNS check successful` junto con el error del certificado.
 - El build bloquea la activación accidental de espacios publicitarios display cuando `contact_email` está vacío. Ese correo no se inventa: debe completarlo el titular.
+
+
+## 10. Nueva auditoría editorial automatizada (octubre de 2026)
+
+El flujo de integración continua ejecuta ahora `scripts/audit_seo_content_quality.py` después de generar las páginas y de la auditoría técnica del sitio. Genera `build/seo-content-quality-report.json` con el recuento aproximado de palabras visibles, páginas sin H1, descripciones cortas o ausentes y grupos de títulos, H1 o cuerpos exactamente repetidos.
+
+**Cómo interpretar el informe:**
+- Es una herramienta para priorizar revisión editorial, no una puntuación de Google ni un requisito oficial de longitud.
+- Una página corta puede resolver bien una intención concreta; no se debe ampliar con texto de relleno solo para alcanzar un número.
+- Un H1 o título similar puede ser correcto si las páginas responden a intenciones distintas, pero hay que comprobar que cada URL aporta una utilidad específica.
+- No se aplica `noindex`, no se elimina ninguna URL y no se modifica el sitemap automáticamente a partir de estas señales.
+- Las incidencias de Search Console deben cruzarse con la URL concreta, su canonical, contenido real, enlaces internos y estado de rastreo antes de decidir cambios.
+
+Este informe complementa `scripts/audit_static_site.py`, que ya revisa canonicals, enlaces locales, metadatos básicos, JSON-LD, sitemap, robots y salvaguardas de monetización. La auditoría editorial no sustituye la inspección de URL de Search Console ni garantiza indexación o aprobación de AdSense.

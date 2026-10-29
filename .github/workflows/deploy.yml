@@ -52,6 +52,9 @@ jobs:
       - name: Audit generated site integrity
         run: python scripts/audit_static_site.py
 
+      - name: Generate editorial SEO content quality report
+        run: python scripts/audit_seo_content_quality.py
+
       - name: Validate section 6 parts comparator
         run: python scripts/test_part_comparator.py
 
