@@ -88,7 +88,7 @@ h1{{font-size:clamp(2rem,5vw,3.2rem);line-height:1.1;letter-spacing:-.04em;max-w
 <h2>5. Seguridad y normativa</h2>
 <p>La instalación y el uso deben ajustarse a la normativa vigente y a las instrucciones del fabricante. En España, las instalaciones de recarga pueden estar sujetas a requisitos del Reglamento electrotécnico para baja tensión y de la ITC-BT-52, según el caso. Consulta a un profesional cualificado y las fuentes oficiales antes de ejecutar una instalación.</p>
 <p>Fuentes oficiales de referencia: <a href="https://www.boe.es/buscar/act.php?id=BOE-A-2002-18099" target="_blank" rel="noopener noreferrer">Reglamento electrotécnico para baja tensión (BOE)</a> y <a href="https://industria.gob.es/Calidad-Industrial/seguridadindustrial/instalacionesindustriales/baja-tension/Paginas/reglamento-electrotecnico.aspx" target="_blank" rel="noopener noreferrer">información sobre baja tensión del Ministerio de Industria</a>. Comprueba siempre la versión y las disposiciones aplicables a tu instalación.</p>
-<div class="note"><strong>Publicidad y afiliación.</strong> <span>Publicidad y enlaces de afiliación.</span> AutoCalc España puede recibir comisiones por compras que cumplan los requisitos de los programas participantes, sin coste adicional para el usuario. En calidad de Afiliado de Amazon, obtengo ingresos por las compras adscritas que cumplen los requisitos aplicables. Cualquier enlace comercial futuro se identificará de forma visible; no se incluyen enlaces EVDANCE hasta verificar una URL de seguimiento aprobada.</div>
+<div class="note"><strong>Publicidad y afiliación.</strong> <span>Publicidad y enlaces de afiliación.</span> AutoCalc España puede recibir comisiones por compras que cumplan los requisitos de los programas participantes, sin coste adicional para el usuario. En calidad de Afiliado de Amazon, obtengo ingresos por las compras adscritas que cumplen los requisitos aplicables. La ficha comercial EVDANCE se identifica expresamente y no constituye una prueba del producto.</div>
 <h2>Preguntas frecuentes</h2>
 <details class="card"><summary><strong>¿Puedo cargar siempre en un enchufe doméstico?</strong></summary><p>No debe asumirse. La toma, el circuito, las protecciones y el uso prolongado deben ser adecuados y verificados por un profesional; sigue las instrucciones del fabricante.</p></details>
 <details class="card"><summary><strong>¿Un cargador de 22 kW cargará mi coche a 22 kW?</strong></summary><p>No necesariamente. La potencia real depende, entre otros factores, de la capacidad de carga AC del vehículo y de la instalación.</p></details>
@@ -135,6 +135,42 @@ window.addEventListener("DOMContentLoaded",function(){const choice=readChoice();
 })();
 </script>'''
 
+def render_evdance_product_section() -> str:
+    """Render one clearly disclosed, manufacturer-sourced affiliate product card."""
+    from urllib.parse import quote
+
+    destination = "https://eu.evdances.com/products/evdance-schuko-type-2-portable-ev-charger-16a-3-68kw"
+    template = str(CFG.get("affiliate_link_templates", {}).get("evdance", "") or "").strip()
+    if template:
+        if "{destination}" not in template:
+            raise ValueError("La plantilla Awin de EVDANCE debe incluir {destination}.")
+        tracked_url = template.replace("{destination}", quote(destination, safe=""))
+    else:
+        tracked_url = destination
+
+    link = escape(tracked_url, quote=True)
+    disclosure = (
+        "Este enlace es de afiliación: AutoCalc España puede recibir una comisión "
+        "si realizas una compra válida, sin coste adicional para ti."
+        if template else
+        "Enlace directo al fabricante; no hay seguimiento de afiliación configurado."
+    )
+    return f\'''<section id="producto-evdance" class="card" aria-labelledby="evdance-title">
+  <p class="eyebrow">Información comercial · EVDANCE</p>
+  <h2 id="evdance-title">EVDANCE 16A · cargador portátil Schuko a Type 2</h2>
+  <p>El fabricante nos ha propuesto este modelo para el mercado español. La información facilitada lo identifica como un cargador portátil monofásico de hasta 16 A y 3,68 kW, con conexión Schuko y conector Type 2 para el vehículo.</p>
+  <p><strong>Transparencia editorial:</strong> AutoCalc España no ha recibido ni probado este producto. Esta ficha resume la información comercial facilitada por el fabricante; no es una prueba independiente ni una certificación de seguridad, compatibilidad o rendimiento.</p>
+  <ul class="check">
+    <li>Comprueba en el manual de tu vehículo la compatibilidad Type 2 y la potencia AC admitida.</li>
+    <li>Antes de cargar a 16 A, confirma con un profesional que la toma, el circuito y las protecciones son adecuados para una carga prolongada.</li>
+    <li>Solicita y revisa la documentación de conformidad UE, el manual en español, la garantía y las condiciones de devolución.</li>
+    <li>La potencia efectiva puede ser inferior y depende del vehículo, la instalación y los ajustes del equipo.</li>
+  </ul>
+  <p class="note">{escape(disclosure)}</p>
+  <a class="cta" href="{link}" target="_blank" rel="sponsored nofollow noopener noreferrer">Consultar EVDANCE 16A 3,68 kW ↗</a>
+</section>\'''
+
+
 def update_sitemap() -> None:
     path = PUBLIC / "sitemap.xml"
     tree = ET.parse(path)
@@ -149,7 +185,8 @@ def update_sitemap() -> None:
 
 def main() -> None:
     PUBLIC.mkdir(parents=True, exist_ok=True)
-    page = PAGE.replace("</body></html>", CONSENT.replace("__BASE__", escape(BASE, quote=True)).replace("__GA_ID__", escape(str(CFG.get("google_analytics_id", "")), quote=True)) + "</body></html>")
+    page = PAGE.replace("<h2>Preguntas frecuentes</h2>", render_evdance_product_section() + "<h2>Preguntas frecuentes</h2>")
+    page = page.replace("</body></html>", CONSENT.replace("__BASE__", escape(BASE, quote=True)).replace("__GA_ID__", escape(str(CFG.get("google_analytics_id", "")), quote=True)) + "</body></html>")
     (PUBLIC / "guia-cargadores-electricos.html").write_text(page, encoding="utf-8")
     update_sitemap()
     print(f"[OK] Guía de cargadores generada: {URL}")
