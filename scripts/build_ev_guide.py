@@ -154,7 +154,7 @@ def render_evdance_product_section() -> str:
         if template else
         "Enlace directo al fabricante; no hay seguimiento de afiliación configurado."
     )
-    return f\'''<section id="producto-evdance" class="card" aria-labelledby="evdance-title">
+    return f'''<section id="producto-evdance" class="card" aria-labelledby="evdance-title">
   <p class="eyebrow">Información comercial · EVDANCE</p>
   <h2 id="evdance-title">EVDANCE 16A · cargador portátil Schuko a Type 2</h2>
   <p>El fabricante nos ha propuesto este modelo para el mercado español. La información facilitada lo identifica como un cargador portátil monofásico de hasta 16 A y 3,68 kW, con conexión Schuko y conector Type 2 para el vehículo.</p>
@@ -167,7 +167,7 @@ def render_evdance_product_section() -> str:
   </ul>
   <p class="note">{escape(disclosure)}</p>
   <a class="cta" href="{link}" target="_blank" rel="sponsored nofollow noopener noreferrer">Consultar EVDANCE 16A 3,68 kW ↗</a>
-</section>\'''
+</section>'''
 
 
 def update_sitemap() -> None:
