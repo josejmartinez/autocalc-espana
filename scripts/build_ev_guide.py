@@ -139,7 +139,7 @@ def render_evdance_product_section() -> str:
     """Render one clearly disclosed, manufacturer-sourced affiliate product card."""
     from urllib.parse import quote
 
-    destination = "https://eu.evdances.com/products/evdance-schuko-type-2-portable-ev-charger-16a-3-68kw"
+    destination = "https://eu.evdances.com/es/products/evdance-schuko-type-2-portable-ev-charger-16a-3-68kw"
     template = str(CFG.get("affiliate_link_templates", {}).get("evdance", "") or "").strip()
     if template:
         if "{destination}" not in template:
