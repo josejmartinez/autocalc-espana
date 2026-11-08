@@ -18,12 +18,12 @@ for forbidden in ("EVDANCE recomienda", "mejor cargador del mercado", "reseñas 
 
 # The approved EVDANCE Awin template must be used only on the buying guide.
 from urllib.parse import quote
-destination = "https://eu.evdances.com/products/evdance-schuko-type-2-portable-ev-charger-16a-3-68kw"
+destination = "https://eu.evdances.com/es/products/evdance-schuko-type-2-portable-ev-charger-16a-3-68kw"
 expected_tracking = "https://www.awin1.com/cread.php?awinmid=67740&awinaffid=3126791&ued=" + quote(destination, safe="")
 assert expected_tracking in page, "La ficha EVDANCE no usa el enlace Awin aprobado."
 assert 'rel="sponsored nofollow noopener noreferrer"' in page
 assert "no ha recibido ni probado este producto" in page
-assert "no es una prueba independiente" in page
+assert "no es una prueba independiente" in page\nassert "pagead2.googlesyndication.com" not in page, "AdSense no debe cargarse mientras está desactivado."
 calculator = (PUBLIC/"carga-vehiculo-electrico.html").read_text(encoding="utf-8")
 assert "EVDANCE" not in calculator, "La promoción EVDANCE no debe contaminar la calculadora independiente."
 root=ET.parse(PUBLIC/"sitemap.xml").getroot()
