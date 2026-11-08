@@ -26,7 +26,6 @@ PAGE = f'''<!doctype html>
 <link rel="canonical" href="{escape(URL, quote=True)}">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <meta name="theme-color" content="#0f172a">
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1754459878527476" crossorigin="anonymous"></script>
 <meta property="og:type" content="article">
 <meta property="og:title" content="{escape(TITLE, quote=True)}">
 <meta property="og:description" content="{escape(DESCRIPTION, quote=True)}">
