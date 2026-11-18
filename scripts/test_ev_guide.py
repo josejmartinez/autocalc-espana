@@ -23,7 +23,8 @@ expected_tracking = "https://www.awin1.com/cread.php?awinmid=67740&awinaffid=312
 assert expected_tracking in page, "La ficha EVDANCE no usa el enlace Awin aprobado."
 assert 'rel="sponsored nofollow noopener noreferrer"' in page
 assert "no ha recibido ni probado este producto" in page
-assert "no es una prueba independiente" in page\nassert "pagead2.googlesyndication.com" not in page, "AdSense no debe cargarse mientras está desactivado."
+assert "no es una prueba independiente" in page
+assert "pagead2.googlesyndication.com" not in page, "AdSense no debe cargarse mientras está desactivado."
 calculator = (PUBLIC/"carga-vehiculo-electrico.html").read_text(encoding="utf-8")
 assert "EVDANCE" not in calculator, "La promoción EVDANCE no debe contaminar la calculadora independiente."
 root=ET.parse(PUBLIC/"sitemap.xml").getroot()
