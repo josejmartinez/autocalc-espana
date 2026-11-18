@@ -2,6 +2,7 @@
 """Regression checks for the EV charger guide and its search metadata."""
 import json, subprocess, sys, xml.etree.ElementTree as ET
 from pathlib import Path
+from html import escape as html_escape
 ROOT=Path(__file__).resolve().parents[1]
 PUBLIC=ROOT/"public"
 subprocess.run([sys.executable,str(ROOT/"scripts"/"build_ev_guide.py")],cwd=ROOT,check=True)
@@ -18,9 +19,9 @@ for forbidden in ("EVDANCE recomienda", "mejor cargador del mercado", "reseñas 
 
 # The approved EVDANCE Awin template must be used only on the buying guide.
 from urllib.parse import quote
-destination = "https://eu.evdances.com/es/products/evdance-schuko-type-2-portable-ev-charger-16a-3-68kw"
+destination = "https://eu.evdances.com/products/evdance-schuko-type-2-portable-ev-charger-16a-3-68kw"
 expected_tracking = "https://www.awin1.com/cread.php?awinmid=67740&awinaffid=3126791&ued=" + quote(destination, safe="")
-assert expected_tracking in page, "La ficha EVDANCE no usa el enlace Awin aprobado."
+assert html_escape(expected_tracking, quote=True) in page, "La ficha EVDANCE no usa el enlace Awin aprobado."
 assert 'rel="sponsored nofollow noopener noreferrer"' in page
 assert "no ha recibido ni probado este producto" in page
 assert "no es una prueba independiente" in page
