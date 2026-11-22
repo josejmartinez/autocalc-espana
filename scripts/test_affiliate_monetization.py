@@ -12,6 +12,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from build import (  # noqa: E402
     ADSENSE_ADS_ENABLED, ADSENSE_CLIENT, GOOGLE_CERTIFIED_CMP_CONFIGURED,
+    GOOGLE_SITE_VERIFICATION_TAG,
     AMAZON_DISCLOSURE, AFFILIATE_PARTNER_DOMAINS, apply_affiliate_links,
     build_affiliate_url, render_ad_slot, render_affiliate_sidebar,
     validate_commercial_contact,
@@ -25,7 +26,7 @@ def main() -> int:
     if not pages:
         raise AssertionError("No hay páginas generadas en public/.")
 
-    # The publisher snippet is for site verification; ad serving stays disabled.
+    # Search Console verification is separate from the AdSense ad-serving library.
     if ADSENSE_CLIENT != "ca-pub-1754459878527476":
         raise AssertionError("El identificador de editor no coincide con el facilitado por el titular.")
     if ADSENSE_ADS_ENABLED:
@@ -41,8 +42,10 @@ def main() -> int:
         html = page.read_text(encoding="utf-8")
         if AMAZON_DISCLOSURE not in html:
             raise AssertionError(f"Falta la declaración de Amazon en {page.name}.")
-        if "adsbygoogle.js?client=ca-pub-1754459878527476" not in html:
-            raise AssertionError(f"Falta el código de verificación de AdSense en {page.name}.")
+        if GOOGLE_SITE_VERIFICATION_TAG and GOOGLE_SITE_VERIFICATION_TAG not in html:
+            raise AssertionError(f"Falta la etiqueta de verificación de Search Console en {page.name}.")
+        if not ADSENSE_ADS_ENABLED and "adsbygoogle.js" in html:
+            raise AssertionError(f"Se está cargando AdSense con los anuncios desactivados en {page.name}.")
         if "Publicidad y enlaces de afiliación." not in html:
             raise AssertionError(f"Falta el aviso comercial en {page.name}.")
         if "__AFFILIATE_LINK_TEMPLATES_JSON__" in html or "__AMAZON_DISCLOSURE__" in html:
