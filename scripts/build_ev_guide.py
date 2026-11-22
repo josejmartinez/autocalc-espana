@@ -13,6 +13,11 @@ BASE = (f"https://{CFG.get('custom_domain', 'autocalc.es').strip().lower()}"
         if CFG.get("use_custom_domain") is True
         else str(CFG.get("github_pages_url") or CFG.get("domain", "")).rstrip("/"))
 URL = f"{BASE}/guia-cargadores-electricos.html"
+GOOGLE_SITE_VERIFICATION = str(CFG.get("google_site_verification", "") or "").strip()
+GOOGLE_SITE_VERIFICATION_TAG = (
+    f'<meta name="google-site-verification" content="{escape(GOOGLE_SITE_VERIFICATION, quote=True)}">'
+    if GOOGLE_SITE_VERIFICATION else ""
+)
 TITLE = "Cómo elegir un cargador para coche eléctrico en España: guía práctica"
 DESCRIPTION = ("Guía independiente para elegir cargador de coche eléctrico: potencia, conectores, "
                "instalación, seguridad, carga doméstica y costes. Sin rankings ni pruebas inventadas.")
@@ -25,6 +30,7 @@ PAGE = f'''<!doctype html>
 <meta name="description" content="{escape(DESCRIPTION, quote=True)}">
 <link rel="canonical" href="{escape(URL, quote=True)}">
 <meta name="robots" content="index,follow,max-image-preview:large">
+{GOOGLE_SITE_VERIFICATION_TAG}
 <meta name="theme-color" content="#0f172a">
 <meta property="og:type" content="article">
 <meta property="og:title" content="{escape(TITLE, quote=True)}">
