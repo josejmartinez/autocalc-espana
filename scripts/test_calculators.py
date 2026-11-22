@@ -92,8 +92,13 @@ def main() -> int:
     for marker in ("def render_ad_slot(", "__SIDEBAR_LEFT_AD_HTML__", "__SIDEBAR_RIGHT_AD_HTML__", "__INLINE_AD_HTML__"):
         if marker not in source:
             raise AssertionError("Se ha eliminado un espacio publicitario acordado: " + marker)
-    if html and "adsbygoogle.js?client=ca-pub-1754459878527476" not in html:
-        raise AssertionError("Falta el código de verificación AdSense esperado en la página generada.")
+    verification = str(config.get("google_site_verification", "") or "").strip()
+    if html and verification:
+        expected_meta = f'<meta name="google-site-verification" content="{verification}" />'
+        if expected_meta not in html:
+            raise AssertionError("Falta la etiqueta de verificación de Google Search Console en la página generada.")
+    if html and config.get("adsense_ads_enabled") is False and "adsbygoogle.js" in html:
+        raise AssertionError("AdSense no debe cargar su biblioteca mientras los anuncios estén desactivados.")
 
     # Independent numerical sanity checks for important formulas.
     minutes = round((620 / 105) * 60)
