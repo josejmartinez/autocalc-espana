@@ -2395,7 +2395,7 @@ def render_page(
 ):
     canonical = f"{DOMINIO}/" if filename == "index.html" else f"{DOMINIO}/{filename}"
     adsense_script = ""
-    if ADSENSE_CLIENT:
+    if ADSENSE_ADS_ENABLED and GOOGLE_CERTIFIED_CMP_CONFIGURED and ADSENSE_CLIENT:
         adsense_script = f'<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={ADSENSE_CLIENT}" crossorigin="anonymous"></script>'
 
     schema = {
