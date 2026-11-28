@@ -104,7 +104,7 @@ def main() -> int:
         raise AssertionError("Falta el aviso visible en un enlace rastreado.")
     if encoded not in build_affiliate_url("autodoc", "https://www.autodoc.es/search?keyword=alternador", templates):
         raise AssertionError("build_affiliate_url no codifica el destino.")
-    if build_affiliate_url("autodoc", "https://www.autodoc.es/search?keyword=alternador", {}) != "https://www.autodoc.es/search?keyword=alternador":
+    if build_affiliate_url("autodoc", "https://www.autodoc.es/search?keyword=alternador", {}, fixed_deeplinks={}) != "https://www.autodoc.es/search?keyword=alternador":
         raise AssertionError("Sin plantilla, el destino debe permanecer directo.")
 
     # Priority merchants must be supported by the tracking configuration, even when their
