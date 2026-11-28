@@ -47,7 +47,7 @@ def main() -> int:
             raise AssertionError("Falta la etiqueta de verificación de Search Console en la página principal.")
         # The library may be present for publisher verification, but no ad unit may render
         # while ad serving is disabled. Check the actual placement markup, not the loader.
-        adsense_unit = re.search(r"<ins\\b[^>]*adsbygoogle", html, re.IGNORECASE)
+        adsense_unit = re.search(r"<ins\b[^>]*adsbygoogle", html, re.IGNORECASE)
         if not ADSENSE_ADS_ENABLED and adsense_unit:
             raise AssertionError(f"Se está mostrando una unidad AdSense con los anuncios desactivados en {page.name}.")
         if "Publicidad y enlaces de afiliación." not in html:
