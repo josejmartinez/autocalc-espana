@@ -150,10 +150,10 @@ def build_affiliate_url(partner, destination, templates=None, fixed_deeplinks=No
     return str(fixed_link or destination)
 
 
-def apply_affiliate_links(markup, templates=None):
+def apply_affiliate_links(markup, templates=None, fixed_deeplinks=None):
     """Mark genuine affiliate links as sponsored and leave untracked merchant links direct."""
     selected_templates = AFFILIATE_LINK_TEMPLATES if templates is None else templates
-    selected_fixed = AFFILIATE_FIXED_DEEPLINKS
+    selected_fixed = AFFILIATE_FIXED_DEEPLINKS if fixed_deeplinks is None else fixed_deeplinks
 
     def rewrite_anchor(match):
         attrs, body = match.group(1), match.group(2)
