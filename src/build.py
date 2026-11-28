@@ -188,13 +188,7 @@ def apply_affiliate_links(markup, templates=None, fixed_deeplinks=None):
 
         # Static URLs can be rewritten at build time. Dynamic JS template literals
         # are handled by buildPartnerUrl() when the user changes calculator inputs.
-        if fixed_link:
-            attrs = (
-                attrs[:href_match.start(2)]
-                + escape(fixed_link, quote=True)
-                + attrs[href_match.end(2):]
-            )
-        elif (
+        if (
             partner
             and template
             and "{destination}" in template
@@ -205,6 +199,12 @@ def apply_affiliate_links(markup, templates=None, fixed_deeplinks=None):
             attrs = (
                 attrs[:href_match.start(2)]
                 + escape(tracked_href, quote=True)
+                + attrs[href_match.end(2):]
+            )
+        elif fixed_link:
+            attrs = (
+                attrs[:href_match.start(2)]
+                + escape(fixed_link, quote=True)
                 + attrs[href_match.end(2):]
             )
 
