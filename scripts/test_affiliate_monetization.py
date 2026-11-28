@@ -61,10 +61,38 @@ def main() -> int:
                 raise AssertionError("El aviso legal debe dejar claro que el contacto no sustituye los datos identificativos legales.")
 
     sample = '<a href="https://www.autodoc.es/search?keyword=alternador" target="_blank" rel="nofollow sponsored">Buscar AUTODOC</a>'
-    direct = apply_affiliate_links(sample, {})
+    direct = apply_affiliate_links(sample, {}, fixed_deeplinks={})
     direct_rel = re.search(r'rel="([^"]+)"', direct)
     if not direct_rel or "sponsored" in direct_rel.group(1) or "Enlace de afiliado" in direct:
         raise AssertionError("El enlace directo de AUTODOC se marca incorrectamente como afiliado.")
+
+    # Awin generated a fixed deeplink for the alternator search. It must apply
+    # only to this exact destination, never to other AUTODOC searches.
+    fixed_deeplinks = {
+        "autodoc": {
+            "https://www.autodoc.es/search?keyword=alternador": "https://tidd.ly/4kBZbNX"
+        }
+    }
+    fixed_tracked = apply_affiliate_links(sample, {}, fixed_deeplinks=fixed_deeplinks)
+    fixed_rel = re.search(r'rel="([^"]+)"', fixed_tracked)
+    if 'href="https://tidd.ly/4kBZbNX"' not in fixed_tracked:
+        raise AssertionError("El deeplink fijo de Awin no se aplica al destino exacto.")
+    if not fixed_rel or "sponsored" not in fixed_rel.group(1) or "Enlace de afiliado" not in fixed_tracked:
+        raise AssertionError("El deeplink fijo debe marcarse como afiliado y llevar aviso visible.")
+    other_search = '<a href="https://www.autodoc.es/search?keyword=filtros" target="_blank" rel="nofollow">Buscar filtros</a>'
+    other_tracked = apply_affiliate_links(other_search, {}, fixed_deeplinks=fixed_deeplinks)
+    if 'href="https://www.autodoc.es/search?keyword=filtros"' not in other_tracked or "tidd.ly" in other_tracked:
+        raise AssertionError("El deeplink de alternador no debe redirigir búsquedas distintas.")
+    if build_affiliate_url(
+        "autodoc", "https://www.autodoc.es/search?keyword=alternador",
+        templates={}, fixed_deeplinks=fixed_deeplinks
+    ) != "https://tidd.ly/4kBZbNX":
+        raise AssertionError("build_affiliate_url no devuelve el deeplink fijo aprobado.")
+    if build_affiliate_url(
+        "autodoc", "https://www.autodoc.es/search?keyword=filtros",
+        templates={}, fixed_deeplinks=fixed_deeplinks
+    ) != "https://www.autodoc.es/search?keyword=filtros":
+        raise AssertionError("Un deeplink fijo no debe sustituir destinos distintos.")
 
     templates = {"autodoc": "https://tracking.example/click?destination={destination}"}
     tracked = apply_affiliate_links(sample, templates)
