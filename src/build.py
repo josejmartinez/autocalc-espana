@@ -59,6 +59,7 @@ GOOGLE_SITE_VERIFICATION_TAG = (
 
 
 AFFILIATE_LINK_TEMPLATES = CFG.get("affiliate_link_templates", {})
+AFFILIATE_FIXED_DEEPLINKS = CFG.get("affiliate_fixed_deeplinks", {})
 AFFILIATE_PARTNER_DOMAINS = {
     "autodoc": ("autodoc.es",),
     "norauto": ("norauto.es",),
@@ -96,6 +97,31 @@ unknown_affiliate_partners = set(AFFILIATE_LINK_TEMPLATES) - set(AFFILIATE_PARTN
 if unknown_affiliate_partners:
     raise ValueError("Comercios de afiliación desconocidos: " + ", ".join(sorted(unknown_affiliate_partners)))
 
+if not isinstance(AFFILIATE_FIXED_DEEPLINKS, dict):
+    raise TypeError("affiliate_fixed_deeplinks debe ser un objeto JSON por comercio.")
+unknown_fixed_partners = set(AFFILIATE_FIXED_DEEPLINKS) - set(AFFILIATE_PARTNER_DOMAINS)
+if unknown_fixed_partners:
+    raise ValueError("Comercios desconocidos en affiliate_fixed_deeplinks: " + ", ".join(sorted(unknown_fixed_partners)))
+for fixed_partner, fixed_links in AFFILIATE_FIXED_DEEPLINKS.items():
+    if not isinstance(fixed_links, dict):
+        raise TypeError(f"Los deeplinks de {fixed_partner} deben ser un objeto destino-URL.")
+    for fixed_destination, fixed_tracking_url in fixed_links.items():
+        destination_parts = urlsplit(str(fixed_destination))
+        tracking_parts = urlsplit(str(fixed_tracking_url))
+        allowed_destination_host = (destination_parts.hostname or "").lower()
+        if (
+            destination_parts.scheme != "https"
+            or not any(
+                allowed_destination_host == domain or allowed_destination_host.endswith("." + domain)
+                for domain in AFFILIATE_PARTNER_DOMAINS[fixed_partner]
+            )
+            or tracking_parts.scheme != "https"
+            or not tracking_parts.hostname
+            or tracking_parts.username
+            or tracking_parts.password
+        ):
+            raise ValueError(f"El deeplink fijo de {fixed_partner} debe usar destino del comercio y seguimiento HTTPS válido.")
+
 for affiliate_partner, affiliate_template in AFFILIATE_LINK_TEMPLATES.items():
     if not isinstance(affiliate_template, str):
         raise TypeError(f"La plantilla de afiliación de {affiliate_partner} debe ser texto.")
@@ -111,20 +137,23 @@ for affiliate_partner, affiliate_template in AFFILIATE_LINK_TEMPLATES.items():
         )
 
 
-def build_affiliate_url(partner, destination, templates=None):
-    """Apply a merchant-provided HTTPS tracking template to a destination URL."""
+def build_affiliate_url(partner, destination, templates=None, fixed_deeplinks=None):
+    """Resolve a merchant-approved template or an exact, pre-generated deeplink."""
     selected_templates = AFFILIATE_LINK_TEMPLATES if templates is None else templates
+    selected_fixed = AFFILIATE_FIXED_DEEPLINKS if fixed_deeplinks is None else fixed_deeplinks
     template = str(selected_templates.get(partner, "") or "").strip()
-    if not template:
-        return destination
-    if not template.startswith("https://") or "{destination}" not in template:
-        raise ValueError(f"Plantilla de afiliación no válida para {partner}.")
-    return template.replace("{destination}", quote(destination, safe=""))
+    if template:
+        if not template.startswith("https://") or "{destination}" not in template:
+            raise ValueError(f"Plantilla de afiliación no válida para {partner}.")
+        return template.replace("{destination}", quote(destination, safe=""))
+    fixed_link = selected_fixed.get(partner, {}).get(destination, "")
+    return str(fixed_link or destination)
 
 
 def apply_affiliate_links(markup, templates=None):
     """Mark genuine affiliate links as sponsored and leave untracked merchant links direct."""
     selected_templates = AFFILIATE_LINK_TEMPLATES if templates is None else templates
+    selected_fixed = AFFILIATE_FIXED_DEEPLINKS
 
     def rewrite_anchor(match):
         attrs, body = match.group(1), match.group(2)
@@ -153,12 +182,19 @@ def apply_affiliate_links(markup, templates=None):
         if partner is None and not is_amazon_affiliate and not is_direct_paid_ad:
             return match.group(0)
         template = str(selected_templates.get(partner, "") or "").strip() if partner else ""
-        is_affiliate = is_amazon_affiliate or bool(template)
+        fixed_link = str(selected_fixed.get(partner, {}).get(href, "") or "") if partner else ""
+        is_affiliate = is_amazon_affiliate or bool(template) or bool(fixed_link)
         is_sponsored_link = is_affiliate or is_direct_paid_ad
 
         # Static URLs can be rewritten at build time. Dynamic JS template literals
         # are handled by buildPartnerUrl() when the user changes calculator inputs.
-        if (
+        if fixed_link:
+            attrs = (
+                attrs[:href_match.start(2)]
+                + escape(fixed_link, quote=True)
+                + attrs[href_match.end(2):]
+            )
+        elif (
             partner
             and template
             and "{destination}" in template
@@ -203,6 +239,7 @@ def affiliate_disclosure_for_other_merchants():
     active = [
         label for key, label in AFFILIATE_PARTNER_LABELS.items()
         if str(AFFILIATE_LINK_TEMPLATES.get(key, "") or "").strip()
+        or bool(AFFILIATE_FIXED_DEEPLINKS.get(key, {}))
     ]
     if active:
         names = ", ".join(active)
@@ -1264,20 +1301,25 @@ PLANTILLA_HTML = r"""<!DOCTYPE html>
     <script>
         const AMAZON_TAG = "__AMAZON_TAG__";
         const AFFILIATE_LINK_TEMPLATES = __AFFILIATE_LINK_TEMPLATES_JSON__;
+        const AFFILIATE_FIXED_DEEPLINKS = __AFFILIATE_FIXED_DEEPLINKS_JSON__;
         const GOOGLE_ANALYTICS_ID = "__GOOGLE_ANALYTICS_ID__";
 
         function buildPartnerUrl(partner, destination) {
             const template = AFFILIATE_LINK_TEMPLATES[partner];
-            if (!template || typeof destination !== 'string') return destination;
-            if (!template.startsWith('https://') || !template.includes('{destination}')) return destination;
-            return template.replaceAll('{destination}', encodeURIComponent(destination));
+            if (template && template.startsWith('https://') && template.includes('{destination}')) {
+                return template.replaceAll('{destination}', encodeURIComponent(destination));
+            }
+            return AFFILIATE_FIXED_DEEPLINKS[partner]?.[destination] || destination;
         }
 
         function setPartnerLink(elementOrId, partner, destination) {
             const el = typeof elementOrId === 'string' ? document.getElementById(elementOrId) : elementOrId;
             if (!el || typeof destination !== 'string') return;
             const template = AFFILIATE_LINK_TEMPLATES[partner] || '';
-            const tracked = Boolean(template && template.startsWith('https://') && template.includes('{destination}'));
+            const tracked = Boolean(
+                (template && template.startsWith('https://') && template.includes('{destination}'))
+                || AFFILIATE_FIXED_DEEPLINKS[partner]?.[destination]
+            );
             el.href = tracked ? buildPartnerUrl(partner, destination) : destination;
 
             const relTokens = (el.getAttribute('rel') || '').split(/\s+/).filter(Boolean)
@@ -2444,6 +2486,7 @@ def render_page(
         "__INTERNAL_LINKS_HTML__": internal_links,
         "__AMAZON_TAG__": AMAZON_TAG,
         "__AFFILIATE_LINK_TEMPLATES_JSON__": json.dumps(AFFILIATE_LINK_TEMPLATES, ensure_ascii=False),
+        "__AFFILIATE_FIXED_DEEPLINKS_JSON__": json.dumps(AFFILIATE_FIXED_DEEPLINKS, ensure_ascii=False),
         "__AMAZON_DISCLOSURE__": AMAZON_DISCLOSURE,
         "__OTHER_AFFILIATE_DISCLOSURE__": affiliate_disclosure_for_other_merchants(),
         "__SIDEBAR_LEFT_AD_HTML__": render_sidebar_ad("sidebar_left", "autodoc", "AUTODOC · recambios para tu vehículo", "Consulta piezas nuevas por modelo o referencia y comprueba compatibilidad antes de comprar.", f"https://www.autodoc.es/search?keyword={quote(car_autodoc_query.replace(chr(43), chr(32)), safe='')}"),
