@@ -44,7 +44,9 @@ def main() -> int:
             raise AssertionError(f"Falta la declaración de Amazon en {page.name}.")
         if GOOGLE_SITE_VERIFICATION_TAG and GOOGLE_SITE_VERIFICATION_TAG not in html:
             raise AssertionError(f"Falta la etiqueta de verificación de Search Console en {page.name}.")
-        if not ADSENSE_ADS_ENABLED and "adsbygoogle.js" in html:
+        # Detect an actual external script tag, not incidental text in inline JS.
+        adsense_loader = re.search(r"<script[^>]+src=[^>]*adsbygoogle\\.js", html, re.IGNORECASE)
+        if not ADSENSE_ADS_ENABLED and adsense_loader:
             raise AssertionError(f"Se está cargando AdSense con los anuncios desactivados en {page.name}.")
         if "Publicidad y enlaces de afiliación." not in html:
             raise AssertionError(f"Falta el aviso comercial en {page.name}.")
