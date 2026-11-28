@@ -56,5 +56,10 @@
     "inline": ""
   },
   "adsense_ads_enabled": false,
-  "contact_phone": "624597253"
+  "contact_phone": "624597253",
+  "affiliate_fixed_deeplinks": {
+    "autodoc": {
+      "https://www.autodoc.es/search?keyword=alternador": "https://tidd.ly/4kBZbNX"
+    }
+  }
 }
